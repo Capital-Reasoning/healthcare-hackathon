@@ -52,6 +52,7 @@ export {
 
 export {
   getLatestRunIds,
+  getBestTargetPerPatient,
   getCategorySplit,
   getDueHorizonStats,
   getTriageByAge,

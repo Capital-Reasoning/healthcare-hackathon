@@ -1,7 +1,8 @@
 import { Activity } from 'lucide-react';
+import { unstable_cache } from 'next/cache';
 import { getTriageQueueWithPatients } from '@/lib/db/queries/engine-results';
 import {
-  getLatestRunIds,
+  getBestTargetPerPatient,
   getCategorySplit,
   getDueHorizonStats,
   getTriageByAge,
@@ -9,6 +10,18 @@ import {
 import { TriageDashboard } from '@/components/healthcare/triage-dashboard';
 import { DashboardVizSummary } from '@/components/healthcare/dashboard-viz-summary';
 import { DashboardIntro } from '@/components/healthcare/dashboard-intro';
+
+// Cache dashboard data for 60s — data doesn't change during demo
+const getCachedTriageQueue = unstable_cache(
+  getTriageQueueWithPatients,
+  ['triage-queue'],
+  { revalidate: 60 },
+);
+const getCachedBestTargets = unstable_cache(
+  getBestTargetPerPatient,
+  ['best-targets'],
+  { revalidate: 60 },
+);
 
 export default async function DashboardPage() {
   // Fetch triage data + analytics in parallel
@@ -19,16 +32,18 @@ export default async function DashboardPage() {
   let triageByAge: Awaited<ReturnType<typeof getTriageByAge>> = [];
 
   try {
-    const [triageItems, runIds] = await Promise.all([
-      getTriageQueueWithPatients(),
-      getLatestRunIds(),
+    // Fetch triage items + best-target-per-patient in parallel (2 queries, cached 60s)
+    const [triageItems, bestPerPatient] = await Promise.all([
+      getCachedTriageQueue(),
+      getCachedBestTargets(),
     ]);
     items = triageItems;
 
+    // Derive all three chart datasets from the single bestPerPatient result
     [categorySplit, dueHorizon, triageByAge] = await Promise.all([
-      getCategorySplit(runIds),
-      getDueHorizonStats(runIds),
-      getTriageByAge(runIds),
+      getCategorySplit(undefined, bestPerPatient),
+      getDueHorizonStats(undefined, bestPerPatient),
+      getTriageByAge(undefined, bestPerPatient),
     ]);
   } catch {
     // Database may not be seeded yet — show empty state

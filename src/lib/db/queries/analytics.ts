@@ -1,4 +1,4 @@
-import { eq, desc, sql, count, inArray } from 'drizzle-orm';
+import { eq, desc, sql, count } from 'drizzle-orm';
 import { db } from '@/lib/db/client';
 import {
   patients,
@@ -59,24 +59,28 @@ export async function getAgeMixStats() {
   return bucketOrder.map((name) => ({ name, value: map.get(name) ?? 0 }));
 }
 
+export type BestTarget = {
+  patientId: string;
+  category: string | null;
+  status: string | null;
+};
+
 /**
  * Deduplicate targets to one per patient (highest score wins).
- * Returns the winning target for each patient — used by queries
- * that need to count patients, not individual targets.
+ * Uses a self-contained subquery — no massive IN-clause params.
+ * Exported so callers can compute once and share across analytics.
  */
-async function getBestTargetPerPatient(runIds: string[]) {
-  if (runIds.length === 0) return [];
-
-  const inList = sql.join(
-    runIds.map((id) => sql`${id}`),
-    sql`, `,
-  );
-
+export async function getBestTargetPerPatient(): Promise<BestTarget[]> {
   const rows = await db.execute(sql`
     SELECT DISTINCT ON (patient_id)
       patient_id, category, status
     FROM pathway_target_run_facts
-    WHERE run_id IN (${inList})
+    WHERE run_id IN (
+      SELECT DISTINCT ON (patient_id) run_id
+      FROM engine_runs
+      WHERE status = 'completed'
+      ORDER BY patient_id, started_at DESC
+    )
     ORDER BY patient_id, action_value_score DESC NULLS LAST
   `);
 
@@ -97,9 +101,11 @@ async function getBestTargetPerPatient(runIds: string[]) {
  * Red/Yellow/Green triage category split — counts distinct patients,
  * each assigned to the category of their highest-value target.
  */
-export async function getCategorySplit(runIds?: string[]) {
-  const ids = runIds ?? (await getLatestRunIds());
-  const bestPerPatient = await getBestTargetPerPatient(ids);
+export async function getCategorySplit(
+  _runIds?: string[],
+  precomputed?: BestTarget[],
+) {
+  const bestPerPatient = precomputed ?? (await getBestTargetPerPatient());
 
   const counts: Record<string, number> = {};
   for (const { category } of bestPerPatient) {
@@ -181,9 +187,11 @@ export async function getProviderRouteMix(runIds?: string[]) {
  * Due horizon — counts distinct patients by the status of their
  * highest-value target: overdue_now / due_soon / up_to_date / unknown_due.
  */
-export async function getDueHorizonStats(runIds?: string[]) {
-  const ids = runIds ?? (await getLatestRunIds());
-  const bestPerPatient = await getBestTargetPerPatient(ids);
+export async function getDueHorizonStats(
+  _runIds?: string[],
+  precomputed?: BestTarget[],
+) {
+  const bestPerPatient = precomputed ?? (await getBestTargetPerPatient());
 
   const counts: Record<string, number> = {};
   for (const { status } of bestPerPatient) {
@@ -217,17 +225,17 @@ export async function getDueHorizonStats(runIds?: string[]) {
  * Triage category breakdown by age group.
  * Each row is an age bucket with counts for red/yellow/green (patient-level).
  */
-export async function getTriageByAge(runIds?: string[]) {
-  const ids = runIds ?? (await getLatestRunIds());
-  const bestPerPatient = await getBestTargetPerPatient(ids);
+export async function getTriageByAge(
+  _runIds?: string[],
+  precomputed?: BestTarget[],
+) {
+  const bestPerPatient = precomputed ?? (await getBestTargetPerPatient());
   if (bestPerPatient.length === 0) return [];
 
-  // Fetch ages for these patients
-  const patientIds = bestPerPatient.map((p) => p.patientId);
+  // Fetch ages for all patients (small table, no param explosion)
   const patientRows = await db
     .select({ patientId: patients.patientId, age: patients.age })
-    .from(patients)
-    .where(inArray(patients.patientId, patientIds));
+    .from(patients);
 
   const ageMap = new Map(patientRows.map((p) => [p.patientId, p.age]));
 
