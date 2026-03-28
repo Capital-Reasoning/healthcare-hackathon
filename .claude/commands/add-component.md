@@ -1,6 +1,6 @@
 # Add a New Component
 
-Create a new UI component for the Rithm app. The user will describe the component they need.
+Create a new UI component for the BestPath app. The user will describe the component they need.
 
 ## Steps
 

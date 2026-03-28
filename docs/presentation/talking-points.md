@@ -1,4 +1,4 @@
-# Talking Points — Rithm
+# Talking Points — BestPath
 
 ## The Problem
 
@@ -9,7 +9,7 @@
 
 ## Our Solution: Generative UI
 
-- **Rithm** fuses a production-grade data platform with an AI co-pilot that generates native UI
+- **BestPath** fuses a production-grade data platform with an AI co-pilot that generates native UI
 - The AI doesn't just return text — it builds the same charts, tables, and cards that power the rest of the app
 - "Component duality" — every visualization works in static pages AND in agent-generated responses
 - The user gets a polished data platform **and** an intelligent assistant in one product
@@ -23,7 +23,7 @@
 
 ## Technical Architecture (One-liner)
 
-Next.js 16 + React 19 + Claude Sonnet 4.6 + OpenUI generative components + Supabase PostgreSQL with pgvector + LlamaParse/Gemini RAG pipeline — deployed on Vercel.
+Next.js 16 + React 19 + Claude Opus 4.6 + OpenUI generative components + Supabase PostgreSQL with pgvector + LlamaParse/Gemini RAG pipeline — deployed on Vercel.
 
 **Deeper if asked:**
 - **Frontend**: TypeScript (strict), Tailwind v4, shadcn/ui, Zustand state management, container queries for responsive layouts

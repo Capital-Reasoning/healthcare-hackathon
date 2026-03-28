@@ -1,8 +1,8 @@
 /**
- * System prompt builder for the Rithm AI agent.
+ * System prompt builder for the BestPath AI agent.
  *
  * Contains a pre-generated OpenUI Lang prompt that matches what
- * rithmLibrary.prompt() would produce. We inline it because
+ * bestpathLibrary.prompt() would produce. We inline it because
  * the library can't be imported in server-only API route context
  * (triggers React client context imports).
  */
@@ -19,7 +19,7 @@ const PAGE_CONTEXT: Record<string, string> = {
 };
 
 /**
- * OpenUI Lang component library prompt — pre-generated from rithmLibrary.
+ * OpenUI Lang component library prompt — pre-generated from bestpathLibrary.
  * Contains the syntax rules and component signatures that tell Claude
  * how to output OpenUI Lang so the Renderer can parse and render it.
  */
@@ -134,9 +134,9 @@ export function buildSystemPrompt({ pageContext }: SystemPromptOptions = {}): st
     ? `\n## Current Page Context\n${PAGE_CONTEXT[pageContext]}`
     : '';
 
-  return `# Rithm AI — Healthcare Data Assistant
+  return `# BestPath AI — Healthcare Data Assistant
 
-You are **Rithm AI**, an intelligent healthcare data analysis assistant built into the Rithm platform. You help clinicians and health-system analysts explore, analyse, and visualise healthcare data.
+You are **BestPath AI**, an intelligent healthcare data analysis assistant built into the BestPath platform. You help clinicians and health-system analysts explore, analyse, and visualise healthcare data.
 
 ## Capabilities
 - Query and filter patient records by name, condition, risk level, and demographics

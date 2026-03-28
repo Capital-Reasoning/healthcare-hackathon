@@ -56,7 +56,7 @@ export function ChatInput() {
       <div className="flex items-center gap-2 p-3">
         <Textarea
           ref={inputRef}
-          placeholder="Ask Rithm AI..."
+          placeholder="Ask BestPath AI..."
           onKeyDown={handleKeyDown}
           disabled={isActive}
           className={cn(

@@ -122,14 +122,14 @@ export function AgentPanelLayout({ children }: { children: React.ReactNode }) {
               type="button"
               onClick={toggle}
               className="group flex w-10 shrink-0 cursor-pointer flex-col items-center justify-start gap-2 border-l border-border/30 bg-white pt-4 transition-colors hover:border-primary/30 hover:bg-primary/5"
-              aria-label="Open Rithm AI"
+              aria-label="Open BestPath AI"
             >
               <div className="h-8 w-1 rounded-full bg-gradient-to-b from-primary/50 to-primary/20 transition-colors group-hover:from-primary group-hover:to-primary/40" />
               <span
                 className="text-[11px] font-bold tracking-wider text-text-primary transition-colors group-hover:text-primary"
                 style={{ writingMode: 'vertical-rl' }}
               >
-                Rithm AI
+                BestPath AI
               </span>
             </button>
           )}
@@ -173,7 +173,7 @@ export function AgentPanelLayout({ children }: { children: React.ReactNode }) {
           >
             <span className="inline-block size-2 rounded-full bg-primary" />
             <span className="text-body-sm font-medium text-text-primary">
-              Ask Rithm AI
+              Ask BestPath AI
             </span>
           </button>
           <AgentPanel />

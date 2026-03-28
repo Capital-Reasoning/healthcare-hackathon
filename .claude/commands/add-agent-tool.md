@@ -1,6 +1,6 @@
 # Add a New Agent Tool
 
-Register a new tool that the Rithm AI agent can use. The user will describe what the tool should do.
+Register a new tool that the BestPath AI agent can use. The user will describe what the tool should do.
 
 ## Steps
 

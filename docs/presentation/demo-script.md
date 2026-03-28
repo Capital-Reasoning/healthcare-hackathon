@@ -1,6 +1,6 @@
-# Demo Script — Rithm (2-3 Minutes)
+# Demo Script — BestPath (2-3 Minutes)
 
-> **Goal:** Show that Rithm fuses powerful data visualization with an AI co-pilot that generates native UI on the fly — not a chatbot, not a static dashboard, but both working together.
+> **Goal:** Show that BestPath fuses powerful data visualization with an AI co-pilot that generates native UI on the fly — not a chatbot, not a static dashboard, but both working together.
 
 ---
 
@@ -50,7 +50,7 @@
 
 ## Closing (10 seconds)
 
-> "Rithm: where data meets intelligence. Thank you."
+> "BestPath: where data meets intelligence. Thank you."
 
 - Show the dashboard one more time — full circle
 
@@ -66,7 +66,7 @@
 
 ## Technical Talking Points (if judges ask)
 
-- **Architecture:** Next.js + React, Claude Sonnet 4.6 with OpenUI for generative components
+- **Architecture:** Next.js + React, Claude Opus 4.6 with OpenUI for generative components
 - **Data:** Supabase PostgreSQL with pgvector for hybrid search
 - **RAG:** LlamaParse + semantic chunking + Gemini embeddings + hybrid retrieval (vector + keyword)
 - **Differentiator:** OpenUI — the AI generates native UI components, not raw text. 47-67% fewer tokens than JSON alternatives. Streaming renders progressively.

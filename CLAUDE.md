@@ -1,4 +1,4 @@
-# Rithm — AI-powered Healthcare Data Platform
+# BestPath — AI-powered Healthcare Data Platform
 
 ## Quick Start
 ```bash
@@ -10,7 +10,7 @@ npm run dev                   # Start dev server at localhost:3000
 ```
 
 ## Stack
-Next.js 16 (App Router) · TypeScript (strict) · Tailwind v4 + shadcn/ui · Zustand · Supabase (Postgres + pgvector) · Drizzle ORM · Vercel AI SDK + Claude Sonnet 4.6 · OpenUI (generative UI) · Recharts · LlamaParse → Gemini Embeddings → pgvector RAG
+Next.js 16 (App Router) · TypeScript (strict) · Tailwind v4 + shadcn/ui · Zustand · Supabase (Postgres + pgvector) · Drizzle ORM · Vercel AI SDK + Claude Opus 4.6 · OpenUI (generative UI) · Recharts · LlamaParse → Gemini Embeddings → pgvector RAG
 
 ## Principles
 - **Hackathon speed** — ship fast, iterate, don't over-engineer

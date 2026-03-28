@@ -13,7 +13,7 @@
 | **Database** | Supabase (PostgreSQL + pgvector) | Auth + DB + vectors + storage + realtime in one platform. Free tier. |
 | **ORM** | Drizzle ORM | Type-safe, lightweight, Postgres-native, great migration story |
 | **AI Framework** | Vercel AI SDK (`ai`, `@ai-sdk/react`, `@ai-sdk/anthropic`) | First-class React streaming, tool calling, chat hooks |
-| **AI Model** | Claude Sonnet 4.6 (extended thinking, medium budget) | Fast for demos, smart enough for analysis. Opus toggle later if needed. |
+| **AI Model** | Claude Opus 4.6 | Most capable model for clinical analysis and reasoning. |
 | **Generative UI** | OpenUI (`@openuidev/react-lang`, `@openuidev/react-headless`) | Native React, 47-67% fewer tokens than JSON, streaming renderer, defineComponent pattern |
 | **Charts** | Recharts | Most used React chart library (24k+ stars), D3-powered, declarative, great docs, agents know it well |
 | **RAG Parsing** | LlamaParse (REST API) | Best-in-class document parsing, handles tables/forms/complex layouts |
@@ -70,7 +70,7 @@ User Query → Claude (with tools) → vector_search(query) → top-K chunks →
 - Light mode only (hackathon scope)
 
 ### App Name
-- Display name: "Rithm" — configured in `src/config/app.ts`
+- Display name: "BestPath" — configured in `src/config/app.ts`
 - Easily changeable (single source of truth)
 
 ## MCP Servers (configured in .claude/settings.json)

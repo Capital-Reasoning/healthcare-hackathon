@@ -28,11 +28,11 @@ import {
 } from './components';
 
 /**
- * The Rithm OpenUI component library — registered with createLibrary so
+ * The BestPath OpenUI component library — registered with createLibrary so
  * the agent can generate structured UI responses that are parsed and
  * rendered with real React components.
  */
-export const rithmLibrary = createLibrary({
+export const bestpathLibrary = createLibrary({
   components: [
     // Data Display
     StatCardDefinition,

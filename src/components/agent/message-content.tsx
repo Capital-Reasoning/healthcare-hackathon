@@ -3,7 +3,7 @@
 import { useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Renderer } from '@openuidev/react-lang';
-import { rithmLibrary } from '@/lib/openui/library';
+import { bestpathLibrary } from '@/lib/openui/library';
 import { GeneratedCard } from './generated-card';
 
 interface MessageContentProps {
@@ -219,7 +219,7 @@ export function MessageContent({ text, isStreaming }: MessageContentProps) {
         if (unit.type === 'openui') {
           return (
             <GeneratedCard key={i}>
-              <Renderer response={unit.content} library={rithmLibrary} />
+              <Renderer response={unit.content} library={bestpathLibrary} />
             </GeneratedCard>
           );
         }

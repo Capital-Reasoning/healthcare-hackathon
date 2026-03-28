@@ -60,7 +60,7 @@ export function AgentPanelHeader({
           {/* Title */}
           <Activity className="size-4 text-primary" aria-hidden="true" />
           <span className="text-body-sm font-semibold text-text-primary">
-            Rithm AI
+            BestPath AI
           </span>
         </>
       )}

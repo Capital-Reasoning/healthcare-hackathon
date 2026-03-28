@@ -15,7 +15,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Rithm",
+  title: "BestPath",
   description: "AI-powered healthcare insights",
 };
 

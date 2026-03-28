@@ -31,7 +31,7 @@ export const useAgentStore = create<AgentState>()(
       setStreaming: (isStreaming) => set({ isStreaming }),
     }),
     {
-      name: 'rithm-agent-panel',
+      name: 'bestpath-agent-panel',
       partialize: (state) => ({ isOpen: state.isOpen }),
     },
   ),

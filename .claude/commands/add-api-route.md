@@ -1,6 +1,6 @@
 # Add a New API Route
 
-Create a new REST API endpoint for the Rithm app. The user will describe the resource/endpoint they need.
+Create a new REST API endpoint for the BestPath app. The user will describe the resource/endpoint they need.
 
 ## Steps
 

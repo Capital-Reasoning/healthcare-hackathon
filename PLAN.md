@@ -1,8 +1,8 @@
-# Rithm: Proactive Care Intelligence Platform
+# BestPath: Proactive Care Intelligence Platform
 
 ## The One-Sentence Pitch
 
-Rithm identifies the highest-value clinical action for every patient — the screening, medication start, referral, or follow-up most likely to prevent an emergency — and surfaces it with evidence so clinicians can act before conditions escalate. For the 6.5 million Canadians without a family doctor, the same engine powers a self-service care navigator that tells people what they need and who can help, routing them to the least-strained provider capable of addressing it.
+BestPath identifies the highest-value clinical action for every patient — the screening, medication start, referral, or follow-up most likely to prevent an emergency — and surfaces it with evidence so clinicians can act before conditions escalate. For the 6.5 million Canadians without a family doctor, the same engine powers a self-service care navigator that tells people what they need and who can help, routing them to the least-strained provider capable of addressing it.
 
 ---
 
@@ -34,7 +34,7 @@ We directly address:
 | Criteria                 | Weight | Our Story                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 | ------------------------ | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Innovation**           | 25%    | Not a chatbot or dashboard. A two-vector proactive engine (RCV/SRV) that determines the next best clinical action — screening, medication start, referral, or follow-up — for every patient. AI identifies what's needed; deterministic comparison confirms urgency. The same engine serves clinicians AND patients — two interfaces, one architecture. Generative UI (OpenUI) means every query produces a bespoke clinical view, not a static page.                                                    |
-| **Technical Execution**  | 25%    | Two-vector patient model, structured AI output with evidence citations, deterministic comparator (no hallucination on the critical path), append-only run history, operational queue scoring algorithm. Full-stack: Next.js 16, Supabase + pgvector, Drizzle ORM, Claude Sonnet 4.6, Vercel AI SDK, 23 OpenUI components, hybrid RAG pipeline.                                                                                                                                                           |
+| **Technical Execution**  | 25%    | Two-vector patient model, structured AI output with evidence citations, deterministic comparator (no hallucination on the critical path), append-only run history, operational queue scoring algorithm. Full-stack: Next.js 16, Supabase + pgvector, Drizzle ORM, Claude Opus 4.6, Vercel AI SDK, 23 OpenUI components, hybrid RAG pipeline.                                                                                                                                                             |
 | **Impact Potential**     | 25%    | 6.5M Canadians lack a family doctor. Clinics drown in reactive care. ER closures across provinces. This system: (1) lets clinics surface the highest-value next action for every patient — the intervention most likely to prevent an ER visit — and (2) gives unattached patients evidence-based guidance on what they need and who can help. Every recommendation is auditable, guideline-cited, and clinician-reviewable. Designed as decision support under Health Canada's SaMD exclusion criteria. |
 | **Presentation Quality** | 15%    | Two-perspective demo: clinician queue drill-down, then patient self-service navigation. Problem → solution → live demo → impact in 5 minutes.                                                                                                                                                                                                                                                                                                                                                            |
 | **Design & UX**          | 10%    | AI IS the interface. Natural language in, actionable recommendations out. Generative UI renders clinical views tailored to the question. Zero cognitive load, zero behavior change. Warm teal design system, glass aesthetic for AI panel, clean data display.                                                                                                                                                                                                                                           |
@@ -316,7 +316,7 @@ Clinical guidelines for the risk prompt's retrieval context. Options:
 
 ### Act 2: The Clinician View (90 seconds)
 - Open dashboard → show prioritized patient queue
-- "Rithm has analyzed 2,000 patients against clinical guidelines. Here's who needs action first — and what that action is."
+- "BestPath has analyzed 2,000 patients against clinical guidelines. Here's who needs action first — and what that action is."
 - Click top patient → agent panel opens
 - "Why is this patient #1?" → agent explains: RCV summary, identified actions, evidence citations
 - Agent renders: PatientCard + RiskBadge + Timeline of needed actions
@@ -344,21 +344,21 @@ Clinical guidelines for the risk prompt's retrieval context. Options:
 
 ## Key Technical Decisions
 
-| Decision                                        | Choice                              | Why                                                                                        |
-| ----------------------------------------------- | ----------------------------------- | ------------------------------------------------------------------------------------------ |
+| Decision                                            | Choice                              | Why                                                                                                                                                      |
+| --------------------------------------------------- | ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | AI identifies needed actions, math confirms urgency | Hybrid AI + deterministic           | Trust. AI determines what's clinically indicated; deterministic comparison against care history confirms urgency. No hallucination on the critical path. |
-| Same engine for clinician + patient             | Single architecture                 | Innovation story. Reduces build scope. Doubles impact narrative.                           |
-| OpenUI generative components                    | Agent renders bespoke views         | Every query produces a tailored clinical view, not a static dashboard. No new UI to learn. |
-| RAG for clinical guidelines                     | Evidence-backed recommendations     | Every recommendation is traceable to a source document.                                    |
-| Provider-type routing                           | Condition → least-strained provider | Directly addresses "no family doctor" crisis. Routes away from ER/GP when possible.        |
-| Structured JSON model output                    | Forced schema                       | Enables deterministic comparator downstream. No freeform text on the critical path.        |
-| Append-only run history                         | Reproducibility + audit trail       | Every recommendation is traceable by run_id, corpus version, timestamp.                    |
+| Same engine for clinician + patient                 | Single architecture                 | Innovation story. Reduces build scope. Doubles impact narrative.                                                                                         |
+| OpenUI generative components                        | Agent renders bespoke views         | Every query produces a tailored clinical view, not a static dashboard. No new UI to learn.                                                               |
+| RAG for clinical guidelines                         | Evidence-backed recommendations     | Every recommendation is traceable to a source document.                                                                                                  |
+| Provider-type routing                               | Condition → least-strained provider | Directly addresses "no family doctor" crisis. Routes away from ER/GP when possible.                                                                      |
+| Structured JSON model output                        | Forced schema                       | Enables deterministic comparator downstream. No freeform text on the critical path.                                                                      |
+| Append-only run history                             | Reproducibility + audit trail       | Every recommendation is traceable by run_id, corpus version, timestamp.                                                                                  |
 
 ---
 
 ## Regulatory Framing (One Sentence for Judges)
 
-"Rithm is designed as a clinical decision support system under Health Canada's SaMD exclusion criteria — it augments clinical judgment, never replaces it. All recommendations require clinician review. All data processing can run in a private environment with zero data leaving the hospital."
+"BestPath is designed as a clinical decision support system under Health Canada's SaMD exclusion criteria — it augments clinical judgment, never replaces it. All recommendations require clinician review. All data processing can run in a private environment with zero data leaving the hospital."
 
 ---
 

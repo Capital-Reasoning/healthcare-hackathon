@@ -1,6 +1,6 @@
 ---
 name: BuildersVault Healthcare Hackathon prep
-description: Hackathon March 27-28, 2026 at UVic. Building "Rithm" — AI-powered healthcare data platform. React/Next.js + OpenUI + Claude + Supabase. 8-phase scaffold in setup-prompts/.
+description: Hackathon March 27-28, 2026 at UVic. Building "BestPath" — AI-powered healthcare data platform. React/Next.js + OpenUI + Claude + Supabase. 8-phase scaffold in setup-prompts/.
 type: project
 ---
 
@@ -14,11 +14,11 @@ BuildersVault Hackathon #2 — Healthcare AI, March 27-28, 2026 at University of
 - Partners: Anthropic (will likely provide Claude API credits), UVic Hacks, Red Bull
 
 **Finalized architecture:**
-- **App name:** Rithm (configurable in config/app.ts)
+- **App name:** BestPath (configurable in config/app.ts)
 - **Framework:** Next.js 15 (App Router) + React + TypeScript (strict)
 - **UI:** Tailwind v4 + shadcn/ui + OpenUI (defineComponent/createLibrary for agent generative UI)
 - **State:** Zustand
-- **AI:** Vercel AI SDK + Claude Sonnet 4.6 (extended thinking, medium budget)
+- **AI:** Vercel AI SDK + Claude Opus 4.6 (extended thinking, medium budget)
 - **Charts:** Recharts
 - **Database:** Supabase (PostgreSQL + pgvector + Realtime + Storage)
 - **ORM:** Drizzle

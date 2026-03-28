@@ -180,7 +180,7 @@ export const useConversationStore = create<ConversationState>()(
         set({ conversations: [], activeConversationId: null }),
     }),
     {
-      name: 'rithm-conversations',
+      name: 'bestpath-conversations',
     },
   ),
 );

@@ -1,4 +1,4 @@
-# Rithm — AI-powered Healthcare Data Platform
+# BestPath — AI-powered Healthcare Data Platform
 
 ## Setup
 
@@ -73,7 +73,7 @@ These are slash commands you run in Claude Code to scaffold code quickly during 
 
 ## Architecture
 
-**Stack:** Next.js 16 (App Router) · TypeScript · Tailwind v4 + shadcn/ui · Zustand · Supabase (Postgres + pgvector) · Drizzle ORM · Vercel AI SDK + Claude Sonnet 4.6 · OpenUI (generative UI) · Recharts · LlamaParse + Gemini Embeddings + pgvector RAG
+**Stack:** Next.js 16 (App Router) · TypeScript · Tailwind v4 + shadcn/ui · Zustand · Supabase (Postgres + pgvector) · Drizzle ORM · Vercel AI SDK + Claude Opus 4.6 · OpenUI (generative UI) · Recharts · LlamaParse + Gemini Embeddings + pgvector RAG
 
 ### Key Idea: Generative UI
 The AI agent doesn't return text — it generates native UI components (charts, tables, patient cards) using the same component library that powers the static pages. This is powered by [OpenUI](https://openui.fly.dev), a DSL for describing UI that's 47-67% more token-efficient than JSON.

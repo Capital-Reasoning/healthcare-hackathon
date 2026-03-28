@@ -14,7 +14,7 @@ export default function DesignSystemPage() {
         <h1 className="text-display text-navy-800">Visual Reference</h1>
         <p className="text-body text-text-secondary mt-2">
           All design tokens, patterns, components, and utilities available in
-          Rithm.
+          BestPath.
         </p>
       </div>
 

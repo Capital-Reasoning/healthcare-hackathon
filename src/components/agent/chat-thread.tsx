@@ -58,7 +58,7 @@ export function ChatThread() {
           </div>
           <div className="space-y-1.5">
             <h2 className="text-h3 font-semibold text-text-primary">
-              Rithm AI
+              BestPath AI
             </h2>
             <p className="max-w-[300px] text-body-sm text-text-muted">
               Explore patient records, clinical metrics, and research documents

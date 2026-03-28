@@ -1,6 +1,6 @@
 # Scaffold a New Page
 
-Create a new page in the Rithm app. The user will provide the page name (e.g., "analytics", "reports").
+Create a new page in the BestPath app. The user will provide the page name (e.g., "analytics", "reports").
 
 ## Steps
 

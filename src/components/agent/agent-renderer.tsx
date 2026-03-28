@@ -1,7 +1,7 @@
 'use client';
 
 import { Renderer } from '@openuidev/react-lang';
-import { rithmLibrary } from '@/lib/openui/library';
+import { bestpathLibrary } from '@/lib/openui/library';
 import { GeneratedCard } from './generated-card';
 
 interface AgentRendererProps {
@@ -18,7 +18,7 @@ export function AgentRenderer({ response, isStreaming }: AgentRendererProps) {
     <GeneratedCard>
       <Renderer
         response={response}
-        library={rithmLibrary}
+        library={bestpathLibrary}
         isStreaming={isStreaming}
       />
     </GeneratedCard>
