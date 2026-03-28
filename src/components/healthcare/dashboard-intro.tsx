@@ -13,9 +13,6 @@ export function DashboardIntro({ children }: { children: ReactNode }) {
   const setAnalyzed = useAnalysisStore((s) => s.setAnalyzed);
   const [stage, setStage] = useState<Stage>(hasAnalyzed ? 'done' : 'idle');
 
-  // Already analyzed → render children immediately
-  if (stage === 'done') return <>{children}</>;
-
   function handleSkipAll() {
     setAnalyzed();
     setStage('done');
@@ -32,12 +29,14 @@ export function DashboardIntro({ children }: { children: ReactNode }) {
 
   return (
     <>
-      {/* Dashboard content — hidden until revealing */}
+      {/* Dashboard content — always mounted, visibility controlled by stage */}
       <div
         className={
-          stage === 'revealing'
-            ? 'animate-[dashboard-reveal_500ms_ease-out_200ms_forwards] opacity-0'
-            : 'hidden'
+          stage === 'done'
+            ? ''
+            : stage === 'revealing'
+              ? 'animate-[dashboard-reveal_500ms_ease-out_200ms_forwards] opacity-0'
+              : 'hidden'
         }
       >
         {children}
