@@ -28,7 +28,7 @@ export default async function PatientDetailPage({
   const lastEncounter = patient.encounters[0] ?? null;
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
+    <div className="max-w-6xl mx-auto space-y-6 pt-8">
       {/* Back link */}
       <Link
         href="/"

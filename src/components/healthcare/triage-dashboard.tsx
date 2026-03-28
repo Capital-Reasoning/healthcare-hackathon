@@ -317,6 +317,7 @@ function CompletedSection({
 
   async function rerunOne(patientId: string) {
     setRerunningId(patientId);
+    toast.info('Running assessment — this may take a minute or two', { duration: 5000 });
     try {
       const res = await fetch('/api/engine/assess', {
         method: 'POST',
@@ -340,6 +341,7 @@ function CompletedSection({
 
   async function rerunAll() {
     setRerunningAll(true);
+    toast.info('Rerunning all assessments — this will take several minutes', { duration: 8000 });
     const patientIds = doneItems.map((i) => i.patientId);
     let success = 0;
     for (const pid of patientIds) {

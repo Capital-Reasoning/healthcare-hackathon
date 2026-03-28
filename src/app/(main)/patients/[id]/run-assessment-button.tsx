@@ -12,6 +12,7 @@ export function RunAssessmentButton({ patientId }: { patientId: string }) {
 
   async function handleRun() {
     setLoading(true);
+    toast.info('Running assessment — this may take a minute or two', { duration: 5000 });
     try {
       const res = await fetch('/api/engine/assess', {
         method: 'POST',
