@@ -1,14 +1,13 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import {
-  Activity,
   Compass,
   LayoutDashboard,
   Users,
 } from 'lucide-react';
-import { APP_CONFIG } from '@/config/app';
 import { cn } from '@/lib/utils';
 
 /** Navigation item definition */
@@ -42,13 +41,17 @@ export function Navbar({ className }: { className?: string }) {
         className
       )}
     >
-      {/* Left: Logo + App Name */}
-      <div className="flex items-center gap-2">
-        <Activity className="size-5 text-teal-500" aria-hidden="true" />
-        <span className="font-heading text-body-sm font-semibold text-white">
-          {APP_CONFIG.name}
-        </span>
-      </div>
+      {/* Left: Logo */}
+      <Link href="/" className="flex items-center">
+        <Image
+          src="/logo-new.png"
+          alt="BestPath"
+          width={400}
+          height={300}
+          className="h-12 w-auto"
+          priority
+        />
+      </Link>
 
       {/* Center: Navigation Links */}
       <nav

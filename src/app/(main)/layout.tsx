@@ -1,6 +1,5 @@
 import { Navbar } from "@/components/navigation";
 import { CommandPalette } from "@/components/navigation/command-palette";
-import { AgentPanelLayout } from "@/components/agent/agent-panel-layout";
 
 export default function MainLayout({
   children,
@@ -13,9 +12,9 @@ export default function MainLayout({
       <CommandPalette />
 
       {/* Main content area — fixed height, navbar offset via pt-14 */}
-      <div className="flex min-h-0 flex-1 pt-14">
-        <AgentPanelLayout>{children}</AgentPanelLayout>
-      </div>
+      <main className="@container/main min-w-0 flex-1 overflow-y-auto p-6 pt-14">
+        {children}
+      </main>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 # BestPath — Proactive Care Intelligence Platform
 
-> Identifies the next-step highest-value clinical action for patients based on all available information — the screening, medication start, referral, or follow-up most likely to prevent an emergency — and surfaces it with evidence so clinicians can act before conditions escalate.
+> BestPath identifies the next-step highest-value clinical action for patients based on all available information — the screening, medication start, referral, or follow-up most likely to prevent an emergency — and surfaces it with evidence so clinicians can act with a single click before conditions escalate.
 
 **Live Demo:** [healthcare-hackathon-capital-reasoning-team.vercel.app](https://healthcare-hackathon-capital-reasoning-team.vercel.app)
 

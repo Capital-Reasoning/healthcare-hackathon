@@ -43,16 +43,19 @@ export function DashboardIntro({ children }: { children: ReactNode }) {
         {children}
       </div>
 
-      {/* Idle: show analyze button on frosted glass card */}
+      {/* Idle: dark themed pre-analysis screen matching navbar / cube animation */}
       {stage === 'idle' && (
-        <div className="flex h-full min-h-[calc(100vh-3.5rem)] items-center justify-center p-8">
-          <div className="flex flex-col items-center gap-6 rounded-2xl border border-white/20 bg-white/60 px-12 py-10 text-center shadow-xl backdrop-blur-xl">
-            <div className="rounded-full bg-primary/10 p-5">
-              <Sparkles className="size-10 text-primary" />
+        <div
+          className="fixed inset-0 top-14 z-40 flex items-center justify-center p-8"
+          style={{ background: '#07101b' }}
+        >
+          <div className="flex flex-col items-center gap-6 rounded-2xl border border-white/10 bg-white/[0.07] px-12 py-10 text-center shadow-2xl backdrop-blur-xl">
+            <div className="rounded-full bg-teal-500/15 p-5">
+              <Sparkles className="size-10 text-teal-400" />
             </div>
             <div className="flex flex-col gap-2">
-              <h2 className="text-h2 text-foreground">Clinical Triage Analysis</h2>
-              <p className="max-w-md text-body-sm text-muted-foreground">
+              <h2 className="text-h2 text-white">Clinical Triage Analysis</h2>
+              <p className="max-w-md text-body-sm text-white/60">
                 Run BestPath&apos;s AI engine across patient records to identify prioritized
                 care actions from clinical guideline analysis.
               </p>
