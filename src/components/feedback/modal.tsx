@@ -66,7 +66,7 @@ function Modal({
 
         <div data-slot="modal-body">{children}</div>
 
-        {footer && <DialogFooter className="bg-bg-muted">{footer}</DialogFooter>}
+        {footer && <DialogFooter className="bg-muted">{footer}</DialogFooter>}
       </DialogContent>
     </Dialog>
   );

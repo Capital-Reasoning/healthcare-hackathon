@@ -15,7 +15,7 @@
 import 'dotenv/config';
 import * as fs from 'fs';
 import * as path from 'path';
-import { eq, and, sql } from 'drizzle-orm';
+import { sql } from 'drizzle-orm';
 import { parseHtml, extractTitle } from './lib/html-parser';
 import {
   parseWithUnstructured,

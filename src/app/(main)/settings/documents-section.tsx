@@ -99,10 +99,10 @@ export function DocumentsSection() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-lg font-semibold text-text-primary">
+        <h2 className="text-lg font-semibold text-foreground">
           Document Library
         </h2>
-        <p className="mt-1 text-sm text-text-muted">
+        <p className="mt-1 text-sm text-muted-foreground">
           Upload clinical documents to build your searchable knowledge base. The
           AI agent can search and cite these documents.
         </p>
@@ -115,11 +115,11 @@ export function DocumentsSection() {
       />
 
       {isLoading ? (
-        <p className="py-6 text-center text-sm text-text-muted">
+        <p className="py-6 text-center text-sm text-muted-foreground">
           Loading documents...
         </p>
       ) : documents.length === 0 ? (
-        <p className="py-6 text-center text-sm text-text-muted">
+        <p className="py-6 text-center text-sm text-muted-foreground">
           No documents uploaded yet. Upload a PDF, DOCX, TXT, or MD file to get
           started.
         </p>

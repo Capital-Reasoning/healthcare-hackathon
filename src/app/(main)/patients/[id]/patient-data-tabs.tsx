@@ -111,7 +111,7 @@ export function PatientDataTabs({
 
   return (
     <div className="space-y-4">
-      <h2 className="text-h2 text-foreground">Patient Data</h2>
+      <h2 className="text-h2 text-foreground">Clinical Record</h2>
 
       <Tabs defaultValue="encounters">
         <TabsList variant="line">

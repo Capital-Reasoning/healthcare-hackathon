@@ -92,7 +92,7 @@ export function PageTabs({
           ref={tabsRef}
           role="tablist"
           aria-label="Page tabs"
-          className="relative inline-flex items-center gap-1 rounded-lg border border-border bg-bg-muted p-1"
+          className="relative inline-flex items-center gap-1 rounded-lg border border-border bg-muted p-1"
         >
           {/* Sliding indicator */}
           <div

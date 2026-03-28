@@ -1,108 +1,68 @@
-# BestPath — AI-powered Healthcare Data Platform
+# BestPath — Proactive Care Intelligence Platform
 
-## Setup
+> Identifies the next-step highest-value clinical action for patients based on all available information — the screening, medication start, referral, or follow-up most likely to prevent an emergency — and surfaces it with evidence so clinicians can act before conditions escalate.
+
+## Team
+- **Peter Salmon** — Capital Reasoning Solutions, Victoria, BC
+
+## Challenge Track
+**Track 1: Clinical AI** — "Build an AI-powered tool that improves clinical workflows, patient care, or healthcare delivery using the provided Synthea patient dataset."
+
+## Problem
+6.5 million Canadians have no family doctor. Clinics are overwhelmed with reactive care. Patients end up in the ER because a blood pressure medication wasn't started, a referral wasn't made, a follow-up after an abnormal result never happened. These are preventable emergencies.
+
+## Solution
+BestPath is a dual-interface clinical intelligence engine:
+
+1. **Clinician View** — A proactive triage dashboard. The system analyzes patients against clinical guidelines, determines the next best clinical action for each, and surfaces a prioritized queue: Red (overdue + high risk), Yellow (overdue + lower risk), Green (on track). Every recommendation is cited against specific clinical guidelines.
+
+2. **Patient View** — A care navigator for people without a family doctor. Enter your health information conversationally, get evidence-based guidance on what you need and who can help — pharmacist, dietitian, walk-in clinic, LifeLabs — not just "see a doctor."
+
+Both interfaces run on the same core: patient data + clinical guidelines via RAG → deterministic comparison → prioritized, evidence-backed next best actions.
+
+## How It Works
+
+1. **Patient Context Builder** — Assembles demographics, conditions, medications, labs, and vitals from the database
+2. **Evidence Connection (RAG)** — Searches 4,000+ clinical guideline documents to find applicable recommendations
+3. **Deterministic Comparator** — Pure math: guidelines say what's needed, patient data shows what's been done, arithmetic determines what's overdue
+4. **Priority Scoring** — Ranks actions by risk level, overdue severity, and confidence
+5. **Evidence Citations** — Every recommendation links to the specific guideline passage that supports it
+
+## Tech Stack
+Next.js 16 · TypeScript · Tailwind v4 + shadcn/ui · Supabase (Postgres + pgvector) · Drizzle ORM · Claude Sonnet (assessment engine) + Opus (interactive agent) · Vercel AI SDK · OpenUI (generative UI) · Gemini Embeddings · Hybrid RAG (vector + keyword + RRF)
+
+## Clinical Knowledge Base
+We built a systematic pipeline to acquire and curate 4,000+ clinical guideline documents from BC and national sources. The corpus includes screening guidelines, management protocols, drug safety information, and provincial quality standards. Every recommendation traces to a specific passage. See `health-info-data/` for the acquisition pipeline.
+
+## Live Demo
+[Vercel URL — to be added after deployment]
+
+## Slides
+See `docs/presentation/pitch.html` (open in browser) or [Google Slides link — to be added]
+
+## How to Run Locally
 
 ```bash
+# Prerequisites: Node.js 20+, npm
+
+# Install dependencies
 npm install
-cp .env.example .env.local   # Fill in API keys (see below)
-npm run db:push               # Push schema to Supabase
-npm run db:seed               # Seed demo data
-npm run dev                   # http://localhost:3000
+
+# Set up environment variables
+cp .env.example .env.local
+# Fill in: ANTHROPIC_API_KEY, DATABASE_URL, SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY,
+# SUPABASE_SECRET_KEY, GEMINI_API_KEY, GOOGLE_GENERATIVE_AI_API_KEY, LLAMAPARSE_API_KEY
+
+# Push database schema
+npm run db:push
+
+# Start development server
+npm run dev
+# Open http://localhost:3000
+
+# Run the assessment engine on patients
+npx tsx scripts/run-batch.ts --limit 50 --tier production
 ```
 
-### Required Environment Variables
-- `DATABASE_URL` — Supabase Postgres connection string
-- `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY`
-- `ANTHROPIC_API_KEY` — Claude API key (for AI agent)
-- `LLAMAPARSE_API_KEY` — LlamaParse (for document ingestion)
-- `GEMINI_API_KEY` / `GOOGLE_GENERATIVE_AI_API_KEY` — Gemini (for embeddings)
-
-## Commands
-
-| Command | What it does |
-|---------|-------------|
-| `npm run dev` | Start dev server |
-| `npm run build` | Production build |
-| `npm run typecheck` | TypeScript check |
-| `npm run lint` | ESLint + typecheck |
-| `npm run format` | Prettier |
-| `npm run db:push` | Push schema to Supabase |
-| `npm run db:seed` | Seed demo data |
-| `npm run db:studio` | Open Drizzle Studio |
-| `npm run db:generate` | Generate Drizzle migrations |
-| `npm run db:indexes` | Set up pgvector indexes |
-
-## Hackathon Commands (Claude Code)
-
-These are slash commands you run in Claude Code to scaffold code quickly during the hackathon.
-
-### `/challenge-intake`
-**When:** First thing after the hackathon challenge brief is revealed.
-**How:** Paste the challenge brief into `docs/challenge-intake.md`, then run `/challenge-intake`. Claude will analyse the brief, map it to existing components/APIs/tools, identify gaps, and generate a sprint plan with time estimates.
-
-### `/scaffold-page`
-**When:** You need a new page (e.g., analytics, reports, cohort-builder).
-**How:** Run `/scaffold-page analytics`. Claude creates the route file, adds a nav link, adds a command palette entry, and sets up agent page context.
-
-### `/add-component`
-**When:** You need a new UI component that the agent can also render.
-**How:** Run `/add-component` and describe what you need. Claude creates the component file, TypeScript props interface, OpenUI definition, barrel export, and registers it in the library.
-
-### `/add-api-route`
-**When:** You need a new data endpoint (e.g., for challenge-specific data).
-**How:** Run `/add-api-route` and describe the resource. Claude creates the route file, query functions, and registers it as an agent tool — all following the standard response format.
-
-### `/add-agent-tool`
-**When:** You want the AI agent to be able to do something new (e.g., query a new dataset).
-**How:** Run `/add-agent-tool` and describe the capability. Claude creates the Zod schema, tool definition, and updates the system prompt.
-
-### `/pre-commit`
-**When:** Before committing — runs typecheck, lint, and console.log checks.
-**How:** Run `/pre-commit`. If everything passes, Claude stages and commits with a generated message. If something fails, it shows errors and suggests fixes.
-
-## Docs
-
-- `docs/presentation/demo-script.md` — 2-3 minute demo script
-- `docs/presentation/talking-points.md` — Key differentiators and talking points
-- `docs/challenge-intake.md` — Template for hackathon challenge analysis
-- `docs/ideas.md` — Stretch goals and future ideas
-- `docs/colour-scheme.md` — Design system colour palette
-- `docs/stack-decisions.md` — Architecture decisions
-
----
-
-## Architecture
-
-**Stack:** Next.js 16 (App Router) · TypeScript · Tailwind v4 + shadcn/ui · Zustand · Supabase (Postgres + pgvector) · Drizzle ORM · Vercel AI SDK + Claude Opus 4.6 · OpenUI (generative UI) · Recharts · LlamaParse + Gemini Embeddings + pgvector RAG
-
-### Key Idea: Generative UI
-The AI agent doesn't return text — it generates native UI components (charts, tables, patient cards) using the same component library that powers the static pages. This is powered by [OpenUI](https://openui.fly.dev), a DSL for describing UI that's 47-67% more token-efficient than JSON.
-
-### Project Structure
-```
-src/
-├── app/(main)/          # Pages: dashboard, patients, research, settings
-├── app/api/             # REST API endpoints (consistent response shape)
-├── components/          # UI components (9 categories)
-├── lib/ai/              # Claude agent, tools, system prompt, OpenUI
-├── lib/db/              # Drizzle schema, queries, seed data
-├── lib/rag/             # LlamaParse → chunking → Gemini embeddings → pgvector
-├── stores/              # Zustand: agent panel, conversations, UI state
-└── config/              # App config, Zod-validated env vars
-```
-
-### Agent Tools
-7 tools registered for the AI agent: `queryPatients`, `getPatientDetail`, `searchDocuments`, `keywordSearch`, `listDocuments`, `getDocumentChunk`, `getMetrics`. Tools call the query layer directly (no HTTP round-trip).
-
-### OpenUI Component Library
-23 renderable components: StatCard, DataBadge, List, DataTable, ImageCard, ComparisonTable, MetricRow, BarChart, LineChart, DonutChart, SparkLine, AreaChart, HeatMap, ScatterPlot, RadarChart, GaugeChart, PatientCard, RiskBadge, Timeline, VitalSign, MedicationCard, StatusAlert, Row, Card, Tabs.
-
-### Database
-Supabase PostgreSQL with pgvector. 11 tables: patients, providers, organizations, encounters, observations, medications, documents, documentChunks, conversations, messages. Drizzle ORM with typed queries.
-
-### RAG Pipeline
-LlamaParse (document parsing) → semantic chunking (1500 char, 200 overlap) → Gemini embeddings (3072 dimensions) → pgvector storage → hybrid retrieval (vector + keyword with Reciprocal Rank Fusion).
-
----
-
-*Built by Capital Reasoning for the BuildersVault Healthcare Hackathon.*
+## Regulatory Note
+BestPath is designed as a clinical decision support system under Health Canada's SaMD exclusion criteria — it augments clinical judgment, never replaces it. All recommendations require clinician review.

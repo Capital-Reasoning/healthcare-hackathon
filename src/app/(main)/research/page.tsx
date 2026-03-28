@@ -101,8 +101,8 @@ export default function ResearchPage() {
                 onClick={() => setMode(m.value)}
                 className={`flex-1 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
                   mode === m.value
-                    ? 'bg-primary text-white'
-                    : 'text-text-secondary hover:text-text-primary'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
                 {m.label}
@@ -117,7 +117,7 @@ export default function ResearchPage() {
         {isSearching && (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="size-6 animate-spin text-primary" />
-            <span className="ml-2 text-sm text-text-muted">
+            <span className="ml-2 text-sm text-muted-foreground">
               Searching documents...
             </span>
           </div>
@@ -125,11 +125,11 @@ export default function ResearchPage() {
 
         {!isSearching && hasSearched && results.length === 0 && (
           <div className="flex flex-col items-center py-12 text-center">
-            <FileText className="size-12 text-text-muted/40" />
-            <p className="mt-3 text-sm font-medium text-text-secondary">
+            <FileText className="size-12 text-muted-foreground/40" />
+            <p className="mt-3 text-sm font-medium text-muted-foreground">
               No results found
             </p>
-            <p className="mt-1 text-xs text-text-muted">
+            <p className="mt-1 text-xs text-muted-foreground">
               Try a different query or search mode. Upload documents in Settings
               to build your knowledge base.
             </p>
@@ -138,11 +138,11 @@ export default function ResearchPage() {
 
         {!isSearching && !hasSearched && (
           <div className="flex flex-col items-center py-12 text-center">
-            <Search className="size-12 text-text-muted/40" />
-            <p className="mt-3 text-sm font-medium text-text-secondary">
+            <Search className="size-12 text-muted-foreground/40" />
+            <p className="mt-3 text-sm font-medium text-muted-foreground">
               Search your document library
             </p>
-            <p className="mt-1 text-xs text-text-muted">
+            <p className="mt-1 text-xs text-muted-foreground">
               Use semantic search to find relevant clinical guidelines, protocols,
               and research across all uploaded documents.
             </p>
@@ -151,7 +151,7 @@ export default function ResearchPage() {
 
         {!isSearching && results.length > 0 && (
           <div className="space-y-3">
-            <p className="text-xs text-text-muted">
+            <p className="text-xs text-muted-foreground">
               {results.length} result{results.length !== 1 ? 's' : ''} found
             </p>
 
@@ -163,18 +163,18 @@ export default function ResearchPage() {
                       documentTitle={result.documentTitle}
                       page={result.pageNumber ?? undefined}
                     />
-                    <span className="shrink-0 text-[10px] text-text-muted">
+                    <span className="shrink-0 text-[10px] text-muted-foreground">
                       {(result.score * 100).toFixed(0)}% match
                     </span>
                   </div>
 
                   {result.heading && (
-                    <p className="mb-1 text-xs font-semibold text-text-secondary">
+                    <p className="mb-1 text-xs font-semibold text-muted-foreground">
                       {result.heading}
                     </p>
                   )}
 
-                  <p className="text-sm leading-relaxed text-text-primary">
+                  <p className="text-sm leading-relaxed text-foreground">
                     {expandedId === result.id
                       ? result.content
                       : result.content.slice(0, 300) +

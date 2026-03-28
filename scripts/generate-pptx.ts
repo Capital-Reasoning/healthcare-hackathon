@@ -47,7 +47,7 @@ function sectionLabel(s: PptxGenJS.Slide, text: string, y = 0.45) {
   s.addText(text.toUpperCase(), {
     x: 0.75, y, w: 5, h: 0.35,
     fontSize: 10, color: C.tealLight, fontFace: FONT,
-    letterSpacing: 3, bold: true,
+    bold: true, charSpacing: 3,
   });
 }
 
@@ -93,7 +93,7 @@ function addTechItem(s: PptxGenJS.Slide, x: number, y: number, title: string, bo
   });
   s.addText(title.toUpperCase(), {
     x: x + 0.2, y: y + 0.12, w: 5.3, h: 0.3,
-    fontSize: 10, color: C.tealLight, fontFace: FONT, bold: true, letterSpacing: 1,
+    fontSize: 10, color: C.tealLight, fontFace: FONT, bold: true, charSpacing: 1,
   });
   s.addText(body, {
     x: x + 0.2, y: y + 0.45, w: 5.3, h: 0.7,
@@ -160,7 +160,7 @@ function routeExample(s: PptxGenJS.Slide, x: number, y: number, quote: string, r
   // Header row
   s.addText("BUILDERSVAULT.AI HEALTHCARE & AI HACKATHON", {
     x: 0.75, y: 0.35, w: 7, h: 0.3,
-    fontSize: 9, color: C.tealLight, fontFace: FONT, letterSpacing: 2, bold: true,
+    fontSize: 9, color: C.tealLight, fontFace: FONT, charSpacing: 2, bold: true,
   });
   s.addText("Capital Reasoning  ·  March 2026", {
     x: 8, y: 0.35, w: 4.5, h: 0.3,
@@ -216,7 +216,7 @@ function routeExample(s: PptxGenJS.Slide, x: number, y: number, quote: string, r
     { text: "For every patient in a panel: find the ", options: { fontSize: 18, color: C.white, fontFace: FONT, bold: true } },
     { text: "single highest-value clinical action", options: { fontSize: 18, color: C.tealLight, fontFace: FONT, bold: true } },
     { text: " most likely to ", options: { fontSize: 18, color: C.white, fontFace: FONT, bold: true } },
-    { text: "prevent an ER visit", options: { fontSize: 18, color: C.white, fontFace: FONT, bold: true, underline: true } },
+    { text: "prevent an ER visit", options: { fontSize: 18, color: C.white, fontFace: FONT, bold: true, underline: { style: "heavy" } } },
     { text: ". Surface it with cited evidence. Let clinicians act.", options: { fontSize: 18, color: C.white, fontFace: FONT, bold: true } },
   ], { x: 0.75, y: 1.7, w: 11.5, h: 0.9, lineSpacingMultiple: 1.4 });
 

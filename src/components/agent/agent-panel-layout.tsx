@@ -126,7 +126,7 @@ export function AgentPanelLayout({ children }: { children: React.ReactNode }) {
             >
               <div className="h-8 w-1 rounded-full bg-gradient-to-b from-primary/50 to-primary/20 transition-colors group-hover:from-primary group-hover:to-primary/40" />
               <span
-                className="text-[11px] font-bold tracking-wider text-text-primary transition-colors group-hover:text-primary"
+                className="text-[11px] font-bold tracking-wider text-foreground transition-colors group-hover:text-primary"
                 style={{ writingMode: 'vertical-rl' }}
               >
                 BestPath AI
@@ -172,7 +172,7 @@ export function AgentPanelLayout({ children }: { children: React.ReactNode }) {
             )}
           >
             <span className="inline-block size-2 rounded-full bg-primary" />
-            <span className="text-body-sm font-medium text-text-primary">
+            <span className="text-body-sm font-medium text-foreground">
               Ask BestPath AI
             </span>
           </button>

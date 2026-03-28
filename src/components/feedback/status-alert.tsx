@@ -91,7 +91,7 @@ function StatusAlert({
         <div className="flex-1 min-w-0">
           <p className="text-body-sm font-medium text-navy-800">{title}</p>
           {description && (
-            <p className="text-body-sm text-text-secondary mt-0.5">{description}</p>
+            <p className="text-body-sm text-muted-foreground mt-0.5">{description}</p>
           )}
         </div>
 

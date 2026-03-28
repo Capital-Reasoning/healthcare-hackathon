@@ -77,7 +77,7 @@ export async function parseWithUnstructured(
       chunkingStrategy: 'by_title' as any,
       maxCharacters: 1500,
       newAfterNChars: 1000,
-      combineTextUnderNChars: 400,
+      combineUnderNChars: 400,
     },
   });
 

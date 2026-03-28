@@ -152,8 +152,10 @@ async function main() {
       console.log(`\n--- Chunk Size Distribution ---`);
       const buckets = [0, 250, 500, 750, 1000, 1250, 1500];
       for (let i = 0; i < buckets.length - 1; i++) {
-        const count = chunkSizes.filter(s => s >= buckets[i] && s < buckets[i+1]).length;
-        if (count > 0) console.log(`  ${buckets[i]}-${buckets[i+1]}: ${count} chunks`);
+        const lo = buckets[i]!;
+        const hi = buckets[i+1]!;
+        const count = chunkSizes.filter(s => s >= lo && s < hi).length;
+        if (count > 0) console.log(`  ${lo}-${hi}: ${count} chunks`);
       }
       const over1500 = chunkSizes.filter(s => s >= 1500).length;
       if (over1500 > 0) console.log(`  1500+: ${over1500} chunks`);

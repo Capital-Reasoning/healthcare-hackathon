@@ -47,7 +47,7 @@ describe('scoreAndCategorize', () => {
     const [result] = scoreAndCategorize([input]);
 
     // 300 + 80 + 100 + 20 = 500
-    expect(result.actionValueScore).toBe(500);
+    expect(result!.actionValueScore).toBe(500);
   });
 
   it('computes correct score: low risk + up_to_date + 0 overdue + low confidence = 100', () => {
@@ -61,7 +61,7 @@ describe('scoreAndCategorize', () => {
     const [result] = scoreAndCategorize([input]);
 
     // 100 + 0 + 0 + 0 = 100
-    expect(result.actionValueScore).toBe(100);
+    expect(result!.actionValueScore).toBe(100);
   });
 
   it('computes medium risk + due_soon + 0 overdue + medium confidence = 250', () => {
@@ -75,7 +75,7 @@ describe('scoreAndCategorize', () => {
     const [result] = scoreAndCategorize([input]);
 
     // 200 + 40 + 0 + 10 = 250
-    expect(result.actionValueScore).toBe(250);
+    expect(result!.actionValueScore).toBe(250);
   });
 
   // -------------------------------------------------------------------
@@ -93,7 +93,7 @@ describe('scoreAndCategorize', () => {
     const [result] = scoreAndCategorize([input]);
 
     // 300 + 80 + 180 (capped) + 20 = 580
-    expect(result.actionValueScore).toBe(580);
+    expect(result!.actionValueScore).toBe(580);
   });
 
   it('clamps negative overdue days to 0', () => {
@@ -107,7 +107,7 @@ describe('scoreAndCategorize', () => {
     const [result] = scoreAndCategorize([input]);
 
     // 100 + 0 + 0 (clamped from -45) + 0 = 100
-    expect(result.actionValueScore).toBe(100);
+    expect(result!.actionValueScore).toBe(100);
   });
 
   // -------------------------------------------------------------------
@@ -122,7 +122,7 @@ describe('scoreAndCategorize', () => {
 
     const [result] = scoreAndCategorize([input]);
 
-    expect(result.category).toBe('red');
+    expect(result!.category).toBe('red');
   });
 
   it('assigns yellow category when overdue_now + medium risk', () => {
@@ -133,7 +133,7 @@ describe('scoreAndCategorize', () => {
 
     const [result] = scoreAndCategorize([input]);
 
-    expect(result.category).toBe('yellow');
+    expect(result!.category).toBe('yellow');
   });
 
   it('assigns yellow category when overdue_now + low risk', () => {
@@ -144,7 +144,7 @@ describe('scoreAndCategorize', () => {
 
     const [result] = scoreAndCategorize([input]);
 
-    expect(result.category).toBe('yellow');
+    expect(result!.category).toBe('yellow');
   });
 
   it('assigns yellow category for due_soon regardless of risk tier', () => {
@@ -156,7 +156,7 @@ describe('scoreAndCategorize', () => {
 
       const [result] = scoreAndCategorize([input]);
 
-      expect(result.category).toBe('yellow');
+      expect(result!.category).toBe('yellow');
     }
   });
 
@@ -169,7 +169,7 @@ describe('scoreAndCategorize', () => {
 
       const [result] = scoreAndCategorize([input]);
 
-      expect(result.category).toBe('yellow');
+      expect(result!.category).toBe('yellow');
     }
   });
 
@@ -183,7 +183,7 @@ describe('scoreAndCategorize', () => {
 
       const [result] = scoreAndCategorize([input]);
 
-      expect(result.category).toBe('green');
+      expect(result!.category).toBe('green');
     }
   });
 
@@ -219,20 +219,20 @@ describe('scoreAndCategorize', () => {
     const results = scoreAndCategorize(inputs);
 
     // Highest score first
-    expect(results[0].condition).toBe('High priority');
-    expect(results[0].priorityRank).toBe(1);
+    expect(results[0]!.condition).toBe('High priority');
+    expect(results[0]!.priorityRank).toBe(1);
 
-    expect(results[1].condition).toBe('Medium priority');
-    expect(results[1].priorityRank).toBe(2);
+    expect(results[1]!.condition).toBe('Medium priority');
+    expect(results[1]!.priorityRank).toBe(2);
 
-    expect(results[2].condition).toBe('Low priority');
-    expect(results[2].priorityRank).toBe(3);
+    expect(results[2]!.condition).toBe('Low priority');
+    expect(results[2]!.priorityRank).toBe(3);
   });
 
   it('handles a single target (rank 1)', () => {
     const input = makeInput();
     const [result] = scoreAndCategorize([input]);
-    expect(result.priorityRank).toBe(1);
+    expect(result!.priorityRank).toBe(1);
   });
 
   it('handles an empty array', () => {
@@ -258,9 +258,9 @@ describe('scoreAndCategorize', () => {
 
     const results = scoreAndCategorize([a, b]);
 
-    expect(results[0].priorityRank).toBe(1);
-    expect(results[1].priorityRank).toBe(2);
-    expect(results[0].actionValueScore).toBe(results[1].actionValueScore);
+    expect(results[0]!.priorityRank).toBe(1);
+    expect(results[1]!.priorityRank).toBe(2);
+    expect(results[0]!.actionValueScore).toBe(results[1]!.actionValueScore);
   });
 
   // -------------------------------------------------------------------
@@ -278,7 +278,7 @@ describe('scoreAndCategorize', () => {
     const [result] = scoreAndCategorize([input]);
 
     // 300 + 80 + 180 + 20 = 580
-    expect(result.actionValueScore).toBe(580);
+    expect(result!.actionValueScore).toBe(580);
   });
 
   // -------------------------------------------------------------------
@@ -296,6 +296,6 @@ describe('scoreAndCategorize', () => {
     const [result] = scoreAndCategorize([input]);
 
     // 100 + 20 + 0 + 0 = 120
-    expect(result.actionValueScore).toBe(120);
+    expect(result!.actionValueScore).toBe(120);
   });
 });

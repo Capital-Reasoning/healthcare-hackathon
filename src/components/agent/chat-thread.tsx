@@ -57,10 +57,10 @@ export function ChatThread() {
             <Activity className="size-8 text-primary" />
           </div>
           <div className="space-y-1.5">
-            <h2 className="text-h3 font-semibold text-text-primary">
+            <h2 className="text-h3 font-semibold text-foreground">
               BestPath AI
             </h2>
-            <p className="max-w-[300px] text-body-sm text-text-muted">
+            <p className="max-w-[300px] text-body-sm text-muted-foreground">
               Explore patient records, clinical metrics, and research documents
               using natural language.
             </p>
@@ -76,10 +76,10 @@ export function ChatThread() {
           ].map(({ icon: Icon, text }) => (
             <div
               key={text}
-              className="flex items-center gap-3 rounded-xl bg-bg-muted/60 px-4 py-2.5 text-left"
+              className="flex items-center gap-3 rounded-xl bg-muted/60 px-4 py-2.5 text-left"
             >
               <Icon className="size-4 shrink-0 text-primary" />
-              <span className="text-xs text-text-secondary">{text}</span>
+              <span className="text-xs text-muted-foreground">{text}</span>
             </div>
           ))}
         </div>

@@ -33,7 +33,7 @@ export function ThinkingIndicator({ toolName }: ThinkingIndicatorProps) {
         ))}
       </div>
 
-      <span className="text-xs font-medium text-text-muted">{label}</span>
+      <span className="text-xs font-medium text-muted-foreground">{label}</span>
     </div>
   );
 }

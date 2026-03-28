@@ -45,16 +45,16 @@ export default async function PatientDetailPage({
           </div>
           <div className="flex-1 min-w-0">
             <h1 className="text-h1 text-foreground">
-              Patient: {patientName}
+              {patientName}
             </h1>
             <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1 text-sm text-muted-foreground">
-              {patient.age != null && <span>Age: {patient.age}</span>}
-              {patient.sex && <span>Sex: {patient.sex}</span>}
-              <span>ID: {patient.patientId}</span>
+              {patient.age != null && <span>{patient.age} years old</span>}
+              {patient.sex && <span>{patient.sex}</span>}
+              <span>MRN {patient.patientId}</span>
             </div>
             {lastEncounter && (
               <p className="text-sm text-muted-foreground mt-1">
-                Last Encounter:{' '}
+                Last seen{' '}
                 {lastEncounter.encounterDate
                   ? new Date(lastEncounter.encounterDate).toLocaleDateString(
                       'en-US',

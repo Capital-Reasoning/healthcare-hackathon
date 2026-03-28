@@ -91,15 +91,15 @@ export function FileUpload({
           'flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed bg-card px-6 py-8 transition-colors',
           isDragging
             ? 'border-primary bg-primary-tint'
-            : 'border-border hover:border-primary/50 hover:bg-surface-warm',
+            : 'border-border hover:border-primary/50 hover:bg-muted',
           isUploading && 'pointer-events-none opacity-60',
         )}
       >
-        <Upload className="size-8 text-text-muted" />
-        <p className="text-sm font-medium text-text-secondary">
+        <Upload className="size-8 text-muted-foreground" />
+        <p className="text-sm font-medium text-muted-foreground">
           Drop a file here or click to browse
         </p>
-        <p className="text-xs text-text-muted">
+        <p className="text-xs text-muted-foreground">
           PDF, DOCX, TXT, MD — up to {maxSizeMB}MB
         </p>
 
@@ -113,16 +113,16 @@ export function FileUpload({
       </div>
 
       {error && (
-        <p className="text-xs font-medium text-red-600">{error}</p>
+        <p className="text-xs font-medium text-destructive">{error}</p>
       )}
 
       {selectedFile && !error && (
         <div className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2">
           <FileText className="size-4 text-primary" />
-          <span className="flex-1 truncate text-sm text-text-primary">
+          <span className="flex-1 truncate text-sm text-foreground">
             {selectedFile.name}
           </span>
-          <span className="text-xs text-text-muted">
+          <span className="text-xs text-muted-foreground">
             {(selectedFile.size / 1024 / 1024).toFixed(1)}MB
           </span>
           {!isUploading && (
@@ -131,7 +131,7 @@ export function FileUpload({
                 e.stopPropagation();
                 clearFile();
               }}
-              className="rounded p-0.5 text-text-muted hover:text-text-primary"
+              className="rounded p-0.5 text-muted-foreground hover:text-foreground"
             >
               <X className="size-3.5" />
             </button>

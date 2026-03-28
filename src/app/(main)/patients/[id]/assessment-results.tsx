@@ -200,7 +200,7 @@ export function AssessmentResults({
             Assessment Results
           </h2>
           <p className="text-sm text-muted-foreground mt-1">
-            Engine run:{' '}
+            Assessed{' '}
             {new Date(runDate).toLocaleDateString('en-US', {
               year: 'numeric',
               month: 'long',

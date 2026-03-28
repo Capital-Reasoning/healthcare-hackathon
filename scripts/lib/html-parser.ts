@@ -147,12 +147,6 @@ export function parseHtml(
     return [];
   }
 
-  // Extract document title
-  const docTitle =
-    $('title').text().trim() ||
-    $('h1').first().text().trim() ||
-    null;
-
   // Walk the content and split into sections by headings
   const sections = extractSections($, $content);
 

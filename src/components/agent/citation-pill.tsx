@@ -33,10 +33,10 @@ export function CitationPill({
         align="start"
         className="max-w-[300px] text-xs"
       >
-        <p className="font-semibold text-text-primary">{documentTitle}</p>
-        {page && <p className="text-text-muted">Page {page}</p>}
+        <p className="font-semibold text-foreground">{documentTitle}</p>
+        {page && <p className="text-muted-foreground">Page {page}</p>}
         {excerpt && (
-          <p className="mt-1.5 border-t border-border pt-1.5 leading-relaxed text-text-secondary">
+          <p className="mt-1.5 border-t border-border pt-1.5 leading-relaxed text-muted-foreground">
             {excerpt}
           </p>
         )}

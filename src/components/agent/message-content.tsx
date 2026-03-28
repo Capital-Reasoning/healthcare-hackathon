@@ -151,7 +151,7 @@ const mdComponents: React.ComponentProps<typeof ReactMarkdown>['components'] =
       </h3>
     ),
     h4: ({ children }) => (
-      <h4 className="mt-3 mb-1 text-sm font-semibold text-text-muted">
+      <h4 className="mt-3 mb-1 text-sm font-semibold text-muted-foreground">
         {children}
       </h4>
     ),
@@ -178,13 +178,13 @@ const mdComponents: React.ComponentProps<typeof ReactMarkdown>['components'] =
       const isBlock = className?.includes('language-');
       if (isBlock) {
         return (
-          <pre className="my-1.5 overflow-x-auto rounded-lg bg-bg-inset p-3 text-xs">
+          <pre className="my-1.5 overflow-x-auto rounded-lg bg-muted p-3 text-xs">
             <code>{children}</code>
           </pre>
         );
       }
       return (
-        <code className="rounded bg-bg-inset px-1 py-0.5 text-xs">
+        <code className="rounded bg-muted px-1 py-0.5 text-xs">
           {children}
         </code>
       );
@@ -192,7 +192,7 @@ const mdComponents: React.ComponentProps<typeof ReactMarkdown>['components'] =
     pre: ({ children }) => <>{children}</>,
     hr: () => <hr className="my-2 border-border/50" />,
     blockquote: ({ children }) => (
-      <blockquote className="my-1.5 border-l-2 border-primary/30 pl-3 italic text-text-muted">
+      <blockquote className="my-1.5 border-l-2 border-primary/30 pl-3 italic text-muted-foreground">
         {children}
       </blockquote>
     ),
@@ -227,7 +227,7 @@ export function MessageContent({ text, isStreaming }: MessageContentProps) {
         return (
           <div
             key={i}
-            className="animate-fade-in-up text-body-sm leading-relaxed text-text-primary"
+            className="animate-fade-in-up text-body-sm leading-relaxed text-foreground"
           >
             <ReactMarkdown components={mdComponents}>
               {unit.content}

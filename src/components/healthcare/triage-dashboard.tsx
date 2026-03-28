@@ -38,9 +38,9 @@ type AnimationPhase =
 
 const PHASE_MESSAGES: Record<AnimationPhase, string> = {
   idle: '',
-  connecting: 'Connecting patient data to clinical guidelines...',
-  comparing: 'Running deterministic comparator...',
-  scoring: 'Scoring and categorizing results...',
+  connecting: 'Matching patient records to clinical guidelines...',
+  comparing: 'Comparing care history against recommended pathways...',
+  scoring: 'Categorizing findings by clinical priority...',
   done: '',
 };
 

@@ -29,7 +29,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Dashboard', href: '/', icon: LayoutDashboard },
   { label: 'Patients', href: '/patients', icon: Users },
   { label: 'Research', href: '/research', icon: FlaskConical },
-  { label: 'Navigator', href: '/navigator', icon: Compass },
+  { label: 'Care Navigator', href: '/navigator', icon: Compass },
   { label: 'Settings', href: '/settings', icon: Settings },
 ];
 

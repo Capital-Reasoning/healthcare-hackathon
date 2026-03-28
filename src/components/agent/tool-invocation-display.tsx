@@ -46,13 +46,13 @@ export function ToolInvocationDisplay({
     <div
       className={cn(
         'text-xs',
-        !grouped && 'my-1.5 rounded-lg border border-border/50 bg-bg-muted/40',
+        !grouped && 'my-1.5 rounded-lg border border-border/50 bg-muted/40',
       )}
     >
       <button
         type="button"
         onClick={() => setExpanded(!expanded)}
-        className="flex w-full items-center gap-2 px-2.5 py-1.5 text-left transition-colors hover:bg-bg-muted/60"
+        className="flex w-full items-center gap-2 px-2.5 py-1.5 text-left transition-colors hover:bg-muted/60"
       >
         {isError ? (
           <AlertCircle className="size-3 text-destructive" />
@@ -65,12 +65,12 @@ export function ToolInvocationDisplay({
         <span
           className={cn(
             'flex-1 font-medium',
-            isComplete ? 'text-text-secondary' : 'text-text-primary',
+            isComplete ? 'text-muted-foreground' : 'text-foreground',
           )}
         >
           {label}
           {!isComplete && !isError && (
-            <span className="ml-1 text-text-muted shimmer">…</span>
+            <span className="ml-1 text-muted-foreground shimmer">…</span>
           )}
         </span>
 
@@ -85,8 +85,8 @@ export function ToolInvocationDisplay({
         <div className="border-t border-border/30 px-2.5 py-2 animate-expand">
           {input != null && (
             <div className="mb-1.5">
-              <span className="font-semibold text-text-muted">Input:</span>
-              <pre className="mt-0.5 overflow-x-auto rounded bg-bg-inset p-1.5 font-mono text-[10px] leading-relaxed text-text-secondary">
+              <span className="font-semibold text-muted-foreground">Input:</span>
+              <pre className="mt-0.5 overflow-x-auto rounded bg-muted p-1.5 font-mono text-[10px] leading-relaxed text-muted-foreground">
                 {JSON.stringify(input, null, 2)}
               </pre>
             </div>
@@ -94,8 +94,8 @@ export function ToolInvocationDisplay({
 
           {isComplete && output != null && (
             <div>
-              <span className="font-semibold text-text-muted">Result:</span>
-              <pre className="mt-0.5 overflow-x-auto rounded bg-bg-inset p-1.5 font-mono text-[10px] leading-relaxed text-text-secondary">
+              <span className="font-semibold text-muted-foreground">Result:</span>
+              <pre className="mt-0.5 overflow-x-auto rounded bg-muted p-1.5 font-mono text-[10px] leading-relaxed text-muted-foreground">
                 {JSON.stringify(output, null, 2)}
               </pre>
             </div>

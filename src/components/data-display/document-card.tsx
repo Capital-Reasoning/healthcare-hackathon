@@ -35,7 +35,7 @@ export function DocumentCard({
     : null;
 
   return (
-    <div className="flex items-start gap-3 rounded-xl border border-border bg-card p-4 transition-colors hover:bg-surface-warm">
+    <div className="flex items-start gap-3 rounded-xl border border-border bg-card p-4 transition-colors hover:bg-muted">
       <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary-tint">
         {status === 'processing' ? (
           <Loader2 className="size-5 animate-spin text-primary" />
@@ -45,14 +45,14 @@ export function DocumentCard({
       </div>
 
       <div className="min-w-0 flex-1">
-        <h3 className="truncate text-sm font-semibold text-text-primary">
+        <h3 className="truncate text-sm font-semibold text-foreground">
           {title}
         </h3>
         {filename && (
-          <p className="truncate text-xs text-text-muted">{filename}</p>
+          <p className="truncate text-xs text-muted-foreground">{filename}</p>
         )}
 
-        <div className="mt-1.5 flex flex-wrap items-center gap-2 text-xs text-text-muted">
+        <div className="mt-1.5 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
           {pageCount != null && <span>{pageCount} pages</span>}
           {chunkCount != null && <span>{chunkCount} chunks</span>}
           {date && <span>{date}</span>}
@@ -82,7 +82,7 @@ export function DocumentCard({
       {onDelete && status !== 'processing' && (
         <button
           onClick={() => onDelete(id)}
-          className="shrink-0 rounded p-1 text-text-muted transition-colors hover:bg-red-50 hover:text-red-600"
+          className="shrink-0 rounded p-1 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
         >
           <Trash2 className="size-4" />
         </button>

@@ -36,8 +36,8 @@ export function EvidenceCitation({ refs }: { refs: EvidenceRef[] }) {
 
   if (!refs || refs.length === 0) {
     return (
-      <p className="text-xs text-muted-foreground italic">
-        (no source document available)
+      <p className="text-xs text-muted-foreground">
+        No supporting documents cited for this recommendation.
       </p>
     );
   }
@@ -90,7 +90,7 @@ export function EvidenceCitation({ refs }: { refs: EvidenceRef[] }) {
                   disabled={loading}
                 >
                   <ExternalLink className="size-3" data-icon="inline-start" />
-                  View source
+                  View full text
                 </Button>
               )}
             </li>

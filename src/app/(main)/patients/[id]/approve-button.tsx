@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Mail, CheckCircle2 } from 'lucide-react';
+import { Send, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import {
@@ -53,9 +53,9 @@ export function ApproveButton({
 
   return (
     <>
-      <Button onClick={() => setDialogOpen(true)} className="gap-2">
-        <Mail className="size-4" data-icon="inline-start" />
-        Approve &amp; Send to Patient
+      <Button onClick={() => setDialogOpen(true)} className="gap-2 min-w-44">
+        <Send className="size-4" data-icon="inline-start" />
+        Approve &amp; Send
       </Button>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
@@ -129,7 +129,7 @@ export function ApproveButton({
               Cancel
             </Button>
             <Button onClick={handleConfirm} className="gap-2">
-              <Mail className="size-4" data-icon="inline-start" />
+              <Send className="size-4" data-icon="inline-start" />
               Send Notification
             </Button>
           </DialogFooter>

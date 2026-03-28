@@ -23,7 +23,7 @@ const mdComponents: React.ComponentProps<typeof ReactMarkdown>['components'] = {
     </h3>
   ),
   h4: ({ children }) => (
-    <h4 className="mt-3 mb-1 text-sm font-semibold text-text-muted">
+    <h4 className="mt-3 mb-1 text-sm font-semibold text-muted-foreground">
       {children}
     </h4>
   ),
@@ -50,13 +50,13 @@ const mdComponents: React.ComponentProps<typeof ReactMarkdown>['components'] = {
     const isBlock = className?.includes('language-');
     if (isBlock) {
       return (
-        <pre className="my-2 overflow-x-auto rounded-lg bg-bg-inset p-4 text-sm">
+        <pre className="my-2 overflow-x-auto rounded-lg bg-muted p-4 text-sm">
           <code>{children}</code>
         </pre>
       );
     }
     return (
-      <code className="rounded bg-bg-inset px-1.5 py-0.5 text-sm">
+      <code className="rounded bg-muted px-1.5 py-0.5 text-sm">
         {children}
       </code>
     );
@@ -64,7 +64,7 @@ const mdComponents: React.ComponentProps<typeof ReactMarkdown>['components'] = {
   pre: ({ children }) => <>{children}</>,
   hr: () => <hr className="my-3 border-border/50" />,
   blockquote: ({ children }) => (
-    <blockquote className="my-2 border-l-2 border-primary/30 pl-4 italic text-text-muted">
+    <blockquote className="my-2 border-l-2 border-primary/30 pl-4 italic text-muted-foreground">
       {children}
     </blockquote>
   ),
@@ -73,7 +73,7 @@ const mdComponents: React.ComponentProps<typeof ReactMarkdown>['components'] = {
 /* ─── Welcome message ─── */
 
 const WELCOME_TEXT =
-  'Welcome to BestPath Care Navigator. I help people without a family doctor understand what clinical care they may need and where to get it in British Columbia.\n\nTo get started, could you tell me a bit about yourself? I would like to know your age, sex, and any health conditions or medications you are currently managing.';
+  'Hi there, I\'m your BestPath Care Navigator. I\'m here to help you understand what preventive care and screenings you may be due for, and where to access them in British Columbia -- even if you don\'t have a family doctor.\n\nTo get started, could you tell me a bit about yourself? For example, your age, sex, and any health conditions or medications you\'re currently managing.';
 
 const WELCOME_MESSAGE: UIMessage = {
   id: 'welcome',

@@ -25,7 +25,7 @@ export function SourcesPanel({ sources }: SourcesPanelProps) {
     <div className="mt-2 rounded-lg border border-border bg-card">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex w-full items-center gap-2 px-3 py-2 text-xs font-medium text-text-secondary transition-colors hover:text-text-primary"
+        className="flex w-full items-center gap-2 px-3 py-2 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
       >
         <BookOpen className="size-3.5" />
         Sources ({sources.length})
@@ -46,7 +46,7 @@ export function SourcesPanel({ sources }: SourcesPanelProps) {
                 excerpt={source.excerpt.slice(0, 200)}
               />
               {source.heading && (
-                <p className="pl-1 text-[10px] text-text-muted">
+                <p className="pl-1 text-[10px] text-muted-foreground">
                   {source.heading}
                 </p>
               )}

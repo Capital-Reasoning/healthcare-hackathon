@@ -147,7 +147,6 @@ async function processFile(file: FileEntry): Promise<void> {
 
 async function runPool(files: FileEntry[]) {
   const queue = [...files];
-  const active: Promise<void>[] = [];
 
   function logProgress() {
     const done = completed + errors;

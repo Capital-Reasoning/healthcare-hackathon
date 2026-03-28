@@ -51,7 +51,7 @@ export function AgentPanelHeader({
           >
             <ArrowLeft className="size-3.5" />
           </Button>
-          <span className="text-body-sm font-semibold text-text-primary">
+          <span className="text-body-sm font-semibold text-foreground">
             History
           </span>
         </>
@@ -59,7 +59,7 @@ export function AgentPanelHeader({
         <>
           {/* Title */}
           <Activity className="size-4 text-primary" aria-hidden="true" />
-          <span className="text-body-sm font-semibold text-text-primary">
+          <span className="text-body-sm font-semibold text-foreground">
             BestPath AI
           </span>
         </>

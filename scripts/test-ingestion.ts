@@ -23,7 +23,7 @@ import {
   db,
 } from './lib/corpus-store';
 import { embedQuery } from '../src/lib/rag/embed';
-import { sql, cosineDistance, desc } from 'drizzle-orm';
+import { sql, cosineDistance } from 'drizzle-orm';
 import * as schema from '../src/lib/db/schema';
 
 const CORPUS_ROOT = path.resolve(

@@ -25,7 +25,7 @@ interface LayoutCardProps extends React.ComponentProps<'div'> {
 
 const variantClasses: Record<'default' | 'muted' | 'interactive', string> = {
   default: '',
-  muted: 'bg-bg-muted',
+  muted: 'bg-muted',
   interactive:
     'transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 cursor-pointer',
 };

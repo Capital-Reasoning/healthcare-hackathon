@@ -7,7 +7,6 @@
 import 'dotenv/config';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
-import { eq } from 'drizzle-orm';
 import * as schema from '../../src/lib/db/schema';
 import { embedDocuments } from '../../src/lib/rag/embed';
 import type { ParsedChunk } from './html-parser';

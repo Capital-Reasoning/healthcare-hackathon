@@ -38,7 +38,7 @@ export function ConversationHistory({
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-3 px-6 text-center">
         <Clock className="size-8 text-hint" />
-        <p className="text-body-sm text-text-muted">No conversations yet</p>
+        <p className="text-body-sm text-muted-foreground">No conversations yet</p>
         <p className="text-xs text-hint">
           Start a conversation and it will appear here.
         </p>
@@ -71,21 +71,21 @@ export function ConversationHistory({
                   }
                 }}
                 className={cn(
-                  'group flex w-full cursor-pointer items-start gap-2.5 rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-bg-muted',
+                  'group flex w-full cursor-pointer items-start gap-2.5 rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-muted',
                   c.id === activeConversationId && 'bg-primary-tint/50',
                 )}
               >
                 <MessageSquare className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="truncate text-body-sm font-medium text-text-primary">
+                    <span className="truncate text-body-sm font-medium text-foreground">
                       {c.title}
                     </span>
                     <span className="shrink-0 text-[10px] text-hint">
                       {date}
                     </span>
                   </div>
-                  <p className="mt-0.5 truncate text-xs text-text-muted">
+                  <p className="mt-0.5 truncate text-xs text-muted-foreground">
                     {preview}
                   </p>
                 </div>

@@ -75,14 +75,14 @@ export function ChatBubble({ message, isLast }: ChatBubbleProps) {
 
   // Assistant message — content goes directly on the card surface
   return (
-    <div className="group animate-fade-in text-body-sm text-text-primary">
+    <div className="group animate-fade-in text-body-sm text-foreground">
       {groups.map((group, gi) => {
         // Tool group — render in a single bordered container
         if (group.type === 'tool-group') {
           return (
             <div
               key={gi}
-              className="my-3 overflow-hidden rounded-lg border border-border/50 bg-bg-muted/30"
+              className="my-3 overflow-hidden rounded-lg border border-border/50 bg-muted/30"
             >
               {group.parts.map((part, i) => (
                 <div
@@ -120,7 +120,7 @@ export function ChatBubble({ message, isLast }: ChatBubbleProps) {
           }
           if (part.type === 'reasoning') {
             return (
-              <details key={key} className="mt-1 text-xs text-text-muted">
+              <details key={key} className="mt-1 text-xs text-muted-foreground">
                 <summary className="cursor-pointer font-medium">
                   Thinking…
                 </summary>
@@ -153,7 +153,7 @@ export function ChatBubble({ message, isLast }: ChatBubbleProps) {
           <button
             type="button"
             onClick={handleCopy}
-            className="flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[11px] text-muted-foreground transition-colors hover:bg-bg-muted hover:text-foreground"
+            className="flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[11px] text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             aria-label="Copy message"
           >
             {copied ? (
