@@ -92,9 +92,9 @@ function CommandPalette({ className }: CommandPaletteProps) {
               <Compass className="text-muted-foreground" />
               Care Navigator
             </CommandItem>
-            <CommandItem onSelect={() => runAction(() => { /* placeholder */ })}>
+            <CommandItem onSelect={() => navigate('/')}>
               <Zap className="text-muted-foreground" />
-              Run Assessment
+              Analyze Patient Panel
             </CommandItem>
             <CommandItem onSelect={() => runAction(toggleAgent)}>
               <MessageSquare className="text-muted-foreground" />
@@ -106,7 +106,7 @@ function CommandPalette({ className }: CommandPaletteProps) {
           <CommandSeparator />
 
           <CommandGroup heading="Search">
-            <CommandItem onSelect={() => navigate('/patients?search=true')}>
+            <CommandItem onSelect={() => navigate('/patients')}>
               <Search className="text-muted-foreground" />
               Search Patients…
             </CommandItem>
