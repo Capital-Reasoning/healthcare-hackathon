@@ -1,6 +1,6 @@
 import { eq, desc, sql, count, inArray } from 'drizzle-orm';
 import { db } from '@/lib/db/client';
-import { pathwayTargetRunFacts, engineRuns, patients } from '@/lib/db/schema';
+import { pathwayTargetRunFacts, engineRuns } from '@/lib/db/schema';
 
 /**
  * Get the latest completed engine run for a patient.
@@ -127,117 +127,64 @@ export interface TriageItem {
 /**
  * Get the triage queue enriched with patient name/age/sex.
  * Returns the HIGHEST-VALUE single action per patient (deduped).
+ * Uses DISTINCT ON to do all deduplication and joining in Postgres.
  */
 export async function getTriageQueueWithPatients(): Promise<TriageItem[]> {
-  // Step 1: Get all triage items from getTriageQueue()
-  const items = await getTriageQueue();
-  if (items.length === 0) return [];
+  const rows = await db.execute(sql`
+    SELECT * FROM (
+      SELECT DISTINCT ON (ptrf.patient_id)
+        ptrf.id,
+        ptrf.run_id AS "runId",
+        ptrf.patient_id AS "patientId",
+        ptrf.target_id AS "targetId",
+        ptrf.condition,
+        ptrf.screening_type AS "screeningType",
+        ptrf.action,
+        ptrf.risk_tier AS "riskTier",
+        ptrf.status,
+        ptrf.overdue_days AS "overdueDays",
+        ptrf.due_date AS "dueDate",
+        ptrf.confidence,
+        ptrf.confidence_reason AS "confidenceReason",
+        ptrf.action_value_score AS "actionValueScore",
+        ptrf.why_this_action AS "whyThisAction",
+        ptrf.why_now AS "whyNow",
+        ptrf.provider_route AS "providerRoute",
+        ptrf.category,
+        p.first_name AS "firstName",
+        p.last_name AS "lastName",
+        p.age,
+        p.sex
+      FROM pathway_target_run_facts ptrf
+      JOIN engine_runs er ON er.run_id = ptrf.run_id AND er.status = 'completed'
+      JOIN patients p ON p.patient_id = ptrf.patient_id
+      ORDER BY ptrf.patient_id, ptrf.action_value_score DESC NULLS LAST
+    ) sub
+    ORDER BY
+      CASE sub.category WHEN 'red' THEN 1 WHEN 'yellow' THEN 2 WHEN 'green' THEN 3 ELSE 4 END,
+      sub."actionValueScore" DESC NULLS LAST
+  `);
 
-  // Step 2: Deduplicate — keep only highest-scoring target per patient
-  const bestByPatient = new Map<string, (typeof items)[number]>();
-  for (const item of items) {
-    if (!bestByPatient.has(item.patientId)) {
-      bestByPatient.set(item.patientId, item);
-    }
-  }
-
-  // Step 3: Fetch patient demographics
-  const patientIds = Array.from(bestByPatient.keys());
-  const patientRows = await db
-    .select({
-      patientId: patients.patientId,
-      firstName: patients.firstName,
-      lastName: patients.lastName,
-      age: patients.age,
-      sex: patients.sex,
-    })
-    .from(patients)
-    .where(inArray(patients.patientId, patientIds));
-
-  const patientMap = new Map(patientRows.map((p) => [p.patientId, p]));
-
-  // Step 4: Merge
-  const result: TriageItem[] = [];
-  for (const item of bestByPatient.values()) {
-    const patient = patientMap.get(item.patientId);
-    if (!patient) continue; // skip orphaned records
-    result.push({
-      id: item.id,
-      runId: item.runId,
-      patientId: item.patientId,
-      targetId: item.targetId,
-      condition: item.condition,
-      screeningType: item.screeningType,
-      action: item.action,
-      riskTier: item.riskTier,
-      status: item.status,
-      overdueDays: item.overdueDays,
-      dueDate: item.dueDate,
-      confidence: item.confidence,
-      confidenceReason: item.confidenceReason,
-      actionValueScore: item.actionValueScore,
-      whyThisAction: item.whyThisAction,
-      whyNow: item.whyNow,
-      providerRoute: item.providerRoute,
-      category: item.category,
-      firstName: patient.firstName,
-      lastName: patient.lastName,
-      age: patient.age,
-      sex: patient.sex,
-    });
-  }
-
-  // Sort by category priority then score
-  const categoryOrder: Record<string, number> = {
-    red: 1,
-    yellow: 2,
-    green: 3,
-  };
-  result.sort((a, b) => {
-    const catA = categoryOrder[a.category ?? ''] ?? 4;
-    const catB = categoryOrder[b.category ?? ''] ?? 4;
-    if (catA !== catB) return catA - catB;
-    return (b.actionValueScore ?? 0) - (a.actionValueScore ?? 0);
-  });
-
-  return result;
+  return [...rows] as unknown as TriageItem[];
 }
 
 /**
  * Get dashboard-level stats from engine results.
  * Only counts targets from the latest completed run per patient.
+ * Uses DISTINCT ON to deduplicate in Postgres.
  */
 export async function getDashboardStats() {
-  // Step 1: Find latest completed run per patient (same pattern as getTriageQueue)
-  const completedRuns = await db
-    .select({
-      runId: engineRuns.runId,
-      patientId: engineRuns.patientId,
-    })
-    .from(engineRuns)
-    .where(eq(engineRuns.status, 'completed'))
-    .orderBy(desc(engineRuns.startedAt));
-
-  const latestRunByPatient = new Map<string, string>();
-  for (const run of completedRuns) {
-    if (!latestRunByPatient.has(run.patientId)) {
-      latestRunByPatient.set(run.patientId, run.runId);
-    }
-  }
-  const latestRunIds = Array.from(latestRunByPatient.values());
-
-  // Step 2: Count categories only from latest runs, and count all runs by status
-  const [categoryStats, runStats] = await Promise.all([
-    latestRunIds.length > 0
-      ? db
-          .select({
-            category: pathwayTargetRunFacts.category,
-            count: count(),
-          })
-          .from(pathwayTargetRunFacts)
-          .where(inArray(pathwayTargetRunFacts.runId, latestRunIds))
-          .groupBy(pathwayTargetRunFacts.category)
-      : Promise.resolve([]),
+  const [categoryRows, runStats] = await Promise.all([
+    db.execute(sql`
+      SELECT category, COUNT(*)::int AS count FROM (
+        SELECT DISTINCT ON (ptrf.patient_id) ptrf.category
+        FROM pathway_target_run_facts ptrf
+        JOIN engine_runs er ON er.run_id = ptrf.run_id AND er.status = 'completed'
+        ORDER BY ptrf.patient_id, ptrf.action_value_score DESC NULLS LAST
+      ) sub
+      WHERE category IS NOT NULL
+      GROUP BY category
+    `),
     db
       .select({
         status: engineRuns.status,
@@ -248,8 +195,11 @@ export async function getDashboardStats() {
   ]);
 
   const categories: Record<string, number> = {};
-  for (const row of categoryStats) {
-    if (row.category) categories[row.category] = row.count;
+  for (const row of categoryRows as unknown as {
+    category: string;
+    count: number;
+  }[]) {
+    categories[row.category] = Number(row.count);
   }
 
   const runs: Record<string, number> = {};

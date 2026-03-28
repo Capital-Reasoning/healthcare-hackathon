@@ -18,22 +18,13 @@ import {
  * avoiding redundant DB round-trips.
  */
 export async function getLatestRunIds(): Promise<string[]> {
-  const completedRuns = await db
-    .select({
-      runId: engineRuns.runId,
-      patientId: engineRuns.patientId,
-    })
-    .from(engineRuns)
-    .where(eq(engineRuns.status, 'completed'))
-    .orderBy(desc(engineRuns.startedAt));
-
-  const latestByPatient = new Map<string, string>();
-  for (const run of completedRuns) {
-    if (!latestByPatient.has(run.patientId)) {
-      latestByPatient.set(run.patientId, run.runId);
-    }
-  }
-  return Array.from(latestByPatient.values());
+  const rows = await db.execute(sql`
+    SELECT DISTINCT ON (patient_id) run_id
+    FROM engine_runs
+    WHERE status = 'completed'
+    ORDER BY patient_id, started_at DESC
+  `);
+  return ([...rows] as unknown as { run_id: string }[]).map((r) => r.run_id);
 }
 
 // ── Analytics queries ──────────────────────────────────────────────────────
@@ -76,29 +67,24 @@ export async function getAgeMixStats() {
 async function getBestTargetPerPatient(runIds: string[]) {
   if (runIds.length === 0) return [];
 
-  const allTargets = await db
-    .select({
-      patientId: pathwayTargetRunFacts.patientId,
-      category: pathwayTargetRunFacts.category,
-      status: pathwayTargetRunFacts.status,
-      actionValueScore: pathwayTargetRunFacts.actionValueScore,
-    })
-    .from(pathwayTargetRunFacts)
-    .where(inArray(pathwayTargetRunFacts.runId, runIds))
-    .orderBy(desc(pathwayTargetRunFacts.actionValueScore));
+  const rows = await db.execute(sql`
+    SELECT DISTINCT ON (patient_id)
+      patient_id, category, status
+    FROM pathway_target_run_facts
+    WHERE run_id = ANY(${runIds})
+    ORDER BY patient_id, action_value_score DESC NULLS LAST
+  `);
 
-  const best = new Map<
-    string,
-    { category: string | null; status: string | null }
-  >();
-  for (const t of allTargets) {
-    if (!best.has(t.patientId)) {
-      best.set(t.patientId, { category: t.category, status: t.status });
-    }
-  }
-  return Array.from(best.entries()).map(([patientId, data]) => ({
-    patientId,
-    ...data,
+  return (
+    [...rows] as unknown as {
+      patient_id: string;
+      category: string | null;
+      status: string | null;
+    }[]
+  ).map((r) => ({
+    patientId: r.patient_id,
+    category: r.category,
+    status: r.status,
   }));
 }
 
