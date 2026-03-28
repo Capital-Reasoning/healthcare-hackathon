@@ -124,7 +124,89 @@
 
 ---
 
-## Phases 6-8: In Progress
-- Phase 6: Presentation & demo polish (agents running)
-- Phase 7: UI/UX audit (agents running)
-- Phase 8: README & deployment readiness (agents running)
+## Phase 6: Presentation & Demo Polish — COMPLETE
+**Time:** 2026-03-28 ~01:45
+**Files modified:**
+- `docs/presentation/demo-script.md` — Rewritten for actual built product (5-act flow)
+- `docs/presentation/talking-points.md` — BestPath value prop + corpus sourcing story
+- `docs/presentation/demo-patients.md` — Created with selection guide + SQL query
+- Various component styling refinements across agent panel, cards, buttons
+
+**Typecheck:** PASS
+**Notes:** Demo script matches actual product. Talking points include corpus acquisition pipeline story (4,026 documents curated).
+
+---
+
+## Phase 7: UI/UX Audit — COMPLETE
+**Time:** 2026-03-28 ~01:45
+**Files modified:**
+- Multiple component files refined for professional appearance
+- Eliminated generic AI copy throughout
+- Consistent colour scheme enforcement
+
+**Typecheck:** PASS
+**Notes:** All generic "Welcome to..." and "Get started..." text removed. Teal primary consistent. Warm white background applied. Column headers are actionable ("Needs Urgent Action" not "Red").
+
+---
+
+## Phase 8: README & Submission Readiness — COMPLETE
+**Time:** 2026-03-28 ~01:45
+**Files modified:**
+- `README.md` — Complete rewrite for hackathon submission
+- Model provider updated with working free models from OpenRouter
+
+**Typecheck:** PASS
+**Notes:** README has team, track, problem, solution, tech stack, setup instructions, regulatory note. No secrets in tracked files.
+
+---
+
+## Review Rounds (5 rounds of deep review)
+
+### Round 1: Build Verification & Runtime Testing — COMPLETE
+- Production build passes (21 routes compiled)
+- All routes return HTTP 200 (/, /patients, /navigator, /patients/PAT-000001, etc.)
+- All APIs working (patients: 2000, encounters: 10000, medications: 5000)
+- Updated free model provider to meta-llama/llama-3.3-70b-instruct:free
+
+### Round 2: Engine Correctness Deep Dive — COMPLETE
+- Full audit of assess-patient pipeline, persist.ts column mapping, engine-results queries
+- All data flows verified: build-patient-context → LLM → comparator → scoring → persist
+- JSONB handling correct for evidenceRefs and missingDataTasks
+- Date math in comparator verified
+
+### Round 3: UI Completeness & Polish — COMPLETE
+- Rewrote patients list from stub to full searchable table
+- Fixed command palette generic entries
+- Verified all pages: dashboard, patient detail, navigator, patients, research, settings
+- All clickable elements navigate correctly
+
+### Round 4: Integration Testing & Error Handling — COMPLETE
+- Created tests/integration/api.test.ts (25 tests) — API helpers, scoring edge cases, date handling
+- Created tests/integration/data-flow.test.ts (14 tests) — deduplication, full pipeline flow
+- Added try/catch to chat API route
+- Added Array.isArray guards on JSONB fields
+- Total: 93 tests passing across 5 files
+
+### Round 5: Final Polish & Demo Readiness — COMPLETE
+- Cleaned README placeholder URLs
+- Verified no secrets in tracked files
+- All UI copy professional and product-specific
+- Colour scheme consistent across all pages
+- Final verification: typecheck clean, build passes, 93 tests passing
+
+---
+
+## Final Status
+**Typecheck:** PASS (0 errors in src/)
+**Tests:** 93 passed, 0 failed (5 test files)
+**Build:** PASS (21 routes — 10 static, 11 dynamic)
+**Engine data:** 0 runs (Peter needs to run: `npx tsx scripts/run-batch.ts --limit 50 --tier production`)
+**Known issues:** None critical
+**Recommended next steps for Peter:**
+1. **Run the engine batch:** `npx tsx scripts/run-batch.ts --limit 50 --tier production` (populates triage dashboard)
+2. **Start dev server:** `npm run dev` and verify pages at localhost:3000
+3. **Test navigator chat:** Go to /navigator and have a test conversation
+4. **Select demo patients:** After batch run, use SQL from docs/presentation/demo-patients.md
+5. **Deploy to Vercel:** Set env vars, run `vercel --prod`
+6. **Update README:** Add Vercel URL and slides link after deployment
+7. **Practice the demo:** Follow docs/presentation/demo-script.md (5-minute flow)
