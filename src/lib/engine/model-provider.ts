@@ -15,6 +15,10 @@ export function getEngineModel(tier: ModelTier = 'production') {
     case 'testing':
       return openrouter('anthropic/claude-sonnet-4');
     case 'free':
-      return openrouter('nvidia/llama-3.3-nemotron-super-49b-v1:free');
+      // Best free models on OpenRouter for structured clinical reasoning
+      // nvidia/nemotron-3-super-120b-a12b:free — largest free model, great quality
+      // meta-llama/llama-3.3-70b-instruct:free — strong alternative
+      // minimax/minimax-m2.5:free — another capable option
+      return openrouter('meta-llama/llama-3.3-70b-instruct:free');
   }
 }

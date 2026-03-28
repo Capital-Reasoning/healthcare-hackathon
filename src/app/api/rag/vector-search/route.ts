@@ -20,7 +20,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       data: results,
-      meta: { total: results.length },
+      meta: { page: 1, pageSize: topK, total: results.length, totalPages: 1 },
       error: null,
     });
   } catch (error) {

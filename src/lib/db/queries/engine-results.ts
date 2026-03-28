@@ -208,14 +208,36 @@ export async function getTriageQueueWithPatients(): Promise<TriageItem[]> {
  * Only counts targets from the latest completed run per patient.
  */
 export async function getDashboardStats() {
+  // Step 1: Find latest completed run per patient (same pattern as getTriageQueue)
+  const completedRuns = await db
+    .select({
+      runId: engineRuns.runId,
+      patientId: engineRuns.patientId,
+    })
+    .from(engineRuns)
+    .where(eq(engineRuns.status, 'completed'))
+    .orderBy(desc(engineRuns.startedAt));
+
+  const latestRunByPatient = new Map<string, string>();
+  for (const run of completedRuns) {
+    if (!latestRunByPatient.has(run.patientId)) {
+      latestRunByPatient.set(run.patientId, run.runId);
+    }
+  }
+  const latestRunIds = Array.from(latestRunByPatient.values());
+
+  // Step 2: Count categories only from latest runs, and count all runs by status
   const [categoryStats, runStats] = await Promise.all([
-    db
-      .select({
-        category: pathwayTargetRunFacts.category,
-        count: count(),
-      })
-      .from(pathwayTargetRunFacts)
-      .groupBy(pathwayTargetRunFacts.category),
+    latestRunIds.length > 0
+      ? db
+          .select({
+            category: pathwayTargetRunFacts.category,
+            count: count(),
+          })
+          .from(pathwayTargetRunFacts)
+          .where(inArray(pathwayTargetRunFacts.runId, latestRunIds))
+          .groupBy(pathwayTargetRunFacts.category)
+      : Promise.resolve([]),
     db
       .select({
         status: engineRuns.status,
