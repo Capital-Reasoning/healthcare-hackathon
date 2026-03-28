@@ -67,11 +67,16 @@ export async function getAgeMixStats() {
 async function getBestTargetPerPatient(runIds: string[]) {
   if (runIds.length === 0) return [];
 
+  const inList = sql.join(
+    runIds.map((id) => sql`${id}`),
+    sql`, `,
+  );
+
   const rows = await db.execute(sql`
     SELECT DISTINCT ON (patient_id)
       patient_id, category, status
     FROM pathway_target_run_facts
-    WHERE run_id = ANY(${runIds})
+    WHERE run_id IN (${inList})
     ORDER BY patient_id, action_value_score DESC NULLS LAST
   `);
 
