@@ -267,14 +267,14 @@ function AssistantMessageContent({ text, isStreaming }: { text: string; isStream
 
 function BrandPanel() {
   return (
-    <div className="w-full max-w-xl space-y-6 px-8">
-        {/* Logo */}
+    <div className="w-full max-w-sm space-y-6">
+        {/* Logo — full width, no padding constraint */}
         <Image
-          src="/bestpath-logo.png"
+          src="/bestpath-logo.jpg"
           alt="BestPath — A Step In The Right Direction"
-          width={1700}
-          height={1000}
-          className="w-full h-auto"
+          width={859}
+          height={720}
+          className="mx-auto w-72 h-auto mb-8"
           priority
         />
 
