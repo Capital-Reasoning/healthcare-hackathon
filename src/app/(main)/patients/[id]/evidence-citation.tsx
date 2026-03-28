@@ -22,11 +22,25 @@ interface EvidenceRef {
 interface ChunkData {
   id: string;
   content: string;
+  textAsHtml: string | null;
   pageNumber: number | null;
   heading: string | null;
   chunkIndex: number;
   documentId: string | null;
   documentTitle: string;
+  sourceUrl: string | null;
+}
+
+/**
+ * Safely decode a URI-encoded string.
+ * Returns the original string if decoding fails (malformed encoding).
+ */
+function safeDecodeTitle(title: string): string {
+  try {
+    return decodeURIComponent(title);
+  } catch {
+    return title;
+  }
 }
 
 export function EvidenceCitation({ refs }: { refs: EvidenceRef[] }) {
@@ -36,8 +50,8 @@ export function EvidenceCitation({ refs }: { refs: EvidenceRef[] }) {
 
   if (!refs || refs.length === 0) {
     return (
-      <p className="text-xs text-muted-foreground">
-        No supporting documents cited for this recommendation.
+      <p className="text-xs text-muted-foreground italic">
+        Evidence sources being updated
       </p>
     );
   }
@@ -66,44 +80,43 @@ export function EvidenceCitation({ refs }: { refs: EvidenceRef[] }) {
           <BookOpen className="size-3" />
           Evidence
         </div>
-        <ol className="space-y-2">
+        <ul className="space-y-2.5">
           {refs.map((ref, idx) => (
             <li
               key={idx}
-              className="border-l-2 border-primary/30 pl-3 text-sm"
+              className="border-l-2 border-primary/30 pl-3"
             >
-              <span className="font-medium text-foreground">
-                [{idx + 1}]
-              </span>{' '}
-              <span className="font-medium text-foreground/80">
-                &ldquo;{ref.documentTitle}&rdquo;
-              </span>{' '}
-              <span className="text-muted-foreground">
-                &mdash; &ldquo;{ref.excerpt}&rdquo;
-              </span>
-              {ref.chunkId && (
-                <Button
-                  variant="link"
-                  size="xs"
-                  className="ml-1 h-auto p-0 text-xs"
-                  onClick={() => handleViewSource(ref.chunkId)}
-                  disabled={loading}
-                >
-                  <ExternalLink className="size-3" data-icon="inline-start" />
-                  View full text
-                </Button>
-              )}
+              <div className="flex items-center gap-1.5">
+                <span className="text-sm font-semibold text-foreground">
+                  {safeDecodeTitle(ref.documentTitle)}
+                </span>
+                {ref.chunkId && (
+                  <Button
+                    variant="link"
+                    size="xs"
+                    className="ml-1 h-auto p-0 text-xs"
+                    onClick={() => handleViewSource(ref.chunkId)}
+                    disabled={loading}
+                  >
+                    <FileText className="size-3" data-icon="inline-start" />
+                    View full text
+                  </Button>
+                )}
+              </div>
+              <p className="text-sm text-muted-foreground mt-0.5 leading-relaxed">
+                {ref.excerpt}
+              </p>
             </li>
           ))}
-        </ol>
+        </ul>
       </div>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="sm:max-w-lg max-h-[80vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-3xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <FileText className="size-4" />
-              {selectedChunk?.documentTitle ?? 'Source Document'}
+              {safeDecodeTitle(selectedChunk?.documentTitle ?? 'Source Document')}
             </DialogTitle>
             {selectedChunk?.heading && (
               <DialogDescription>
@@ -113,10 +126,31 @@ export function EvidenceCitation({ refs }: { refs: EvidenceRef[] }) {
               </DialogDescription>
             )}
           </DialogHeader>
-          <div className="rounded-lg border border-border bg-muted/50 p-4 text-sm leading-relaxed whitespace-pre-wrap">
-            {selectedChunk?.content ?? 'Loading...'}
-          </div>
-          <DialogFooter showCloseButton />
+
+          {selectedChunk?.textAsHtml ? (
+            <div
+              className="rounded-lg border border-border bg-muted/50 p-4 text-sm leading-relaxed prose prose-sm max-w-none"
+              dangerouslySetInnerHTML={{ __html: selectedChunk.textAsHtml }}
+            />
+          ) : (
+            <div className="rounded-lg border border-border bg-muted/50 p-4 text-sm leading-relaxed whitespace-pre-wrap">
+              {selectedChunk?.content ?? 'Loading...'}
+            </div>
+          )}
+
+          <DialogFooter showCloseButton>
+            {selectedChunk?.sourceUrl && (
+              <a
+                href={selectedChunk.sourceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-md border border-border bg-background px-4 py-2 text-sm font-medium hover:bg-muted transition-colors"
+              >
+                <ExternalLink className="size-4" />
+                View Full Document
+              </a>
+            )}
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </>

@@ -33,7 +33,7 @@ export default async function DashboardPage() {
           <h1 className="text-h1 text-foreground">Clinical Triage</h1>
         </div>
         <p className="text-body-sm text-muted-foreground">
-          AI-powered patient panel analysis against clinical guidelines
+          Prioritized care actions identified from guideline analysis
         </p>
       </header>
 

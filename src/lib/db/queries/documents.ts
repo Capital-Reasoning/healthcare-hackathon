@@ -126,11 +126,13 @@ export async function getChunkById(chunkId: string) {
     .select({
       id: corpusChunks.id,
       content: corpusChunks.content,
+      textAsHtml: corpusChunks.textAsHtml,
       pageNumber: corpusChunks.pageNumber,
       heading: corpusChunks.heading,
       chunkIndex: corpusChunks.chunkIndex,
       documentId: corpusChunks.documentId,
       documentTitle: corpusDocuments.documentTitle,
+      sourceUrl: corpusDocuments.sourceUrl,
     })
     .from(corpusChunks)
     .innerJoin(corpusDocuments, eq(corpusChunks.documentId, corpusDocuments.id))

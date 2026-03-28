@@ -7,6 +7,10 @@ import { Send, Loader2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import type { UIMessage } from 'ai';
+import {
+  NavigatorResponseRenderer,
+  tryParseCareResponse,
+} from '@/components/navigator';
 
 /* ─── Markdown component overrides (patient-facing, larger text) ─── */
 
@@ -23,7 +27,7 @@ const mdComponents: React.ComponentProps<typeof ReactMarkdown>['components'] = {
     </h3>
   ),
   h4: ({ children }) => (
-    <h4 className="mt-3 mb-1 text-sm font-semibold text-muted-foreground">
+    <h4 className="mt-3 mb-1 text-sm font-semibold text-text-muted">
       {children}
     </h4>
   ),
@@ -64,7 +68,7 @@ const mdComponents: React.ComponentProps<typeof ReactMarkdown>['components'] = {
   pre: ({ children }) => <>{children}</>,
   hr: () => <hr className="my-3 border-border/50" />,
   blockquote: ({ children }) => (
-    <blockquote className="my-2 border-l-2 border-primary/30 pl-4 italic text-muted-foreground">
+    <blockquote className="my-2 border-l-2 border-primary/30 pl-4 italic text-text-muted">
       {children}
     </blockquote>
   ),
@@ -73,13 +77,23 @@ const mdComponents: React.ComponentProps<typeof ReactMarkdown>['components'] = {
 /* ─── Welcome message ─── */
 
 const WELCOME_TEXT =
-  'Hi there, I\'m your BestPath Care Navigator. I\'m here to help you understand what preventive care and screenings you may be due for, and where to access them in British Columbia -- even if you don\'t have a family doctor.\n\nTo get started, could you tell me a bit about yourself? For example, your age, sex, and any health conditions or medications you\'re currently managing.';
+  'Hi there! I\'m your BestPath Care Navigator. I\'m here to help you understand what preventive care and screenings you may be due for, and where to access them in British Columbia -- even if you don\'t have a family doctor.\n\nTo get started, could you tell me a bit about yourself? For example, your age, sex, and any health conditions or medications you\'re currently managing.';
 
 const WELCOME_MESSAGE: UIMessage = {
   id: 'welcome',
   role: 'assistant',
   parts: [{ type: 'text' as const, text: WELCOME_TEXT }],
 };
+
+/* ─── Progress status messages ─── */
+
+const SEARCH_STATUS_MESSAGES = [
+  'Searching clinical guidelines...',
+  'Reviewing screening recommendations...',
+  'Checking preventive care standards...',
+  'Looking up provider options in BC...',
+  'Preparing your personalized guidance...',
+];
 
 /* ─── Helpers ─── */
 
@@ -93,12 +107,63 @@ function getMessageText(message: UIMessage): string {
   return '';
 }
 
+function hasToolActivity(message: UIMessage): boolean {
+  return message.parts?.some((p) => p.type.startsWith('tool-')) ?? false;
+}
+
+/* ─── Pulsing status indicator ─── */
+
+function SearchingIndicator({ message }: { message: string }) {
+  return (
+    <div className="flex items-center gap-3 px-1">
+      <div className="flex items-center gap-1">
+        <span
+          className="inline-block size-2 rounded-full bg-primary"
+          style={{ animation: 'navigator-dot-bounce 1.4s ease-in-out infinite' }}
+        />
+        <span
+          className="inline-block size-2 rounded-full bg-primary"
+          style={{
+            animation: 'navigator-dot-bounce 1.4s ease-in-out 0.2s infinite',
+          }}
+        />
+        <span
+          className="inline-block size-2 rounded-full bg-primary"
+          style={{
+            animation: 'navigator-dot-bounce 1.4s ease-in-out 0.4s infinite',
+          }}
+        />
+      </div>
+      <span className="text-[0.8125rem] text-text-muted">{message}</span>
+    </div>
+  );
+}
+
+/* ─── Message content renderer ─── */
+
+function AssistantMessageContent({ text }: { text: string }) {
+  // Try to parse as structured care response
+  const careResponse = tryParseCareResponse(text);
+
+  if (careResponse) {
+    return <NavigatorResponseRenderer data={careResponse} />;
+  }
+
+  // Fall back to markdown rendering for conversational messages
+  return (
+    <ReactMarkdown remarkPlugins={[remarkGfm]} components={mdComponents}>
+      {text}
+    </ReactMarkdown>
+  );
+}
+
 /* ─── Page component ─── */
 
 export default function NavigatorPage() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const [inputValue, setInputValue] = useState('');
+  const [searchStatusIdx, setSearchStatusIdx] = useState(0);
 
   const { messages, sendMessage, status } = useChat({
     transport: new DefaultChatTransport({
@@ -110,13 +175,25 @@ export default function NavigatorPage() {
 
   const isLoading = status === 'streaming' || status === 'submitted';
 
+  // Rotate the search status message every 3 seconds during loading
+  useEffect(() => {
+    if (!isLoading) {
+      setSearchStatusIdx(0);
+      return;
+    }
+    const interval = setInterval(() => {
+      setSearchStatusIdx((prev) => (prev + 1) % SEARCH_STATUS_MESSAGES.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [isLoading]);
+
   // Auto-scroll to bottom on new messages
   useEffect(() => {
     const el = scrollRef.current;
     if (el) {
       el.scrollTop = el.scrollHeight;
     }
-  }, [messages]);
+  }, [messages, isLoading, searchStatusIdx]);
 
   // Focus input on mount
   useEffect(() => {
@@ -144,50 +221,73 @@ export default function NavigatorPage() {
     [onSubmit],
   );
 
+  // Determine when to show the searching indicator
+  const lastMessage = messages[messages.length - 1];
+  const lastAssistantText =
+    lastMessage?.role === 'assistant' && lastMessage.id !== 'welcome'
+      ? getMessageText(lastMessage)
+      : '';
+  const isToolPhase =
+    isLoading &&
+    lastMessage?.role === 'assistant' &&
+    hasToolActivity(lastMessage) &&
+    !lastAssistantText;
+
+  // Show search indicator when:
+  // 1. We're loading and the last message is user (waiting for first response)
+  // 2. We're loading and the assistant message has tool activity but no text yet
+  const showSearchIndicator =
+    isLoading &&
+    (lastMessage?.role === 'user' || isToolPhase);
+
   return (
     <div className="flex h-full flex-col">
       {/* Chat messages */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto">
-        <div className="mx-auto max-w-2xl space-y-6 px-4 py-8 sm:px-6">
-          {messages.map((message) => (
-            <div
-              key={message.id}
-              className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-            >
-              <div
-                className={`max-w-[85%] rounded-2xl px-5 py-4 ${
-                  message.role === 'user'
-                    ? 'bg-muted text-foreground'
-                    : 'bg-primary-tint text-foreground'
-                }`}
-              >
-                {message.role === 'assistant' ? (
-                  <div className="text-[0.9375rem] leading-relaxed">
-                    <ReactMarkdown
-                      remarkPlugins={[remarkGfm]}
-                      components={mdComponents}
-                    >
-                      {getMessageText(message)}
-                    </ReactMarkdown>
-                  </div>
-                ) : (
-                  <p className="text-[0.9375rem] leading-relaxed">
-                    {getMessageText(message)}
-                  </p>
-                )}
-              </div>
-            </div>
-          ))}
+        <div className="mx-auto max-w-2xl space-y-4 px-4 py-8 sm:px-6">
+          {messages.map((message) => {
+            const text = getMessageText(message);
+            // Skip rendering assistant messages with no text (tool-only steps)
+            if (message.role === 'assistant' && !text && message.id !== 'welcome') {
+              return null;
+            }
 
-          {/* Loading indicator */}
-          {isLoading &&
-            messages[messages.length - 1]?.role !== 'assistant' && (
-              <div className="flex justify-start">
-                <div className="rounded-2xl bg-primary-tint px-5 py-4">
-                  <Loader2 className="size-5 animate-spin text-primary" />
+            return (
+              <div
+                key={message.id}
+                className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+              >
+                <div
+                  className={`max-w-[88%] rounded-2xl px-5 py-4 ${
+                    message.role === 'user'
+                      ? 'bg-primary text-primary-foreground'
+                      : 'border border-border bg-card text-foreground shadow-sm'
+                  }`}
+                >
+                  {message.role === 'assistant' ? (
+                    <div className="text-[0.9375rem] leading-relaxed text-foreground">
+                      <AssistantMessageContent text={text} />
+                    </div>
+                  ) : (
+                    <p className="text-[0.9375rem] leading-relaxed">
+                      {text}
+                    </p>
+                  )}
                 </div>
               </div>
-            )}
+            );
+          })}
+
+          {/* Search/thinking indicator */}
+          {showSearchIndicator && (
+            <div className="flex justify-start">
+              <div className="rounded-2xl border border-border bg-card px-5 py-4 shadow-sm">
+                <SearchingIndicator
+                  message={SEARCH_STATUS_MESSAGES[searchStatusIdx] ?? SEARCH_STATUS_MESSAGES[0]!}
+                />
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -204,7 +304,7 @@ export default function NavigatorPage() {
             onKeyDown={onKeyDown}
             placeholder="Tell me about your health concerns..."
             rows={1}
-            className="flex-1 resize-none rounded-xl border border-border bg-background px-4 py-3 text-[0.9375rem] leading-relaxed text-foreground placeholder:text-hint outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary/30"
+            className="flex-1 resize-none rounded-xl border border-border bg-background px-4 py-3 text-[0.9375rem] leading-relaxed text-foreground placeholder:text-text-muted outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary/30"
             disabled={isLoading}
           />
           <button
@@ -220,9 +320,9 @@ export default function NavigatorPage() {
             )}
           </button>
         </form>
-        <p className="mx-auto mt-2 max-w-2xl text-center text-xs text-hint">
-          This is decision support information, not medical advice. Please
-          discuss recommendations with a healthcare provider.
+        <p className="mx-auto mt-2.5 max-w-2xl text-center text-[0.8125rem] leading-relaxed text-text-muted">
+          This is guidance based on clinical guidelines, not medical advice.
+          Please share these suggestions with a healthcare provider.
         </p>
       </div>
     </div>

@@ -117,10 +117,15 @@ function TriageCard({ item }: { item: TriageItem }) {
             variant={item.confidence === 'high' ? 'success' : item.confidence === 'medium' ? 'warning' : 'secondary'}
             size="sm"
           >
-            {item.confidence}
+            Confidence: {item.confidence}
           </DataBadge>
         )}
-        <RiskBadge level={riskTierToLevel(item.riskTier)} size="sm" showIcon={false} />
+        <RiskBadge
+          level={riskTierToLevel(item.riskTier)}
+          label={`Risk: ${riskTierToLevel(item.riskTier).charAt(0).toUpperCase()}${riskTierToLevel(item.riskTier).slice(1)}`}
+          size="sm"
+          showIcon={false}
+        />
       </div>
     </Link>
   );
@@ -153,16 +158,16 @@ function ConfidenceGroup({
 interface TriageColumnProps {
   title: string;
   icon: React.ReactNode;
-  borderClass: string;
+  accentClass: string;
   items: TriageItem[];
 }
 
-function TriageColumn({ title, icon, borderClass, items }: TriageColumnProps) {
+function TriageColumn({ title, icon, accentClass, items }: TriageColumnProps) {
   const { high, lower } = splitByConfidence(items);
 
   return (
     <div
-      className={`flex flex-col rounded-lg border border-border bg-background p-4 ${borderClass}`}
+      className={`flex flex-col rounded-lg border border-border bg-card shadow-sm p-4 ${accentClass}`}
     >
       <div className="flex items-center gap-2 mb-1">
         {icon}
@@ -356,7 +361,7 @@ export function TriageDashboard({ items, stats }: TriageDashboardProps) {
           <TriageColumn
             title="Needs Urgent Action"
             icon={<AlertCircle className="size-5 text-error" />}
-            borderClass="border-l-4 border-l-error"
+            accentClass="border-t-2 border-t-error"
             items={red}
           />
         </ErrorBoundary>
@@ -365,7 +370,7 @@ export function TriageDashboard({ items, stats }: TriageDashboardProps) {
           <TriageColumn
             title="Follow-up Required"
             icon={<Clock className="size-5 text-warning" />}
-            borderClass="border-l-4 border-l-warning"
+            accentClass="border-t-2 border-t-warning"
             items={yellow}
           />
         </ErrorBoundary>
@@ -374,7 +379,7 @@ export function TriageDashboard({ items, stats }: TriageDashboardProps) {
           <TriageColumn
             title="On Track"
             icon={<CheckCircle2 className="size-5 text-success" />}
-            borderClass="border-l-4 border-l-success"
+            accentClass="border-t-2 border-t-success"
             items={green}
           />
         </ErrorBoundary>

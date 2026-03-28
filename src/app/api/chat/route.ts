@@ -44,8 +44,12 @@ export async function POST(request: Request) {
 
     const modelMessages = await convertToModelMessages(sanitizeMessages(messages));
 
+    const model = isNavigator
+      ? anthropic('claude-sonnet-4-6')
+      : anthropic('claude-opus-4-6');
+
     const result = streamText({
-      model: anthropic('claude-opus-4-6'),
+      model,
       system: systemPrompt,
       messages: modelMessages,
       tools,
