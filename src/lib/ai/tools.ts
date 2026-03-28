@@ -244,6 +244,90 @@ export const agentTools = {
       };
     },
   }),
+
+  assessPatient: tool({
+    description:
+      'Run the BestPath clinical assessment engine on a patient. Analyses their conditions, medications, labs, and vitals against clinical guidelines to identify overdue or upcoming screening and care actions. Returns prioritised targets with evidence citations. Takes 30-60 seconds to complete.',
+    inputSchema: z.object({
+      patientId: z.string().describe('The text patient ID (e.g. "PAT-000123")'),
+      modelTier: z
+        .enum(['production', 'testing', 'free'])
+        .optional()
+        .default('production')
+        .describe('Model tier to use (default: production)'),
+    }),
+    execute: async (args) => {
+      const { assessPatient } = await import('@/lib/engine/assess-patient');
+      const result = await assessPatient(args.patientId, args.modelTier);
+      return {
+        runId: result.runId,
+        patientId: result.patientId,
+        summary: result.summary,
+        overallConfidence: result.overallConfidence,
+        targetCount: result.targets.length,
+        targets: result.targets.map((t) => ({
+          condition: t.condition,
+          screeningType: t.screeningType,
+          action: t.action,
+          riskTier: t.riskTier,
+          status: t.status,
+          category: t.category,
+          overdueDays: t.overdueDays,
+          dueDate: t.dueDate,
+          priorityRank: t.priorityRank,
+          actionValueScore: t.actionValueScore,
+          whyThisAction: t.whyThisAction,
+          whyNow: t.whyNow,
+          confidence: t.confidence,
+          providerRoute: t.providerRoute,
+          evidenceCount: t.evidenceRefs.length,
+        })),
+      };
+    },
+  }),
+
+  getEngineResults: tool({
+    description:
+      'Get existing BestPath engine assessment results for a patient. Returns prioritised clinical targets from the most recent engine run. Use this before running a new assessment to check if results already exist.',
+    inputSchema: z.object({
+      patientId: z.string().describe('The text patient ID (e.g. "PAT-000123")'),
+    }),
+    execute: async (args) => {
+      const { getPatientEngineResults } = await import(
+        '@/lib/db/queries/engine-results'
+      );
+      const results = await getPatientEngineResults(args.patientId);
+      if (results.length === 0) {
+        return {
+          hasResults: false,
+          message: 'No engine results found for this patient. Use assessPatient to run an assessment.',
+        };
+      }
+      const latest = results[0]!;
+      return {
+        hasResults: true,
+        resultCount: results.length,
+        latestRunId: latest.runId,
+        generatedAt: latest.generatedAt,
+        targets: results.map((r) => ({
+          condition: r.condition,
+          screeningType: r.screeningType,
+          action: r.action,
+          riskTier: r.riskTier,
+          status: r.status,
+          category: r.category,
+          overdueDays: r.overdueDays,
+          dueDate: r.dueDate,
+          priorityRank: r.priorityRank,
+          actionValueScore: r.actionValueScore,
+          whyThisAction: r.whyThisAction,
+          whyNow: r.whyNow,
+          confidence: r.confidence,
+          providerRoute: r.providerRoute,
+        })),
+      };
+    },
+  }),
 };
 
 /** Subset of tools for the patient navigator (document search only) */

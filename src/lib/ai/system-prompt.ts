@@ -12,8 +12,8 @@ interface SystemPromptOptions {
 }
 
 const PAGE_CONTEXT: Record<string, string> = {
-  '/': `The user is on the **Dashboard** page. They can see population health metrics, risk distribution, encounter trends, and key performance indicators. Help them understand the data, drill into specific metrics, or generate comparative analyses.`,
-  '/patients': `The user is on the **Patients** page. They may want to search for specific patients, filter by risk level or condition, view patient details, or analyse demographic trends. Prioritise the queryPatients and getPatientDetail tools.`,
+  '/': `The user is on the **Triage Dashboard**. Shows patients grouped by urgency: Red (overdue + high risk), Yellow (overdue + lower risk), Green (on track). Use assessPatient to run analysis on a patient, or getEngineResults to see existing results.`,
+  '/patients': `The user is on the **Patients** page. Use queryPatients and getPatientDetail tools. You can also run assessPatient on any patient to generate clinical recommendations, or getEngineResults to see existing assessment results.`,
   '/research': `The user is on the **Research** page. They may want to search through uploaded clinical documents, find relevant studies, or summarise findings. Prioritise the searchDocuments and keywordSearch tools. You can also use listDocuments to show all available documents. When citing sources, always include the document title and page number: "According to [Document Title, p.X]...". Use multiple search calls with varied queries for thorough research. Use vector/hybrid search for conceptual questions and keyword search for specific codes, drug names, or clinical terms.`,
   '/settings': `The user is on the **Settings** page. Help with configuration questions or general enquiries.`,
 };

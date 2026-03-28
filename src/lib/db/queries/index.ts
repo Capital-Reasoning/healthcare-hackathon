@@ -40,3 +40,9 @@ export {
   getChunkById,
   deleteDocument,
 } from './documents';
+
+export {
+  getPatientEngineResults,
+  getTriageQueue,
+  getDashboardStats,
+} from './engine-results';
