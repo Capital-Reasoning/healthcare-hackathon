@@ -280,7 +280,7 @@ export const agentTools = {
           whyNow: t.whyNow,
           confidence: t.confidence,
           providerRoute: t.providerRoute,
-          evidenceCount: t.evidenceRefs.length,
+          evidenceCount: (Array.isArray(t.evidenceRefs) ? t.evidenceRefs : []).length,
         })),
       };
     },

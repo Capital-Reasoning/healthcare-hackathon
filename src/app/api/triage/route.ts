@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getTriageQueueWithPatients } from '@/lib/db/queries/engine-results';
+import { buildErrorResponse } from '@/lib/db/queries/helpers';
 
 export async function GET() {
   try {
@@ -27,11 +28,9 @@ export async function GET() {
   } catch (error) {
     console.error('GET /api/triage error:', error);
     return NextResponse.json(
-      {
-        data: null,
-        meta: null,
-        error: error instanceof Error ? error.message : 'Failed to fetch triage data',
-      },
+      buildErrorResponse(
+        error instanceof Error ? error.message : 'Failed to fetch triage data',
+      ),
       { status: 500 },
     );
   }

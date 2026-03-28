@@ -30,26 +30,38 @@ function sanitizeMessages(messages: UIMessage[]): UIMessage[] {
 }
 
 export async function POST(request: Request) {
-  const { messages, pageContext } = (await request.json()) as {
-    messages: UIMessage[];
-    pageContext?: string;
-  };
+  try {
+    const { messages, pageContext } = (await request.json()) as {
+      messages: UIMessage[];
+      pageContext?: string;
+    };
 
-  const isNavigator = pageContext === '/navigator';
-  const systemPrompt = isNavigator
-    ? buildNavigatorPrompt()
-    : buildSystemPrompt({ pageContext });
-  const tools = isNavigator ? navigatorTools : agentTools;
+    const isNavigator = pageContext === '/navigator';
+    const systemPrompt = isNavigator
+      ? buildNavigatorPrompt()
+      : buildSystemPrompt({ pageContext });
+    const tools = isNavigator ? navigatorTools : agentTools;
 
-  const modelMessages = await convertToModelMessages(sanitizeMessages(messages));
+    const modelMessages = await convertToModelMessages(sanitizeMessages(messages));
 
-  const result = streamText({
-    model: anthropic('claude-opus-4-6'),
-    system: systemPrompt,
-    messages: modelMessages,
-    tools,
-    stopWhen: stepCountIs(10),
-  });
+    const result = streamText({
+      model: anthropic('claude-opus-4-6'),
+      system: systemPrompt,
+      messages: modelMessages,
+      tools,
+      stopWhen: stepCountIs(10),
+    });
 
-  return result.toUIMessageStreamResponse();
+    return result.toUIMessageStreamResponse();
+  } catch (error) {
+    console.error('POST /api/chat error:', error);
+    return new Response(
+      JSON.stringify({
+        data: null,
+        meta: null,
+        error: error instanceof Error ? error.message : 'Chat request failed',
+      }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } },
+    );
+  }
 }

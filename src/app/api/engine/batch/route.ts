@@ -1,6 +1,10 @@
 import { NextResponse } from 'next/server';
 import { runBatch } from '@/lib/engine/batch';
+import { buildErrorResponse } from '@/lib/db/queries/helpers';
+import { createEngineLogger } from '@/lib/engine/logger';
 import type { ModelTier } from '@/lib/engine/model-provider';
+
+const log = createEngineLogger('api/engine/batch');
 
 export const maxDuration = 300;
 
@@ -25,14 +29,13 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ data: result, meta: null, error: null });
   } catch (error) {
-    console.error('POST /api/engine/batch error:', error);
+    log.error('Batch run failed', {
+      error: error instanceof Error ? error.message : String(error),
+    });
     return NextResponse.json(
-      {
-        data: null,
-        meta: null,
-        error:
-          error instanceof Error ? error.message : 'Batch run failed',
-      },
+      buildErrorResponse(
+        error instanceof Error ? error.message : 'Batch run failed',
+      ),
       { status: 500 },
     );
   }

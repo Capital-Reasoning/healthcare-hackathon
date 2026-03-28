@@ -103,7 +103,8 @@ export async function assessPatient(
 
     // 5. Validate: demote high-confidence targets with empty evidenceRefs
     const validated = deduped.map((t) => {
-      if (t.confidence === 'high' && t.evidenceRefs.length === 0) {
+      const refs = Array.isArray(t.evidenceRefs) ? t.evidenceRefs : [];
+      if (t.confidence === 'high' && refs.length === 0) {
         return { ...t, confidence: 'low' as const, confidenceReason: 'Demoted: no evidence citations provided' };
       }
       return t;
@@ -170,7 +171,7 @@ export async function assessPatient(
 /**
  * Group targets by condition+screeningType, keep the one with highest confidence.
  */
-function deduplicateTargets(
+export function deduplicateTargets(
   targets: import('./types').EngineTarget[],
 ): import('./types').EngineTarget[] {
   const confidenceRank = { high: 3, medium: 2, low: 1 };
