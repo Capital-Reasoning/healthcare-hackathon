@@ -77,7 +77,7 @@ const mdComponents: React.ComponentProps<typeof ReactMarkdown>['components'] = {
 /* ─── Welcome message ─── */
 
 const WELCOME_TEXT =
-  'Hi there! I\'m your BestPath Care Navigator. I\'m here to help you understand what preventive care and screenings you may be due for, and where to access them in British Columbia -- even if you don\'t have a family doctor.\n\nTo get started, could you tell me a bit about yourself? For example, your age, sex, and any health conditions or medications you\'re currently managing.';
+  'Hi! I\'m your BestPath Care Navigator. I help you figure out what preventive care and screenings you\'re due for, and where to access them in British Columbia — even without a family doctor.\n\nLet\'s get started. What\'s your age and sex? And are you managing any health conditions or taking any medications?';
 
 const WELCOME_MESSAGE: UIMessage = {
   id: 'welcome',
@@ -244,7 +244,7 @@ export default function NavigatorPage() {
     <div className="flex h-full flex-col">
       {/* Chat messages */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto">
-        <div className="mx-auto max-w-2xl space-y-4 px-4 py-8 sm:px-6">
+        <div className="mx-auto max-w-3xl space-y-4 px-4 py-8 sm:px-6">
           {messages.map((message) => {
             const text = getMessageText(message);
             // Skip rendering assistant messages with no text (tool-only steps)
@@ -295,7 +295,7 @@ export default function NavigatorPage() {
       <div className="border-t border-border bg-card px-4 py-4 sm:px-6">
         <form
           onSubmit={onSubmit}
-          className="mx-auto flex max-w-2xl items-end gap-3"
+          className="mx-auto flex max-w-3xl items-end gap-3"
         >
           <textarea
             ref={inputRef}
@@ -320,7 +320,7 @@ export default function NavigatorPage() {
             )}
           </button>
         </form>
-        <p className="mx-auto mt-2.5 max-w-2xl text-center text-[0.8125rem] leading-relaxed text-text-muted">
+        <p className="mx-auto mt-2.5 max-w-3xl text-center text-[0.8125rem] leading-relaxed text-text-muted">
           This is guidance based on clinical guidelines, not medical advice.
           Please share these suggestions with a healthcare provider.
         </p>

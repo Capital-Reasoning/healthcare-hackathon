@@ -339,13 +339,13 @@ function AnalysisAnimation({ onComplete }: { onComplete: () => void }) {
 
 /* ─── Time filter options ──────────────────────────── */
 
-type TimeFilter = 'all' | '1h' | 'today' | 'week';
+type TimeFilter = 'all' | 'week' | 'month' | 'year';
 
 const TIME_FILTERS: { value: TimeFilter; label: string }[] = [
   { value: 'all', label: 'All' },
-  { value: '1h', label: 'Last hour' },
-  { value: 'today', label: 'Today' },
-  { value: 'week', label: 'This week' },
+  { value: 'week', label: 'Last week' },
+  { value: 'month', label: 'Last month' },
+  { value: 'year', label: 'Last year' },
 ];
 
 function filterByTime(doneMap: Record<string, number>, filter: TimeFilter): Set<string> {
@@ -353,11 +353,11 @@ function filterByTime(doneMap: Record<string, number>, filter: TimeFilter): Set<
   const entries = Object.entries(doneMap);
   if (filter === 'all') return new Set(entries.map(([id]) => id));
 
-  const cutoff = filter === '1h'
-    ? now - 60 * 60 * 1000
-    : filter === 'today'
-      ? new Date().setHours(0, 0, 0, 0)
-      : now - 7 * 24 * 60 * 60 * 1000;
+  const cutoff = filter === 'week'
+    ? now - 7 * 24 * 60 * 60 * 1000
+    : filter === 'month'
+      ? now - 30 * 24 * 60 * 60 * 1000
+      : now - 365 * 24 * 60 * 60 * 1000;
 
   return new Set(
     entries.filter(([, ts]) => ts >= cutoff).map(([id]) => id),
@@ -538,8 +538,24 @@ function CompletedSection({
 
 /* ─── Main Component ────────────────────────────────── */
 
+/**
+ * Returns true if this is a full page load (initial visit or hard reload).
+ * Client-side (soft) navigations within Next.js will have already set the
+ * session flag, so we skip the analyze animation and go straight to results.
+ */
+function isFullPageLoad(): boolean {
+  if (typeof window === 'undefined') return true;
+  // On hard reload, clear the flag so the analyze button shows again
+  const navEntry = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined;
+  if (navEntry && navEntry.type === 'reload') {
+    sessionStorage.removeItem('bestpath-nav-active');
+  }
+  return !sessionStorage.getItem('bestpath-nav-active');
+}
+
 export function TriageDashboard({ items, stats }: TriageDashboardProps) {
-  const [showResults, setShowResults] = useState(false);
+  // On soft nav (back from patient page etc.) skip straight to results
+  const [showResults, setShowResults] = useState(() => !isFullPageLoad());
   const [animating, setAnimating] = useState(false);
   const [doneIds, setDoneIds] = useState<Set<string>>(new Set());
   const [doneMap, setDoneMap] = useState<Record<string, number>>({});
@@ -565,6 +581,8 @@ export function TriageDashboard({ items, stats }: TriageDashboardProps) {
   const handleAnimationComplete = useCallback(() => {
     setAnimating(false);
     setShowResults(true);
+    // Mark that we've shown results this session — soft navs will skip the button
+    sessionStorage.setItem('bestpath-nav-active', '1');
   }, []);
 
   const handleAnalyze = useCallback(() => {

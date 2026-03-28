@@ -39,13 +39,13 @@ export function RunAssessmentButton({ patientId }: { patientId: string }) {
   }
 
   return (
-    <Button onClick={handleRun} disabled={loading} className="gap-2">
+    <Button variant="outline" size="sm" onClick={handleRun} disabled={loading} className="gap-2">
       {loading ? (
         <Loader2 className="size-4 animate-spin" />
       ) : (
         <Play className="size-4" data-icon="inline-start" />
       )}
-      {loading ? 'Running Assessment...' : 'Run Assessment'}
+      {loading ? 'Rerunning...' : 'Rerun Assessment'}
     </Button>
   );
 }

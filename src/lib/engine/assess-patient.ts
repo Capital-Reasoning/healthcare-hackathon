@@ -1,4 +1,4 @@
-import { generateText, generateObject } from 'ai';
+import { generateText, generateObject, stepCountIs } from 'ai';
 import { db } from '@/lib/db/client';
 import { engineRuns } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
@@ -60,7 +60,7 @@ export async function assessPatient(
       system: ENGINE_SYSTEM_PROMPT,
       prompt: `Here is the patient record to assess:\n\n${context.markdown}\n\nPlease use the searchGuidelines tool extensively to find relevant clinical guidelines for this patient's conditions, medications, age, and risk factors. Search for every condition, every medication, and age-appropriate screening. Then provide your clinical assessment as JSON.`,
       tools: engineTools,
-      maxSteps: 6, // each step ~30-60s, typically completes in 1-2 steps
+      stopWhen: stepCountIs(6), // each step ~30-60s, typically completes in 1-2 steps
     });
     phaseATimer.end({
       steps: phaseAResult.steps.length,
