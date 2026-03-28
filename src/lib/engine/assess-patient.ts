@@ -1,4 +1,4 @@
-import { generateText, generateObject, stepCountIs } from 'ai';
+import { generateText, generateObject } from 'ai';
 import { db } from '@/lib/db/client';
 import { engineRuns } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
@@ -55,13 +55,16 @@ export async function assessPatient(
 
     // 2. Phase A: Tool-use — gather evidence from the knowledge base
     const phaseATimer = log.time('Phase A (tool-use)');
-    const phaseAResult = await generateText({
+    // Use maxSteps for all models — stopWhen/stepCountIs uses the Responses API
+    // which is only supported by direct Anthropic, not OpenRouter providers
+    const phaseAOptions = {
       model,
       system: ENGINE_SYSTEM_PROMPT,
       prompt: `Here is the patient record to assess:\n\n${context.markdown}\n\nPlease use the searchGuidelines tool extensively to find relevant clinical guidelines for this patient's conditions, medications, age, and risk factors. Search for every condition, every medication, and age-appropriate screening. Then provide your clinical assessment as JSON.`,
       tools: engineTools,
-      stopWhen: stepCountIs(6), // each step ~30-60s, typically completes in 1-2 steps
-    });
+      maxSteps: 6,
+    };
+    const phaseAResult = await generateText(phaseAOptions);
     phaseATimer.end({
       steps: phaseAResult.steps.length,
       toolCalls: phaseAResult.steps.reduce(

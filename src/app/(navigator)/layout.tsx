@@ -8,14 +8,15 @@ export default function NavigatorLayout({
 }) {
   return (
     <div className="flex h-screen flex-col bg-background">
-      {/* Top bar */}
-      <header className="flex h-14 items-center justify-between border-b border-border px-6">
-        <div className="flex items-center gap-3">
+      {/* Top bar — minimal, just back link on small screens + branding on mobile */}
+      <header className="flex h-12 items-center justify-between border-b border-border px-4 sm:px-6">
+        <div className="flex items-center gap-2 lg:hidden">
           <HeartPulse className="size-5 text-primary" />
-          <span className="text-body font-semibold text-foreground">
+          <span className="text-body-sm font-semibold text-foreground">
             BestPath Care Navigator
           </span>
         </div>
+        <div className="hidden lg:block" />
         <Link
           href="/"
           className="flex items-center gap-1.5 text-body-sm text-muted-foreground transition-colors hover:text-foreground"

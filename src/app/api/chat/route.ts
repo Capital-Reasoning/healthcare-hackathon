@@ -53,7 +53,7 @@ export async function POST(request: Request) {
       system: systemPrompt,
       messages: modelMessages,
       tools,
-      stopWhen: stepCountIs(10),
+      stopWhen: stepCountIs(isNavigator ? 5 : 10),
     });
 
     return result.toUIMessageStreamResponse();
