@@ -10,6 +10,8 @@ const serverSchema = z.object({
   GEMINI_API_KEY: z.string().min(1),
   GOOGLE_GENERATIVE_AI_API_KEY: z.string().min(1),
   DATABASE_URL: z.string().min(1),
+  UNSTRUCTURED_API_KEY: z.string().min(1).optional(),
+  UNSTRUCTURED_API_URL: z.string().url().optional(),
 });
 
 export type ServerEnv = z.infer<typeof serverSchema>;
