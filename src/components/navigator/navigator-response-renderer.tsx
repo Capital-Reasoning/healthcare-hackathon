@@ -29,7 +29,6 @@ const TIER_CONFIG: Record<
   PriorityTier['priority'],
   {
     label: string;
-    emoji: string;
     icon: typeof AlertTriangle;
     headerBg: string;
     headerText: string;
@@ -39,30 +38,27 @@ const TIER_CONFIG: Record<
 > = {
   'act-soon': {
     label: 'Act Soon',
-    emoji: '\uD83D\uDD34',
     icon: AlertTriangle,
-    headerBg: 'bg-red-50',
-    headerText: 'text-red-800',
-    cardBorder: 'border-red-200',
-    iconColor: 'text-red-600',
+    headerBg: 'bg-red-100',
+    headerText: 'text-red-900',
+    cardBorder: 'border-red-300',
+    iconColor: 'text-red-700',
   },
   'schedule-when-convenient': {
     label: 'Schedule When Convenient',
-    emoji: '\uD83D\uDFE1',
     icon: CalendarClock,
-    headerBg: 'bg-amber-50',
-    headerText: 'text-amber-800',
-    cardBorder: 'border-amber-200',
-    iconColor: 'text-amber-600',
+    headerBg: 'bg-amber-100',
+    headerText: 'text-amber-900',
+    cardBorder: 'border-amber-300',
+    iconColor: 'text-amber-700',
   },
   'keep-doing': {
-    label: 'Keep Doing What You\'re Doing',
-    emoji: '\uD83D\uDFE2',
+    label: 'Keep It Up',
     icon: CheckCircle2,
-    headerBg: 'bg-emerald-50',
-    headerText: 'text-emerald-800',
-    cardBorder: 'border-emerald-200',
-    iconColor: 'text-emerald-600',
+    headerBg: 'bg-emerald-100',
+    headerText: 'text-emerald-900',
+    cardBorder: 'border-emerald-300',
+    iconColor: 'text-emerald-700',
   },
 };
 
@@ -101,35 +97,44 @@ export function tryParseCareResponse(text: string): CareNavigatorResponse | null
 function ActionCard({
   item,
   tierConfig,
+  number,
 }: {
   item: ActionItem;
   tierConfig: (typeof TIER_CONFIG)[PriorityTier['priority']];
+  number: number;
 }) {
   return (
     <div className={`rounded-xl border ${tierConfig.cardBorder} bg-card p-4 shadow-sm`}>
-      <h4 className="text-[0.9375rem] font-semibold text-foreground">{item.title}</h4>
-      <p className="mt-1 text-[0.875rem] leading-relaxed text-text-secondary">
-        {item.description}
-      </p>
+      <div className="flex items-start gap-3">
+        <span
+          className={`flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-bold ${tierConfig.headerBg} ${tierConfig.headerText}`}
+        >
+          {number}
+        </span>
+        <div className="min-w-0 flex-1">
+          <h4 className="text-[0.9375rem] font-semibold text-foreground">{item.title}</h4>
+          <p className="mt-1 text-[0.875rem] leading-relaxed text-text-secondary">
+            {item.description}
+          </p>
 
-      <div className="mt-3 space-y-2">
-        {/* Who to see */}
-        <div className="flex items-start gap-2">
-          <MapPin className={`mt-0.5 size-4 shrink-0 ${tierConfig.iconColor}`} />
-          <div>
-            <span className="text-[0.8125rem] font-medium text-foreground">Who to see: </span>
-            <span className="text-[0.8125rem] text-text-secondary">{item.whoToSee}</span>
-          </div>
-        </div>
+          <div className="mt-3 space-y-1.5">
+            {/* Who to see */}
+            <div className="flex items-start gap-2">
+              <MapPin className={`mt-0.5 size-3.5 shrink-0 ${tierConfig.iconColor}`} />
+              <span className="text-[0.8125rem] text-text-secondary">
+                <span className="font-medium text-foreground">See: </span>
+                {item.whoToSee}
+              </span>
+            </div>
 
-        {/* What to say */}
-        <div className="flex items-start gap-2">
-          <MessageCircle className={`mt-0.5 size-4 shrink-0 ${tierConfig.iconColor}`} />
-          <div>
-            <span className="text-[0.8125rem] font-medium text-foreground">What to say: </span>
-            <span className="text-[0.8125rem] italic text-text-secondary">
-              &ldquo;{item.whatToSay}&rdquo;
-            </span>
+            {/* What to say */}
+            <div className="flex items-start gap-2">
+              <MessageCircle className={`mt-0.5 size-3.5 shrink-0 ${tierConfig.iconColor}`} />
+              <span className="text-[0.8125rem] text-text-secondary">
+                <span className="font-medium text-foreground">Say: </span>
+                <span className="italic">&ldquo;{item.whatToSay}&rdquo;</span>
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -144,6 +149,9 @@ export function NavigatorResponseRenderer({
 }: {
   data: CareNavigatorResponse;
 }) {
+  // Pre-compute global numbering across all tiers
+  let globalItemIndex = 0;
+
   return (
     <div className="space-y-4">
       {/* Greeting */}
@@ -159,22 +167,27 @@ export function NavigatorResponseRenderer({
           <div key={tier.priority} className="space-y-2">
             {/* Tier header */}
             <div
-              className={`flex items-center gap-2 rounded-lg ${config.headerBg} px-3 py-2`}
+              className={`flex items-center gap-2 rounded-lg ${config.headerBg} px-3 py-1.5`}
             >
-              <span className="text-base" role="img" aria-label={config.label}>
-                {config.emoji}
-              </span>
               <Icon className={`size-4 ${config.iconColor}`} />
-              <h3 className={`text-[0.875rem] font-semibold ${config.headerText}`}>
+              <h3 className={`text-[0.8125rem] font-semibold ${config.headerText}`}>
                 {config.label}
               </h3>
             </div>
 
             {/* Action cards */}
             <div className="space-y-2 pl-1">
-              {tier.items.map((item, idx) => (
-                <ActionCard key={idx} item={item} tierConfig={config} />
-              ))}
+              {tier.items.map((item, idx) => {
+                globalItemIndex++;
+                return (
+                  <ActionCard
+                    key={idx}
+                    item={item}
+                    tierConfig={config}
+                    number={globalItemIndex}
+                  />
+                );
+              })}
             </div>
           </div>
         );

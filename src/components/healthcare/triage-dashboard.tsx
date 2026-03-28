@@ -518,7 +518,7 @@ export function TriageDashboard({ items, stats }: TriageDashboardProps) {
           <TriageColumn
             title="Needs Urgent Action"
             icon={<AlertCircle className="size-5 text-error" />}
-            accentClass="border-t-2 border-t-error"
+            accentClass="border-t-[5px] border-t-error"
             items={red}
             doneIds={doneIds}
           />
@@ -526,9 +526,9 @@ export function TriageDashboard({ items, stats }: TriageDashboardProps) {
 
         <ErrorBoundary>
           <TriageColumn
-            title="Follow-up Required"
+            title="Follow-up Soon"
             icon={<Clock className="size-5 text-warning" />}
-            accentClass="border-t-2 border-t-warning"
+            accentClass="border-t-[5px] border-t-amber-400"
             items={yellow}
             doneIds={doneIds}
           />
@@ -538,7 +538,7 @@ export function TriageDashboard({ items, stats }: TriageDashboardProps) {
           <TriageColumn
             title="On Track"
             icon={<CheckCircle2 className="size-5 text-success" />}
-            accentClass="border-t-2 border-t-success"
+            accentClass="border-t-[5px] border-t-success"
             items={green}
             doneIds={doneIds}
           />

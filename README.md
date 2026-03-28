@@ -4,7 +4,7 @@
 
 **Live Demo:** [healthcare-hackathon-capital-reasoning-team.vercel.app](https://healthcare-hackathon-capital-reasoning-team.vercel.app)
 
-**Pitch Deck:** Open [`docs/presentation/pitch.html`](docs/presentation/pitch.html) in a browser for the interactive slide deck, or view [`docs/presentation/BestPath-Pitch.pptx`](docs/presentation/BestPath-Pitch.pptx) as PowerPoint.
+**Slides:** open on [Google Slides](https://docs.google.com/presentation/d/1_PO_Jm7xCQs8n6wpRiFvRmcxQLA5b576bZ6NiHk6XYY/edit?usp=sharing)
 
 ## Team
 
@@ -15,7 +15,7 @@ Capital Reasoning Solutions
 
 ## Challenge Track
 
-**Track 1: Clinical AI** — "Build an AI-powered tool that improves clinical workflows, patient care, or healthcare delivery using the provided Synthea patient dataset."
+**Track 1: Clinical AI** 
 
 ## Problem
 
@@ -25,53 +25,23 @@ Capital Reasoning Solutions
 
 BestPath is a dual-interface clinical intelligence engine:
 
-1. **Clinician View** — A proactive triage dashboard. The system analyzes patients against clinical guidelines, determines the next best clinical action for each, and surfaces a prioritized queue: Red (overdue + high risk), Yellow (overdue + lower risk), Green (on track). Every recommendation is cited against specific clinical guidelines.
+**Clinician View** — A proactive triage dashboard. 
 
-2. **Patient Navigator** — A care navigator for people without a family doctor. Enter your health information conversationally, get evidence-based guidance on what you need and who can help — pharmacist, dietitian, walk-in clinic, LifeLabs — not just "see a doctor."
+The system analyzes patients against clinical guidelines, determines the next best clinical action for each, and surfaces a prioritized queue: Red (overdue + high risk), Yellow (overdue + lower risk), Green (on track). Every recommendation is cited against specific clinical guidelines.
+
+**Patient Navigator**
+
+ A care navigator for people without a family doctor, or anyone looking to get sent in the right direction. Enter your health information conversationally, get evidence-based guidance on what you need and who can help — pharmacist, dietitian, walk-in clinic, LifeLabs — not just "see a doctor."
 
 Both interfaces run on the same core: patient data + clinical guidelines via RAG → deterministic comparison → prioritized, evidence-backed next best actions.
 
 ## How It Works
 
 1. **Patient Context Builder** — Assembles demographics, conditions, medications, labs, and vitals from the database into two vectors: a Risk Confluence Vector (RCV) capturing escalation risk, and a Screening Recency Vector (SRV) tracking when each clinical action was last addressed.
-2. **Evidence Connection (RAG)** — Searches 4,000+ clinical guideline documents to find applicable recommendations for the patient's specific risk profile.
+2. **Evidence Connection (RAG)** — Searches 1500+ clinical guideline documents from BC and Canadian standards libraries to find applicable recommendations for the patient's specific risk profile.
 3. **Deterministic Comparator** — Pure math: guidelines say what's needed, patient data shows what's been done, arithmetic determines what's overdue. No AI guessing on the critical path.
 4. **Priority Scoring** — Ranks actions by risk level, overdue severity, and confidence. Patients are triaged into Red/Yellow/Green categories, each split by confidence level.
 5. **Evidence Citations** — Every recommendation links to the specific guideline passage that supports it.
-
-## Clinical Knowledge Base
-
-We built a systematic pipeline to acquire and curate **4,026 clinical documents** from Canadian healthcare sources, organized into a searchable knowledge base that powers every recommendation.
-
-### Data Acquisition
-
-Three Python scripts (`health-info-data/scripts/`) handle automated acquisition:
-
-1. **`acquire_vector_content.py`** — Broad web crawler that scrapes 14 source groups across Canadian healthcare organizations. Produces a 5,559-row acquisition manifest tracking every document with metadata, SHA1 hashes, and provenance.
-2. **`build_next_best_pathway_corpus.py`** — Policy-driven curation engine that filters the broad manifest using 120+ clinical keywords, deduplicates by content hash, and organizes selected documents into 31 thematic buckets.
-3. **`fetch_augmentation_pack.py`** — Targeted BFS crawler for 46 supplemental sources (BC Cancer, BCCDC immunization, Choosing Wisely, FNHA, etc.) with domain whitelists and depth/page limits.
-
-### Sources
-
-| Category | Documents | Content |
-|----------|-----------|---------|
-| Health Canada DPD | 3,015 | Drug monographs, product info, safety data |
-| BC Guidelines | 449 | Provincial clinical practice guidelines |
-| Specialty Guidelines | 355 | 15+ specialty societies (cardiology, psychiatry, geriatrics, etc.) |
-| Provincial Quality | 124 | Quality pathways and performance standards |
-| National Guidelines | 71 | Primary-care national guidance (CFPC, diabetes, stroke, cardiovascular) |
-| Augmentation Pack | 206 | BC Cancer, BCCDC, BCCSU, FNHA, Choosing Wisely, HealthLinkBC |
-
-Key source organizations include the Canadian Task Force on Preventive Health Care, Health Canada, BC Ministry of Health, CADTH, CIHI, RNAO, and specialty societies (AMMI, CCS, SOGC, CPS, and others).
-
-### Ingestion Pipeline
-
-- **Parsing:** Unstructured extracts structured text from PDFs and HTML
-- **Chunking:** Semantic chunking preserves clinical context
-- **Embedding:** Google Gemini generates 3072-dimensional vectors
-- **Storage:** pgvector in Supabase enables hybrid search (semantic + keyword + Reciprocal Rank Fusion)
-
-Every recommendation traces to a specific guideline passage. The full acquisition pipeline, selection policies, and manifests are in `health-info-data/`.
 
 ## Tech Stack
 
@@ -86,33 +56,33 @@ Every recommendation traces to a specific guideline passage. The full acquisitio
 | Charts        | Recharts                                                                             |
 | State         | Zustand                                                                              |
 
-## How to Run Locally
+### Data Acquisition
 
-```bash
-# Prerequisites: Node.js 20+, npm
+Three Python scripts (`health-info-data/scripts/`) handle automated acquisition:
 
-# Install dependencies
-npm install
+1. **`acquire_vector_content.py`** — Broad web crawler that scrapes 14 source groups across Canadian healthcare organizations. Produces a 5,559-row acquisition manifest tracking every document with metadata, SHA1 hashes, and provenance.
+2. **`build_next_best_pathway_corpus.py`** — Policy-driven curation engine that filters the broad manifest using 120+ clinical keywords, deduplicates by content hash, and organizes selected documents into 31 thematic buckets.
+3. **`fetch_augmentation_pack.py`** — Targeted BFS crawler for 46 supplemental sources (BC Cancer, BCCDC immunization, Choosing Wisely, FNHA, etc.) with domain whitelists and depth/page limits.
 
-# Set up environment variables
-cp .env.example .env.local
-# Fill in: ANTHROPIC_API_KEY, DATABASE_URL, SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY,
-# SUPABASE_SECRET_KEY, GEMINI_API_KEY, GOOGLE_GENERATIVE_AI_API_KEY, LLAMAPARSE_API_KEY
+### Sources
 
-# Push database schema
-npm run db:push
+| Category             | Documents | Content                                                                 |
+| -------------------- | --------- | ----------------------------------------------------------------------- |
+| Health Canada DPD    | 3,015     | Drug monographs, product info, safety data                              |
+| BC Guidelines        | 449       | Provincial clinical practice guidelines                                 |
+| Specialty Guidelines | 355       | 15+ specialty societies (cardiology, psychiatry, geriatrics, etc.)      |
+| Provincial Quality   | 124       | Quality pathways and performance standards                              |
+| National Guidelines  | 71        | Primary-care national guidance (CFPC, diabetes, stroke, cardiovascular) |
+| Augmentation Pack    | 206       | BC Cancer, BCCDC, BCCSU, FNHA, Choosing Wisely, HealthLinkBC            |
 
-# Seed demo data (40 patients with encounters, medications, observations)
-npm run db:seed
+Key source organizations include the Canadian Task Force on Preventive Health Care, Health Canada, BC Ministry of Health, CADTH, CIHI, RNAO, and specialty societies (AMMI, CCS, SOGC, CPS, and others).
 
-# Start development server
-npm run dev
-# Open http://localhost:3000
+### Ingestion Pipeline
 
-# Run the assessment engine on patients (requires health data sources to be added to the repo — large files, not present in git)
-npx tsx scripts/run-batch.ts --limit 50 --tier production
-```
+- **Parsing:** Unstructured extracts structured text from PDFs and HTML
+- **Chunking:** Semantic chunking preserves clinical context
+- **Embedding:** Google Gemini Embedding generates 3072-dimensional vectors
+- **Storage:** pgvector in Supabase enables hybrid search (semantic + keyword + Reciprocal Rank Fusion)
 
-## Regulatory Note
+Every recommendation traces to a specific guideline passage. The full acquisition pipeline, selection policies, and manifests are in `health-info-data/`.
 
-BestPath is designed as a clinical decision support system under Health Canada's SaMD exclusion criteria — it augments clinical judgment, never replaces it. All recommendations require clinician review.
