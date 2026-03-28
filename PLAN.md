@@ -2,7 +2,7 @@
 
 ## The One-Sentence Pitch
 
-Rithm turns reactive healthcare into proactive care by computing what every patient is overdue for, why it matters, and who to act on first — with every recommendation backed by clinical guidelines and reviewable by a clinician. For the 6.5 million Canadians without a family doctor, the same engine powers a self-service care navigator that tells people who to see and why, routing them to the least-strained provider who can actually help.
+Rithm identifies the highest-value clinical action for every patient — the screening, medication start, referral, or follow-up most likely to prevent an emergency — and surfaces it with evidence so clinicians can act before conditions escalate. For the 6.5 million Canadians without a family doctor, the same engine powers a self-service care navigator that tells people what they need and who can help, routing them to the least-strained provider capable of addressing it.
 
 ---
 
@@ -10,11 +10,11 @@ Rithm turns reactive healthcare into proactive care by computing what every pati
 
 Two interfaces on a single clinical intelligence engine:
 
-**Clinician View** — A proactive panel management tool. The system ingests a patient panel (2,000 Synthea patients), identifies which patients are overdue for guideline-recommended screenings and interventions, and surfaces a prioritized action queue: who to act on first, what to do, and why. The AI agent can drill into any patient, explain the clinical reasoning, and render bespoke clinical views in real time using generative UI.
+**Clinician View** — A proactive panel management tool. The system ingests a patient panel (2,000 Synthea patients), determines the next best clinical action for each — whether that's an overdue screening, a medication that should be started, a specialist referral, or a follow-up after an abnormal finding — and surfaces a prioritized action queue: who to act on first, what to do, and why. The AI agent can drill into any patient, explain the clinical reasoning, and render bespoke clinical views in real time using generative UI.
 
-**Patient View** — A self-service care navigator for unattached patients. A person without a family doctor enters their health information conversationally. The same engine determines what they're likely overdue for and routes them to the right provider type — not "see a doctor" (there are none), but "a pharmacist can monitor your blood pressure," "a dietitian can help with diabetes management," or "you need a walk-in clinic for this lab order." Every recommendation is cited against clinical guidelines.
+**Patient View** — A self-service care navigator for unattached patients. A person without a family doctor enters their health information conversationally. The same engine determines what clinical actions they likely need — screenings, medication reviews, referrals, follow-ups — and routes them to the right provider type. Not "see a doctor" (there are none), but "a pharmacist can monitor your blood pressure," "a dietitian can help with diabetes management," or "you need a walk-in clinic to get this referral." Every recommendation is cited against clinical guidelines.
 
-Both interfaces run on the same core: Risk Confluence Vector (RCV) + Screening Recency Vector (SRV) → AI-powered risk assessment → deterministic overdue comparator → prioritized, evidence-backed recommendations.
+Both interfaces run on the same core: Risk Confluence Vector (RCV) + Screening Recency Vector (SRV) → AI-powered risk assessment → deterministic comparator against care recency → prioritized, evidence-backed next best actions.
 
 ---
 
@@ -25,19 +25,19 @@ Both interfaces run on the same core: Risk Confluence Vector (RCV) + Screening R
 > "Build an AI-powered tool that improves clinical workflows, patient care, or healthcare delivery using the provided Synthea patient dataset."
 
 We directly address:
-- **Clinical workflow improvement**: Proactive queue replaces reactive panel management
-- **Patient care improvement**: Catches overdue screenings before conditions escalate to emergency
-- **Healthcare delivery**: Routes unattached patients to the right level of care
+- **Clinical workflow improvement**: Proactive queue replaces reactive panel management — surfaces the next best action per patient
+- **Patient care improvement**: Catches missed screenings, needed medication starts, overdue referrals, and follow-up gaps before conditions escalate to emergency
+- **Healthcare delivery**: Routes unattached patients to the right level of care, weighted toward less-strained providers
 
 ### Scoring Rubric Mapping
 
-| Criteria                 | Weight | Our Story                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| ------------------------ | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Innovation**           | 25%    | Not a chatbot or dashboard. A two-vector proactive engine (RCV/SRV) with deterministic comparison against clinical guidelines. AI identifies conditions; math confirms what's overdue. The same engine serves clinicians AND patients — two interfaces, one architecture. Generative UI (OpenUI) means every query produces a bespoke clinical view, not a static page.                                                              |
-| **Technical Execution**  | 25%    | Two-vector patient model, structured AI output with evidence citations, deterministic comparator (no hallucination on the critical path), append-only run history, operational queue scoring algorithm. Full-stack: Next.js 16, Supabase + pgvector, Drizzle ORM, Claude Sonnet 4.6, Vercel AI SDK, 23 OpenUI components, hybrid RAG pipeline.                                                                                       |
-| **Impact Potential**     | 25%    | 6.5M Canadians lack a family doctor. Clinics drown in reactive care. ER closures across provinces. This system: (1) lets clinics find and act on overdue patients before they become emergencies, and (2) gives unattached patients evidence-based guidance on who to see. Every recommendation is auditable, guideline-cited, and clinician-reviewable. Designed as decision support under Health Canada's SaMD exclusion criteria. |
-| **Presentation Quality** | 15%    | Two-perspective demo: clinician queue drill-down, then patient self-service navigation. Problem → solution → live demo → impact in 5 minutes.                                                                                                                                                                                                                                                                                        |
-| **Design & UX**          | 10%    | AI IS the interface. Natural language in, actionable recommendations out. Generative UI renders clinical views tailored to the question. Zero cognitive load, zero behavior change. Warm teal design system, glass aesthetic for AI panel, clean data display.                                                                                                                                                                       |
+| Criteria                 | Weight | Our Story                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| ------------------------ | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Innovation**           | 25%    | Not a chatbot or dashboard. A two-vector proactive engine (RCV/SRV) that determines the next best clinical action — screening, medication start, referral, or follow-up — for every patient. AI identifies what's needed; deterministic comparison confirms urgency. The same engine serves clinicians AND patients — two interfaces, one architecture. Generative UI (OpenUI) means every query produces a bespoke clinical view, not a static page.                                                    |
+| **Technical Execution**  | 25%    | Two-vector patient model, structured AI output with evidence citations, deterministic comparator (no hallucination on the critical path), append-only run history, operational queue scoring algorithm. Full-stack: Next.js 16, Supabase + pgvector, Drizzle ORM, Claude Sonnet 4.6, Vercel AI SDK, 23 OpenUI components, hybrid RAG pipeline.                                                                                                                                                           |
+| **Impact Potential**     | 25%    | 6.5M Canadians lack a family doctor. Clinics drown in reactive care. ER closures across provinces. This system: (1) lets clinics surface the highest-value next action for every patient — the intervention most likely to prevent an ER visit — and (2) gives unattached patients evidence-based guidance on what they need and who can help. Every recommendation is auditable, guideline-cited, and clinician-reviewable. Designed as decision support under Health Canada's SaMD exclusion criteria. |
+| **Presentation Quality** | 15%    | Two-perspective demo: clinician queue drill-down, then patient self-service navigation. Problem → solution → live demo → impact in 5 minutes.                                                                                                                                                                                                                                                                                                                                                            |
+| **Design & UX**          | 10%    | AI IS the interface. Natural language in, actionable recommendations out. Generative UI renders clinical views tailored to the question. Zero cognitive load, zero behavior change. Warm teal design system, glass aesthetic for AI panel, clean data display.                                                                                                                                                                                                                                           |
 
 ### BuildersVault Values Alignment
 
@@ -152,41 +152,52 @@ For a given patient, assemble two vectors from all available data:
 - Risk behaviors: smoking status
 - Prior abnormal findings from preventive history
 
-**Screening Recency Vector (SRV)** — when each relevant screening was last completed:
-- Condition/screening type → last completed date → result status
-- Derived from encounters, labs, and preventive history
+**Screening Recency Vector (SRV)** — when each relevant clinical action was last addressed:
+- Condition/action type → last completed date → result status
+- Covers screenings, medication initiations, referrals, follow-ups after abnormal findings
+- Derived from encounters, labs, medication history, and preventive history
 
 ### Step 2: Risk Prompt (AI-Powered)
 
 Send a structured prompt built from the RCV to Claude, with RAG-retrieved clinical guideline context:
 
-> "Given this patient's risk profile, which preventable/treatable conditions are most likely to escalate to emergency care if unaddressed? What screening/monitoring is recommended for each, and at what interval?"
+> "Given this patient's risk profile, which preventable/treatable conditions are most likely to escalate to emergency care if unaddressed? For each, what is the recommended next clinical action — screening, medication initiation, specialist referral, monitoring follow-up, or other intervention — and at what interval?"
 
 Model returns structured JSON:
 ```json
 {
   "targets": [
     {
-      "condition": "Type 2 diabetes",
+      "condition": "Stage 1 hypertension",
       "risk_tier": "high",
-      "screening_type": "HbA1c monitoring",
+      "screening_type": "Initiate BP medication",
       "interval_days": 90,
-      "rationale": "...",
-      "evidence_refs": ["guideline_doc_id"]
+      "rationale": "Persistent stage 1 BP (138/86, 133/84) with 10-year ASCVD risk >10%. ACC/AHA 2017 recommends pharmacotherapy.",
+      "evidence_refs": ["acc_aha_2017_bp_guideline"]
+    },
+    {
+      "condition": "CKD progression",
+      "risk_tier": "medium",
+      "screening_type": "Nephrology referral",
+      "interval_days": 180,
+      "rationale": "Persistent ACR >30 mg/mmol with hematuria. NICE NG203 recommends specialist evaluation.",
+      "evidence_refs": ["nice_ng203_ckd"]
     }
   ]
 }
 ```
 
+Note: `screening_type` is a legacy field name — it encompasses any clinical action (screening, medication start, referral, follow-up, prophylaxis).
+
 ### Step 3: Deterministic Comparator (No AI — Pure Math)
 
 For each target from Step 2:
-1. Find matching last-completed date in the SRV
-2. `due_date = last_completed + interval_days`
+1. Find matching last-addressed date in the SRV (screening completed, medication started, referral made, follow-up done)
+2. `due_date = last_addressed + interval_days`
 3. `overdue_days = today - due_date`
-4. Status: `overdue_now` (>0) | `due_soon` (<=30 days) | `up_to_date` | `unknown_due` (no date)
+4. Status: `overdue_now` (>0) | `due_soon` (<=30 days) | `up_to_date` | `unknown_due` (no record of action)
 
-This is the critical trust design: the AI identifies *what* to look for, but the overdue determination is deterministic math against real dates. No hallucination risk on the decision-critical path.
+This is the critical trust design: the AI identifies *what actions are clinically indicated* based on guidelines and patient risk, but the urgency determination is deterministic math against documented care history. No hallucination risk on the decision-critical path.
 
 ### Step 4: Priority Scoring
 
@@ -301,29 +312,30 @@ Clinical guidelines for the risk prompt's retrieval context. Options:
 ## Demo Script (5 Minutes)
 
 ### Act 1: The Problem (30 seconds)
-"6.5 million Canadians have no family doctor. Clinics are overwhelmed — the system is reactive. Patients show up in the ER for things that could have been caught with a routine screening six months ago."
+"6.5 million Canadians have no family doctor. Clinics are overwhelmed — the system is reactive. Patients end up in the ER because a blood pressure medication wasn't started, a referral wasn't made, a follow-up after an abnormal result never happened. These are preventable emergencies."
 
 ### Act 2: The Clinician View (90 seconds)
 - Open dashboard → show prioritized patient queue
-- "Rithm has analyzed 2,000 patients against clinical guidelines. Here's who needs action first."
+- "Rithm has analyzed 2,000 patients against clinical guidelines. Here's who needs action first — and what that action is."
 - Click top patient → agent panel opens
-- "Why is this patient flagged?" → agent explains: RCV summary, overdue screenings, evidence citations
-- Agent renders: PatientCard + RiskBadge + Timeline of overdue actions
-- Show the deterministic logic: "Last HbA1c was 8 months ago. Guidelines recommend every 90 days for uncontrolled diabetes. That's 150 days overdue."
+- "Why is this patient #1?" → agent explains: RCV summary, identified actions, evidence citations
+- Agent renders: PatientCard + RiskBadge + Timeline of needed actions
+- Show variety: "This patient needs BP medication started — persistent stage 1 hypertension with ASCVD risk >10%. This one needs a nephrology referral — persistent albuminuria with hematuria. This one is overdue for colonoscopy surveillance after polyp removal 4 years ago."
+- Show the deterministic logic: "The AI identified the clinical need. The math confirmed the urgency. The guideline is cited. The clinician decides."
 
 ### Act 3: The Patient View (90 seconds)
 - "But what about the 6.5 million without a doctor?"
 - Switch to `/navigator`
 - Chat: "I'm 52, I have high blood pressure, I haven't seen a doctor in 2 years"
 - Agent asks follow-up: medications, smoking, last screenings
-- Agent returns: "Based on what you've told me, you're likely overdue for [X, Y, Z]. Here's who you can see — you don't need a family doctor for these:"
-  - "A pharmacist can check your blood pressure and review your medications"
-  - "You can get bloodwork at LifeLabs — ask for [specific tests]"
-  - "For this concern, a walk-in clinic can provide a referral"
-- Every recommendation cites a guideline
+- Agent returns: "Based on what you've told me, here's what you likely need — and who can help without a family doctor:"
+  - "Your blood pressure needs monitoring and possibly medication — a pharmacist can do both in BC"
+  - "You should get bloodwork to check kidney function and cholesterol — you can book at LifeLabs directly"
+  - "If your results come back abnormal, a walk-in clinic can refer you to a specialist"
+- Every recommendation cites a clinical guideline. No diagnosis — just the right next step and the right door to walk through.
 
 ### Act 4: The Architecture (30 seconds)
-"Same engine, two interfaces. AI identifies conditions. Math confirms what's overdue. Every recommendation is guideline-cited and clinician-reviewable. The AI never makes the final decision — it surfaces the right information so humans can act."
+"Same engine, two interfaces. AI identifies what clinical actions are needed based on guidelines and patient risk. Deterministic comparison confirms urgency against documented care history. Every recommendation is guideline-cited and clinician-reviewable. The AI never makes the final decision — it surfaces the right next step so humans can act."
 
 ### Act 5: Impact (30 seconds)
 "Augment clinician capacity. Navigate patients to the right care. Prevent emergencies before they happen. This is what proactive healthcare looks like."
@@ -334,7 +346,7 @@ Clinical guidelines for the risk prompt's retrieval context. Options:
 
 | Decision                                        | Choice                              | Why                                                                                        |
 | ----------------------------------------------- | ----------------------------------- | ------------------------------------------------------------------------------------------ |
-| AI identifies conditions, math confirms overdue | Hybrid AI + deterministic           | Trust. The critical overdue determination has no hallucination risk.                       |
+| AI identifies needed actions, math confirms urgency | Hybrid AI + deterministic           | Trust. AI determines what's clinically indicated; deterministic comparison against care history confirms urgency. No hallucination on the critical path. |
 | Same engine for clinician + patient             | Single architecture                 | Innovation story. Reduces build scope. Doubles impact narrative.                           |
 | OpenUI generative components                    | Agent renders bespoke views         | Every query produces a tailored clinical view, not a static dashboard. No new UI to learn. |
 | RAG for clinical guidelines                     | Evidence-backed recommendations     | Every recommendation is traceable to a source document.                                    |
