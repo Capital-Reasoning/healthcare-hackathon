@@ -1,0 +1,403 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* ─────────────────────────────────────────
+   Theme tokens
+   ───────────────────────────────────────── */
+@theme inline {
+  /* Shadcn semantic tokens (CSS variable references) */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Primary (Teal) extended scale */
+  --color-primary-hover: #0A7373;
+  --color-primary-pressed: #085C5C;
+  --color-primary-tint: #E8F6F6;
+  --color-primary-tint-medium: #D0EEEE;
+
+  /* Teal aliases (for direct palette access) */
+  --color-teal-50: #E8F6F6;
+  --color-teal-100: #D0EEEE;
+  --color-teal-200: #A8D4D4;
+  --color-teal-500: #0B8585;
+  --color-teal-600: #0A7373;
+  --color-teal-700: #085C5C;
+
+  /* Navy */
+  --color-navy-700: #2A4365;
+  --color-navy-800: #1A2E44;
+
+  /* Background scale */
+  --color-bg-page: #F8F8F6;
+  --color-bg-card: #FFFFFF;
+  --color-bg-muted: #F5F4F0;
+  --color-bg-inset: #EFEEE9;
+
+  /* Border scale */
+  --color-border-strong: #D4D1CA;
+  --color-border-primary: #A8D4D4;
+
+  /* Text scale */
+  --color-text-primary: #1A2E44;
+  --color-text-secondary: #334155;
+  --color-text-muted: #475569;
+
+  /* Hint text */
+  --color-hint: #B8B4AD;
+
+  /* Semantic tints */
+  --color-success-tint: #E6F5F0;
+  --color-warning-tint: #FDF3E3;
+  --color-error: #C93B3B;
+  --color-error-tint: #FDE8E8;
+
+  /* Shadows (warm navy-tinted) */
+  --shadow-sm: 0 1px 2px rgba(26, 46, 68, 0.08);
+  --shadow: 0 1px 3px rgba(26, 46, 68, 0.10), 0 1px 2px rgba(26, 46, 68, 0.07);
+  --shadow-md: 0 4px 6px rgba(26, 46, 68, 0.06), 0 2px 4px rgba(26, 46, 68, 0.04);
+  --shadow-lg: 0 10px 15px rgba(26, 46, 68, 0.06), 0 4px 6px rgba(26, 46, 68, 0.04);
+  --shadow-xl: 0 20px 25px rgba(26, 46, 68, 0.08), 0 10px 10px rgba(26, 46, 68, 0.04);
+
+  /* Border radius */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-2xl: 24px;
+  --radius-3xl: 28px;
+  --radius-4xl: 32px;
+
+  /* Typography */
+  --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), 'Fira Code', monospace;
+  --font-heading: var(--font-inter), system-ui, -apple-system, sans-serif;
+
+  /* Animations */
+  --animate-fade-in: fade-in 200ms ease-out forwards;
+  --animate-fade-in-up: fade-in-up 300ms ease-out forwards;
+  --animate-slide-in-right: slide-in-right 300ms ease-out forwards;
+  --animate-slide-in-up: slide-in-up 300ms ease-out forwards;
+  --animate-scale-in: scale-in 200ms ease-out forwards;
+  --animate-shimmer: shimmer 3.5s ease-in-out infinite;
+  --animate-pulse-subtle: pulse-subtle 2s ease-in-out infinite;
+  --animate-expand: expand 300ms ease-out forwards;
+}
+
+/* ─────────────────────────────────────────
+   shadcn/ui CSS custom properties
+   ───────────────────────────────────────── */
+:root {
+  --background: #F8F8F6;
+  --foreground: #1A2E44;
+  --card: #FFFFFF;
+  --card-foreground: #1A2E44;
+  --popover: #FFFFFF;
+  --popover-foreground: #1A2E44;
+  --primary: #0B8585;
+  --primary-foreground: #FFFFFF;
+  --secondary: #F5F4F0;
+  --secondary-foreground: #1A2E44;
+  --muted: #F5F4F0;
+  --muted-foreground: #334155;
+  --accent: #E8F6F6;
+  --accent-foreground: #085C5C;
+  --destructive: #C93B3B;
+  --border: #E6E4DF;
+  --input: #E6E4DF;
+  --ring: #0B8585;
+  --chart-1: #0B8585;
+  --chart-2: #0A7373;
+  --chart-3: #2A4365;
+  --chart-4: #C27A15;
+  --chart-5: #0B7A5E;
+  --radius: 0.625rem;
+  --success: #0B7A5E;
+  --warning: #C27A15;
+  --sidebar: #F5F4F0;
+  --sidebar-foreground: #1A2E44;
+  --sidebar-primary: #0B8585;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #E8F6F6;
+  --sidebar-accent-foreground: #085C5C;
+  --sidebar-border: #E6E4DF;
+  --sidebar-ring: #0B8585;
+}
+
+/* ─────────────────────────────────────────
+   Keyframes
+   ───────────────────────────────────────── */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-in-right {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes slide-in-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@keyframes pulse-subtle {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes expand {
+  from { opacity: 0; clip-path: inset(0 0 100% 0); }
+  to { opacity: 1; clip-path: inset(0); }
+}
+
+@keyframes slide-loading {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(350%); }
+}
+
+@keyframes spin-gradient {
+  to { --gradient-angle: 360deg; }
+}
+
+@property --gradient-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+/* ─────────────────────────────────────────
+   Typography utilities
+   ───────────────────────────────────────── */
+@utility text-display {
+  font-size: 2.25rem;
+  line-height: 2.5rem;
+  font-weight: 600;
+}
+
+@utility text-h1 {
+  font-size: 1.75rem;
+  line-height: 2.25rem;
+  font-weight: 600;
+}
+
+@utility text-h2 {
+  font-size: 1.375rem;
+  line-height: 1.75rem;
+  font-weight: 600;
+}
+
+@utility text-h3 {
+  font-size: 1.125rem;
+  line-height: 1.5rem;
+  font-weight: 500;
+}
+
+@utility text-body {
+  font-size: 0.9375rem;
+  line-height: 1.5rem;
+}
+
+@utility text-body-sm {
+  font-size: 0.875rem;
+  line-height: 1.375rem;
+}
+
+@utility text-caption {
+  font-size: 0.75rem;
+  line-height: 1.125rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* ─────────────────────────────────────────
+   Glass utilities
+   ───────────────────────────────────────── */
+@utility glass {
+  backdrop-filter: blur(24px);
+  background: rgb(255 255 255 / 0.78);
+  border: 1px solid rgb(255 255 255 / 0.3);
+}
+
+@utility glass-strong {
+  backdrop-filter: blur(40px);
+  background: rgb(255 255 255 / 0.92);
+  border: 1px solid rgb(255 255 255 / 0.4);
+}
+
+@utility glass-subtle {
+  backdrop-filter: blur(16px);
+  background: rgb(255 255 255 / 0.58);
+  border: 1px solid rgb(255 255 255 / 0.15);
+}
+
+@utility glass-dark {
+  backdrop-filter: blur(24px);
+  background: rgb(26 46 68 / 0.88);
+  border: 1px solid rgb(255 255 255 / 0.22);
+  color: white;
+}
+
+/* ─────────────────────────────────────────
+   Glow utilities
+   ───────────────────────────────────────── */
+@utility glow-sm {
+  box-shadow: 0 0 6px rgba(8, 92, 92, 0.28);
+}
+
+@utility glow-md {
+  box-shadow: 0 0 10px rgba(8, 92, 92, 0.35);
+}
+
+@utility glow-lg {
+  box-shadow: 0 0 16px rgba(8, 92, 92, 0.42);
+}
+
+/* ─────────────────────────────────────────
+   Shimmer utility (gradient + animation)
+   ───────────────────────────────────────── */
+@utility shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent 25%,
+    rgba(11, 133, 133, 0.12) 50%,
+    transparent 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 3.5s ease-in-out infinite;
+}
+
+/* ─────────────────────────────────────────
+   Gradient border utilities
+   ───────────────────────────────────────── */
+@utility gradient-border-primary {
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 2px;
+    background: linear-gradient(135deg, #085C5C, #0A7373);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    -webkit-mask-composite: xor;
+    pointer-events: none;
+  }
+}
+
+@utility gradient-border-ai {
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 2px;
+    background: linear-gradient(135deg, #0B8585, #1A2E44, #085C5C);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    -webkit-mask-composite: xor;
+    pointer-events: none;
+  }
+}
+
+/* ─────────────────────────────────────────
+   Base styles
+   ───────────────────────────────────────── */
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
+}
+
+/* ─────────────────────────────────────────
+   Overrides — outside @layer to beat utilities
+   ───────────────────────────────────────── */
+
+/* Form inputs get white bg so they stand out from the page */
+[data-slot="input"],
+[data-slot="textarea"] {
+  background-color: #FFFFFF;
+}
+
+/* Generated UI elements should never show focus outlines */
+.generated-ui-block *:focus {
+  outline: none;
+}
+
+/* Consecutive generated UI blocks share tighter spacing */
+.generated-ui-block + .generated-ui-block {
+  margin-top: 0.25rem;
+}
+
+/* Skeleton loading shapes — stronger contrast against the light page bg */
+[data-slot="skeleton"] {
+  background-color: #D4D1CA;
+}
+
+/* Checkbox + Switch — stronger borders so they stand out from the light page bg */
+[data-slot="checkbox"] {
+  border-color: #C1BDB6;
+}
+[data-slot="switch"][data-unchecked] {
+  background-color: #D4D1CA;
+}

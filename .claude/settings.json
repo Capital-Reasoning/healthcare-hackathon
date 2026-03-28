@@ -1,0 +1,50 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(*)",
+      "Read(*)",
+      "Write(*)",
+      "Edit(*)",
+      "Glob(*)",
+      "Grep(*)",
+      "WebFetch(*)",
+      "WebSearch(*)",
+      "mcp__*"
+    ]
+  },
+  "agents": {
+    "general-purpose": {
+      "model": "opus"
+    },
+    "Plan": {
+      "model": "opus"
+    },
+    "Explore": {
+      "model": "haiku"
+    }
+  },
+  "mcpServers": {
+    "supabase": {
+      "type": "http",
+      "url": "https://mcp.supabase.com/api",
+      "headers": {
+        "Authorization": "Bearer YOUR_SUPABASE_MCP_TOKEN"
+      }
+    },
+    "playwright": {
+      "command": "npx",
+      "args": ["@anthropic-ai/mcp-playwright"]
+    },
+    "context7": {
+      "type": "http",
+      "url": "https://mcp.context7.com/api"
+    },
+    "vercel": {
+      "type": "http",
+      "url": "https://mcp.vercel.com/api",
+      "headers": {
+        "Authorization": "Bearer YOUR_VERCEL_MCP_TOKEN"
+      }
+    }
+  }
+}
