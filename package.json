@@ -14,11 +14,15 @@
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
     "db:seed": "npx tsx src/lib/db/seed.ts",
-    "db:indexes": "npx tsx src/lib/db/setup-indexes.ts"
+    "db:indexes": "npx tsx src/lib/db/setup-indexes.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "engine:batch": "tsx scripts/run-batch.ts"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.63",
     "@ai-sdk/google": "^3.0.52",
+    "@ai-sdk/openai": "^3.0.48",
     "@ai-sdk/react": "^3.0.136",
     "@base-ui/react": "^1.3.0",
     "@hello-pangea/dnd": "^18.0.1",
@@ -30,9 +34,11 @@
     "@supabase/supabase-js": "^2.99.3",
     "@tanstack/react-table": "^8.21.3",
     "ai": "^6.0.134",
+    "cheerio": "^1.2.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
+    "csv-parse": "^6.2.1",
     "date-fns": "^4.1.0",
     "dotenv": "^17.3.1",
     "drizzle-orm": "^0.45.1",
@@ -40,6 +46,7 @@
     "next": "16.2.1",
     "next-themes": "^0.4.6",
     "postgres": "^3.4.8",
+    "pptxgenjs": "^4.0.1",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "react-hook-form": "^7.71.2",
@@ -65,6 +72,7 @@
     "prettier": "^3.8.1",
     "prettier-plugin-tailwindcss": "^0.7.2",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.2"
   }
 }

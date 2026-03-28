@@ -18,9 +18,14 @@ export {
 } from './encounters';
 
 export {
-  getObservations,
-  getVitalSigns,
-} from './observations';
+  getLabResults,
+  getLatestLabResults,
+} from './lab-results';
+
+export {
+  getVitals,
+  getLatestVitals,
+} from './vitals';
 
 export {
   getMedications,

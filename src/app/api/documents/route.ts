@@ -6,7 +6,7 @@ import {
 } from '@/lib/db/queries/helpers';
 import { getDocuments } from '@/lib/db/queries/documents';
 import { db } from '@/lib/db/client';
-import { documents } from '@/lib/db/schema';
+import { corpusDocuments } from '@/lib/db/schema';
 import { ingestDocument } from '@/lib/rag/ingest';
 
 export async function GET(request: Request) {
@@ -44,15 +44,13 @@ export async function POST(request: Request) {
       const title =
         (formData.get('title') as string) ||
         file.name.replace(/\.\w+$/, '');
-      const tagsRaw = formData.get('tags') as string | null;
-      const tags = tagsRaw ? JSON.parse(tagsRaw) : undefined;
 
       const result = await ingestDocument(
         file,
         file.name,
         file.type || 'application/octet-stream',
         file.size,
-        { title, tags },
+        { title },
       );
 
       return NextResponse.json(
@@ -61,19 +59,21 @@ export async function POST(request: Request) {
       );
     }
 
-    // JSON body — metadata-only document create (existing path)
+    // JSON body — metadata-only document create
     const body = await request.json();
 
     const [created] = await db
-      .insert(documents)
+      .insert(corpusDocuments)
       .values({
-        title: body.title,
+        documentTitle: body.documentTitle ?? body.title,
         filename: body.filename,
-        mimeType: body.mimeType,
-        fileSize: body.fileSize,
+        fileType: body.fileType,
+        contentType: body.contentType,
+        sourceBucket: body.sourceBucket ?? 'manual_upload',
         pageCount: body.pageCount,
-        tags: body.tags,
-        metadata: body.metadata,
+        fileSizeBytes: body.fileSizeBytes ?? body.fileSize,
+        clinicalDomains: body.clinicalDomains,
+        jurisdiction: body.jurisdiction,
       })
       .returning();
 

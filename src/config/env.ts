@@ -12,6 +12,7 @@ const serverSchema = z.object({
   DATABASE_URL: z.string().min(1),
   UNSTRUCTURED_API_KEY: z.string().min(1).optional(),
   UNSTRUCTURED_API_URL: z.string().url().optional(),
+  OPENROUTER_API_KEY: z.string().optional(),
 });
 
 export type ServerEnv = z.infer<typeof serverSchema>;

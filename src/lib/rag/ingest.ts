@@ -1,6 +1,6 @@
 import { eq } from 'drizzle-orm';
 import { db } from '@/lib/db/client';
-import { documents, documentChunks } from '@/lib/db/schema';
+import { corpusDocuments, corpusChunks } from '@/lib/db/schema';
 import { parseDocument } from './parse';
 import { chunkMarkdown } from './chunk';
 import { embedDocuments } from './embed';
@@ -16,7 +16,6 @@ export interface IngestionResult {
 
 interface IngestOptions {
   title: string;
-  tags?: string[];
   chunkOptions?: ChunkOptions;
   /** Skip LlamaParse and use this markdown directly */
   precomputedMarkdown?: string;
@@ -24,7 +23,7 @@ interface IngestOptions {
 
 /**
  * Full document ingestion pipeline:
- * create record → parse → chunk → embed → store
+ * create record -> parse -> chunk -> embed -> store
  */
 export async function ingestDocument(
   file: File | Buffer,
@@ -33,16 +32,22 @@ export async function ingestDocument(
   fileSize: number,
   options: IngestOptions,
 ): Promise<IngestionResult> {
+  // Determine file type from mime or extension
+  const fileType = mimeType.includes('pdf')
+    ? 'pdf'
+    : mimeType.includes('html')
+      ? 'html'
+      : filename.split('.').pop() ?? 'unknown';
+
   // 1. Create document record
   const [doc] = await db
-    .insert(documents)
+    .insert(corpusDocuments)
     .values({
-      title: options.title,
+      documentTitle: options.title,
       filename,
-      mimeType,
-      fileSize,
-      tags: options.tags,
-      metadata: { status: 'processing' },
+      fileType,
+      sourceBucket: 'manual_upload',
+      fileSizeBytes: fileSize,
     })
     .returning();
 
@@ -64,9 +69,9 @@ export async function ingestDocument(
     // 3. Update page count
     if (pageCount > 0) {
       await db
-        .update(documents)
+        .update(corpusDocuments)
         .set({ pageCount })
-        .where(eq(documents.id, doc.id));
+        .where(eq(corpusDocuments.id, doc.id));
     }
 
     // 4. Chunk the parsed markdown
@@ -74,9 +79,9 @@ export async function ingestDocument(
 
     if (chunks.length === 0) {
       await db
-        .update(documents)
-        .set({ metadata: { status: 'ready', chunkCount: 0 } })
-        .where(eq(documents.id, doc.id));
+        .update(corpusDocuments)
+        .set({ chunkCount: 0 })
+        .where(eq(corpusDocuments.id, doc.id));
       return { documentId: doc.id, chunksCreated: 0, pageCount };
     }
 
@@ -104,21 +109,15 @@ export async function ingestDocument(
     // Insert in batches to avoid query size limits
     for (let i = 0; i < chunkRecords.length; i += 50) {
       await db
-        .insert(documentChunks)
+        .insert(corpusChunks)
         .values(chunkRecords.slice(i, i + 50));
     }
 
-    // 7. Update document status
+    // 7. Update document chunk count
     await db
-      .update(documents)
-      .set({
-        metadata: {
-          status: 'ready',
-          chunkCount: chunks.length,
-          embeddingModel: 'gemini-embedding-001',
-        },
-      })
-      .where(eq(documents.id, doc.id));
+      .update(corpusDocuments)
+      .set({ chunkCount: chunks.length })
+      .where(eq(corpusDocuments.id, doc.id));
 
     return {
       documentId: doc.id,
@@ -126,16 +125,8 @@ export async function ingestDocument(
       pageCount,
     };
   } catch (error) {
-    // Mark document as failed
-    await db
-      .update(documents)
-      .set({
-        metadata: {
-          status: 'error',
-          error: error instanceof Error ? error.message : 'Unknown error',
-        },
-      })
-      .where(eq(documents.id, doc.id));
+    // Delete failed document record (cascade will remove any partial chunks)
+    await db.delete(corpusDocuments).where(eq(corpusDocuments.id, doc.id));
     throw error;
   }
 }

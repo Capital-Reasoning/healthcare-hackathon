@@ -12,9 +12,20 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const pagination = parsePaginationParams(searchParams);
     const sort = parseSortParams(searchParams);
+
+    // Support both ?active=true and legacy ?status=active
+    const activeParam = searchParams.get('active');
+    const statusParam = searchParams.get('status');
+    let active: boolean | undefined;
+    if (activeParam !== null) {
+      active = activeParam === 'true';
+    } else if (statusParam !== null) {
+      active = statusParam === 'active' ? true : statusParam === 'discontinued' ? false : undefined;
+    }
+
     const filters = {
       patientId: searchParams.get('patientId') ?? undefined,
-      status: searchParams.get('status') ?? undefined,
+      active,
     };
 
     const { data, total } = await getMedications({

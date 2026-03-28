@@ -1,38 +1,36 @@
 import { eq, and, asc, desc, count } from 'drizzle-orm';
 import type { SQL } from 'drizzle-orm';
 import { db } from '@/lib/db/client';
-import { medications } from '@/lib/db/schema';
+import { vitals } from '@/lib/db/schema';
 
 function getSortColumn(field: string) {
   switch (field) {
-    case 'drugName': return medications.drugName;
-    case 'active': return medications.active;
-    case 'startDate': return medications.startDate;
-    case 'createdAt': return medications.createdAt;
+    case 'recordedAt': return vitals.recordedAt;
+    case 'createdAt': return vitals.createdAt;
     default: return null;
   }
 }
 
-interface GetMedicationsParams {
+interface GetVitalsParams {
   page: number;
   pageSize: number;
   sort?: { field: string; direction: 'asc' | 'desc' } | null;
   filters?: {
     patientId?: string;
-    active?: boolean;
+    encounterId?: string;
   };
 }
 
-export async function getMedications(params: GetMedicationsParams) {
+export async function getVitals(params: GetVitalsParams) {
   const { page, pageSize, sort, filters } = params;
   const conditions: SQL[] = [];
 
   if (filters?.patientId) {
-    conditions.push(eq(medications.patientId, filters.patientId));
+    conditions.push(eq(vitals.patientId, filters.patientId));
   }
 
-  if (filters?.active !== undefined) {
-    conditions.push(eq(medications.active, filters.active));
+  if (filters?.encounterId) {
+    conditions.push(eq(vitals.encounterId, filters.encounterId));
   }
 
   const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
@@ -42,13 +40,13 @@ export async function getMedications(params: GetMedicationsParams) {
     ? sort?.direction === 'desc'
       ? desc(sortColumn)
       : asc(sortColumn)
-    : desc(medications.createdAt);
+    : desc(vitals.recordedAt);
 
   const [countResult, data] = await Promise.all([
-    db.select({ total: count() }).from(medications).where(whereClause),
+    db.select({ total: count() }).from(vitals).where(whereClause),
     db
       .select()
-      .from(medications)
+      .from(vitals)
       .where(whereClause)
       .orderBy(orderBy)
       .limit(pageSize)
@@ -58,15 +56,14 @@ export async function getMedications(params: GetMedicationsParams) {
   return { data, total: countResult[0]?.total ?? 0 };
 }
 
-export async function getActiveMedications(patientId: string) {
-  return db
+/** Get the most recent vitals record for a patient */
+export async function getLatestVitals(patientId: string) {
+  const result = await db
     .select()
-    .from(medications)
-    .where(
-      and(
-        eq(medications.patientId, patientId),
-        eq(medications.active, true),
-      ),
-    )
-    .orderBy(desc(medications.createdAt));
+    .from(vitals)
+    .where(eq(vitals.patientId, patientId))
+    .orderBy(desc(vitals.recordedAt))
+    .limit(1);
+
+  return result[0] ?? null;
 }

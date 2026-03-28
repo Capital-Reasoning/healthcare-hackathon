@@ -9,15 +9,11 @@ const queryPatientsSchema = z.object({
   query: z
     .string()
     .optional()
-    .describe('Free-text search term for patient name or MRN'),
-  riskLevel: z
-    .enum(['low', 'medium', 'high', 'critical'])
-    .optional()
-    .describe('Filter by risk level'),
-  condition: z
+    .describe('Free-text search term for patient name or patient ID'),
+  sex: z
     .string()
     .optional()
-    .describe('Filter by primary condition or diagnosis'),
+    .describe('Filter by sex (M or F)'),
   ageRange: z
     .object({
       min: z.number().describe('Minimum age'),
@@ -30,7 +26,7 @@ const queryPatientsSchema = z.object({
 });
 
 const getPatientDetailSchema = z.object({
-  patientId: z.string().describe('The patient UUID'),
+  patientId: z.string().describe('The text patient ID (e.g. "PAT-000123")'),
 });
 
 const searchDocumentsSchema = z.object({
@@ -70,7 +66,7 @@ const getMetricsSchema = z.object({
       'patients',
       'encounters',
       'wait_times',
-      'risk_distribution',
+      'sex_distribution',
       'admissions',
     ])
     .describe('The type of metric to retrieve'),
@@ -91,20 +87,21 @@ export const agentTools = {
         pageSize: args.limit,
         filters: {
           search: args.query,
-          riskLevel: args.riskLevel,
-          condition: args.condition,
+          sex: args.sex,
+          ageMin: args.ageRange?.min,
+          ageMax: args.ageRange?.max,
         },
       });
 
       const patients = data.map((p) => ({
         id: p.id,
+        patientId: p.patientId,
         firstName: p.firstName,
         lastName: p.lastName,
-        mrn: p.mrn,
-        gender: p.gender,
+        sex: p.sex,
         dateOfBirth: p.dateOfBirth,
-        riskLevel: p.riskLevel,
-        condition: p.primaryCondition,
+        age: p.age,
+        postalCode: p.postalCode,
       }));
 
       return { patients, total };
@@ -178,18 +175,20 @@ export const agentTools = {
 
   listDocuments: tool({
     description:
-      'List all uploaded documents in the knowledge base. Returns titles, page counts, and tags.',
+      'List all uploaded documents in the knowledge base. Returns titles, file types, and content types.',
     inputSchema: listDocumentsSchema,
     execute: async (args) => {
       const { data, total } = await getDocuments(args);
       return {
         documents: data.map((d) => ({
           id: d.id,
-          title: d.title,
+          documentTitle: d.documentTitle,
           filename: d.filename,
+          fileType: d.fileType,
+          contentType: d.contentType,
           pageCount: d.pageCount,
-          tags: d.tags,
-          createdAt: d.createdAt,
+          chunkCount: d.chunkCount,
+          ingestedAt: d.ingestedAt,
         })),
         total,
       };
@@ -218,11 +217,10 @@ export const agentTools = {
       const metricsMap: Record<string, object> = {
         patients: {
           total: stats.total,
-          byRiskLevel: stats.byRiskLevel,
-          byGender: stats.byGender,
+          bySex: stats.bySex,
         },
-        risk_distribution: {
-          ...stats.byRiskLevel,
+        sex_distribution: {
+          ...stats.bySex,
           total: stats.total,
         },
         encounters: {
@@ -246,4 +244,10 @@ export const agentTools = {
       };
     },
   }),
+};
+
+/** Subset of tools for the patient navigator (document search only) */
+export const navigatorTools = {
+  searchDocuments: agentTools.searchDocuments,
+  keywordSearch: agentTools.keywordSearch,
 };

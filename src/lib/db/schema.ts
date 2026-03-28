@@ -1,4 +1,4 @@
-import { relations } from 'drizzle-orm';
+import { relations, sql } from 'drizzle-orm';
 import {
   pgTable,
   uuid,
@@ -6,212 +6,349 @@ import {
   timestamp,
   integer,
   numeric,
+  boolean,
   jsonb,
-  pgEnum,
-  vector,
+  date,
   index,
+  uniqueIndex,
+  vector,
 } from 'drizzle-orm/pg-core';
 
-// ── Enums ────────────────────────────────────────────────────────────────────
-
-export const genderEnum = pgEnum('gender', [
-  'male',
-  'female',
-  'other',
-  'unknown',
-]);
-
-export const riskLevelEnum = pgEnum('risk_level', [
-  'low',
-  'medium',
-  'high',
-  'critical',
-]);
-
-export const encounterStatusEnum = pgEnum('encounter_status', [
-  'planned',
-  'in_progress',
-  'completed',
-  'cancelled',
-]);
-
-export const medicationStatusEnum = pgEnum('medication_status', [
-  'active',
-  'discontinued',
-  'pending',
-]);
-
-// ── Core Tables ──────────────────────────────────────────────────────────────
+// ── Patients ────────────────────────────────────────────────────────────────
 
 export const patients = pgTable(
   'patients',
   {
     id: uuid('id').primaryKey().defaultRandom(),
-    mrn: text('mrn').unique(),
+    patientId: text('patient_id').notNull().unique(), // "PAT-000001"
     firstName: text('first_name').notNull(),
     lastName: text('last_name').notNull(),
-    dateOfBirth: timestamp('date_of_birth'),
-    gender: genderEnum('gender'),
-    email: text('email'),
-    phone: text('phone'),
-    address: jsonb('address').$type<{
-      street?: string;
-      city?: string;
-      state?: string;
-      zip?: string;
-      country?: string;
-    }>(),
-    riskLevel: riskLevelEnum('risk_level').default('low'),
-    primaryCondition: text('primary_condition'),
-    metadata: jsonb('metadata'),
-    embedding: vector('embedding', { dimensions: 3072 }),
-    createdAt: timestamp('created_at').defaultNow(),
-    updatedAt: timestamp('updated_at').defaultNow(),
+    dateOfBirth: date('date_of_birth'),
+    age: integer('age'),
+    sex: text('sex'), // M/F from Synthea
+    postalCode: text('postal_code'),
+    bloodType: text('blood_type'),
+    insuranceNumber: text('insurance_number'),
+    primaryLanguage: text('primary_language'),
+    emergencyContactPhone: text('emergency_contact_phone'),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
   },
   (table) => [
-    index('patients_mrn_idx').on(table.mrn),
+    uniqueIndex('patients_patient_id_idx').on(table.patientId),
     index('patients_name_idx').on(table.lastName, table.firstName),
-    index('patients_risk_level_idx').on(table.riskLevel),
+    index('patients_postal_code_idx').on(table.postalCode),
   ],
 );
 
-export const providers = pgTable('providers', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  name: text('name').notNull(),
-  specialty: text('specialty'),
-  department: text('department'),
-  email: text('email'),
-  metadata: jsonb('metadata'),
-  createdAt: timestamp('created_at').defaultNow(),
-});
-
-export const organizations = pgTable('organizations', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  name: text('name').notNull(),
-  type: text('type'),
-  address: jsonb('address').$type<{
-    street?: string;
-    city?: string;
-    state?: string;
-    zip?: string;
-    country?: string;
-  }>(),
-  metadata: jsonb('metadata'),
-  createdAt: timestamp('created_at').defaultNow(),
-});
+// ── Encounters ──────────────────────────────────────────────────────────────
 
 export const encounters = pgTable(
   'encounters',
   {
     id: uuid('id').primaryKey().defaultRandom(),
-    patientId: uuid('patient_id').references(() => patients.id),
-    providerId: uuid('provider_id').references(() => providers.id),
-    organizationId: uuid('organization_id').references(() => organizations.id),
-    type: text('type'),
-    status: encounterStatusEnum('status').default('planned'),
-    startDate: timestamp('start_date'),
-    endDate: timestamp('end_date'),
-    reasonCode: text('reason_code'),
-    reasonDisplay: text('reason_display'),
-    notes: text('notes'),
-    metadata: jsonb('metadata'),
-    createdAt: timestamp('created_at').defaultNow(),
+    encounterId: text('encounter_id').notNull().unique(), // "ENC-0000001"
+    patientId: text('patient_id').notNull(), // FK to patients.patient_id
+    encounterDate: date('encounter_date'),
+    encounterType: text('encounter_type'), // outpatient/emergency/inpatient
+    facility: text('facility'),
+    chiefComplaint: text('chief_complaint'),
+    diagnosisCode: text('diagnosis_code'), // ICD-10-CA
+    diagnosisDescription: text('diagnosis_description'),
+    triageLevel: integer('triage_level'), // CTAS 1-5
+    disposition: text('disposition'),
+    lengthOfStayHours: numeric('length_of_stay_hours'),
+    attendingPhysician: text('attending_physician'),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
   },
   (table) => [
-    index('encounters_patient_date_idx').on(table.patientId, table.startDate),
+    uniqueIndex('encounters_encounter_id_idx').on(table.encounterId),
+    index('encounters_patient_id_idx').on(table.patientId),
+    index('encounters_patient_date_idx').on(
+      table.patientId,
+      table.encounterDate,
+    ),
+    index('encounters_diagnosis_code_idx').on(table.diagnosisCode),
+    index('encounters_encounter_type_idx').on(table.encounterType),
   ],
 );
 
-export const observations = pgTable(
-  'observations',
+// ── Lab Results ─────────────────────────────────────────────────────────────
+
+export const labResults = pgTable(
+  'lab_results',
   {
     id: uuid('id').primaryKey().defaultRandom(),
-    patientId: uuid('patient_id').references(() => patients.id),
-    encounterId: uuid('encounter_id').references(() => encounters.id),
-    code: text('code'),
-    display: text('display'),
-    valueNumeric: numeric('value_numeric'),
-    valueText: text('value_text'),
+    labId: text('lab_id').notNull().unique(), // "LAB-000001"
+    patientId: text('patient_id').notNull(),
+    encounterId: text('encounter_id'),
+    testName: text('test_name'),
+    testCode: text('test_code'), // LOINC
+    value: numeric('value'),
     unit: text('unit'),
-    status: text('status').default('final'),
-    effectiveDate: timestamp('effective_date'),
-    referenceRange: jsonb('reference_range').$type<{
-      low?: number;
-      high?: number;
-      unit?: string;
-    }>(),
-    metadata: jsonb('metadata'),
-    createdAt: timestamp('created_at').defaultNow(),
+    referenceRangeLow: numeric('reference_range_low'),
+    referenceRangeHigh: numeric('reference_range_high'),
+    abnormalFlag: text('abnormal_flag'), // N/H/L
+    collectedDate: date('collected_date'),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
   },
   (table) => [
-    index('observations_patient_date_idx').on(
+    uniqueIndex('lab_results_lab_id_idx').on(table.labId),
+    index('lab_results_patient_date_idx').on(
       table.patientId,
-      table.effectiveDate,
+      table.collectedDate,
     ),
+    index('lab_results_patient_test_idx').on(
+      table.patientId,
+      table.testCode,
+    ),
+    index('lab_results_encounter_idx').on(table.encounterId),
+    index('lab_results_abnormal_idx').on(table.abnormalFlag),
   ],
 );
+
+// ── Vitals ──────────────────────────────────────────────────────────────────
+
+export const vitals = pgTable(
+  'vitals',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    vitalsId: text('vitals_id').notNull().unique(), // "VIT-000001"
+    patientId: text('patient_id').notNull(),
+    encounterId: text('encounter_id'),
+    heartRate: integer('heart_rate'),
+    systolicBp: integer('systolic_bp'),
+    diastolicBp: integer('diastolic_bp'),
+    temperatureCelsius: numeric('temperature_celsius'),
+    respiratoryRate: integer('respiratory_rate'),
+    o2Saturation: numeric('o2_saturation'),
+    painScale: integer('pain_scale'),
+    recordedAt: timestamp('recorded_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+  },
+  (table) => [
+    uniqueIndex('vitals_vitals_id_idx').on(table.vitalsId),
+    index('vitals_patient_recorded_idx').on(
+      table.patientId,
+      table.recordedAt,
+    ),
+    index('vitals_encounter_idx').on(table.encounterId),
+  ],
+);
+
+// ── Medications ─────────────────────────────────────────────────────────────
 
 export const medications = pgTable(
   'medications',
   {
     id: uuid('id').primaryKey().defaultRandom(),
-    patientId: uuid('patient_id').references(() => patients.id),
-    prescriberId: uuid('prescriber_id').references(() => providers.id),
-    name: text('name').notNull(),
-    code: text('code'),
+    medicationId: text('medication_id').notNull().unique(), // "MED-000001"
+    patientId: text('patient_id').notNull(),
+    drugName: text('drug_name').notNull(),
+    drugCode: text('drug_code'), // DIN
     dosage: text('dosage'),
     frequency: text('frequency'),
     route: text('route'),
-    status: medicationStatusEnum('status').default('active'),
-    startDate: timestamp('start_date'),
-    endDate: timestamp('end_date'),
-    metadata: jsonb('metadata'),
-    createdAt: timestamp('created_at').defaultNow(),
+    prescriber: text('prescriber'),
+    startDate: date('start_date'),
+    endDate: date('end_date'),
+    active: boolean('active').default(true),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
   },
   (table) => [
-    index('medications_patient_status_idx').on(table.patientId, table.status),
+    uniqueIndex('medications_medication_id_idx').on(table.medicationId),
+    index('medications_patient_active_idx').on(table.patientId, table.active),
+    index('medications_drug_code_idx').on(table.drugCode),
   ],
 );
 
-// ── RAG Tables ───────────────────────────────────────────────────────────────
+// ── Canadian Drug Reference ─────────────────────────────────────────────────
 
-export const documents = pgTable('documents', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  title: text('title').notNull(),
-  filename: text('filename'),
-  mimeType: text('mime_type'),
-  fileSize: integer('file_size'),
-  pageCount: integer('page_count'),
-  tags: jsonb('tags').$type<string[]>(),
-  metadata: jsonb('metadata'),
-  createdAt: timestamp('created_at').defaultNow(),
-});
-
-export const documentChunks = pgTable(
-  'document_chunks',
+export const canadianDrugReference = pgTable(
+  'canadian_drug_reference',
   {
     id: uuid('id').primaryKey().defaultRandom(),
-    documentId: uuid('document_id').references(() => documents.id, {
-      onDelete: 'cascade',
-    }),
-    content: text('content').notNull(),
-    pageNumber: integer('page_number'),
-    chunkIndex: integer('chunk_index'),
-    heading: text('heading'),
-    embedding: vector('embedding', { dimensions: 3072 }),
-    metadata: jsonb('metadata'),
-    createdAt: timestamp('created_at').defaultNow(),
+    din: text('din').notNull().unique(),
+    drugName: text('drug_name').notNull(),
+    genericName: text('generic_name'),
+    drugClass: text('drug_class'),
+    commonIndication: text('common_indication'),
+    typicalDosage: text('typical_dosage'),
+    route: text('route'),
+    schedule: text('schedule'),
   },
-  (table) => [index('document_chunks_doc_idx').on(table.documentId)],
+  (table) => [
+    uniqueIndex('drug_ref_din_idx').on(table.din),
+    index('drug_ref_class_idx').on(table.drugClass),
+    index('drug_ref_generic_idx').on(table.genericName),
+  ],
 );
 
-// ── Chat Tables ──────────────────────────────────────────────────────────────
+// ── Corpus Documents (RAG) ──────────────────────────────────────────────────
+
+export const corpusDocuments = pgTable(
+  'corpus_documents',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    sourceBucket: text('source_bucket').notNull(), // e.g. "diabetes_national_guidance"
+    uploadGroup: text('upload_group'), // core_clinical_and_screening / emergency_risk_evidence / route_only
+    sourceUrl: text('source_url'),
+    documentTitle: text('document_title').notNull(),
+    filename: text('filename'),
+    fileType: text('file_type'), // html / pdf / docx
+    contentType: text('content_type'), // guideline / pathway / policy / reference / patient_education
+    clinicalDomains: text('clinical_domains')
+      .array()
+      .default(sql`'{}'::text[]`),
+    jurisdiction: text('jurisdiction'), // BC / Canada / International
+    pageCount: integer('page_count'),
+    fileSizeBytes: integer('file_size_bytes'),
+    sha1: text('sha1'),
+    chunkCount: integer('chunk_count').default(0),
+    ingestedAt: timestamp('ingested_at', { withTimezone: true }).defaultNow(),
+  },
+  (table) => [
+    index('corpus_docs_bucket_idx').on(table.sourceBucket),
+    index('corpus_docs_upload_group_idx').on(table.uploadGroup),
+  ],
+);
+
+// ── Corpus Chunks (RAG + Embeddings) ────────────────────────────────────────
+
+export const corpusChunks = pgTable(
+  'corpus_chunks',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    documentId: uuid('document_id')
+      .notNull()
+      .references(() => corpusDocuments.id, { onDelete: 'cascade' }),
+    content: text('content').notNull(), // plain text for embedding + search
+    textAsHtml: text('text_as_html'), // HTML for display (tables, formatted content)
+    heading: text('heading'),
+    pageNumber: integer('page_number'),
+    chunkIndex: integer('chunk_index').notNull(),
+    chunkType: text('chunk_type').default('text'), // text / table / list
+    sourceBucket: text('source_bucket'), // denormalized for fast filtering
+    embedding: vector('embedding', { dimensions: 3072 }),
+    metadata: jsonb('metadata'), // overflow: emphasized_text, parent_id, etc.
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+  },
+  (table) => [
+    index('corpus_chunks_doc_idx').on(table.documentId),
+    index('corpus_chunks_bucket_idx').on(table.sourceBucket),
+  ],
+);
+
+// ── Engine Runs ─────────────────────────────────────────────────────────────
+
+export const engineRuns = pgTable(
+  'engine_runs',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    runId: text('run_id').notNull().unique(),
+    patientId: text('patient_id').notNull(),
+    startedAt: timestamp('started_at', { withTimezone: true }).defaultNow(),
+    completedAt: timestamp('completed_at', { withTimezone: true }),
+    corpusVersion: text('corpus_version'),
+    targetCount: integer('target_count').default(0),
+    status: text('status').default('running'), // running / completed / failed
+    error: text('error'),
+  },
+  (table) => [
+    uniqueIndex('engine_runs_run_id_idx').on(table.runId),
+    index('engine_runs_patient_idx').on(table.patientId),
+  ],
+);
+
+// ── Pathway Target Run Facts (append-only) ──────────────────────────────────
+
+export const pathwayTargetRunFacts = pgTable(
+  'pathway_target_run_facts',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    runId: text('run_id').notNull(),
+    generatedAt: timestamp('generated_at', { withTimezone: true }).notNull(),
+    patientId: text('patient_id').notNull(),
+    targetId: text('target_id').notNull(),
+    condition: text('condition'),
+    screeningType: text('screening_type'),
+    action: text('action'), // what to do
+    riskTier: text('risk_tier'), // high / medium / low
+    status: text('status'), // overdue_now / due_soon / up_to_date / unknown_due
+    overdueDays: integer('overdue_days'),
+    dueDate: date('due_date'),
+    intervalDays: integer('interval_days'),
+    lastCompletedDate: date('last_completed_date'),
+    priorityRank: integer('priority_rank'),
+    confidence: text('confidence'), // high / medium / low
+    confidenceReason: text('confidence_reason'),
+    actionValueScore: integer('action_value_score'), // pre-computed for queue sorting
+    whyThisAction: text('why_this_action'),
+    whyNow: text('why_now'),
+    evidenceRefs: jsonb('evidence_refs'), // [{doc_id, excerpt, chunk_id}]
+    missingDataTasks: jsonb('missing_data_tasks'), // ["string"]
+    providerRoute: text('provider_route'), // pharmacist / dietitian / PT / walk-in / ER / specialist
+    category: text('category'), // red / yellow / green (dashboard)
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+  },
+  (table) => [
+    index('ptrf_patient_condition_idx').on(
+      table.patientId,
+      table.condition,
+      table.screeningType,
+    ),
+    index('ptrf_run_idx').on(table.runId),
+    index('ptrf_category_score_idx').on(
+      table.category,
+      table.actionValueScore,
+    ),
+    index('ptrf_status_idx').on(table.status),
+    index('ptrf_generated_at_idx').on(table.generatedAt),
+  ],
+);
+
+// ── Validation Dataset ──────────────────────────────────────────────────────
+
+export const validationCases = pgTable(
+  'validation_cases',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    caseId: text('case_id').notNull().unique(), // "PC-0001"
+    clinicalDomain: text('clinical_domain'),
+    packageSize: text('package_size'), // sparse / medium / dense
+    difficulty: text('difficulty'), // moderate / difficult / expert
+    isEdgeCase: boolean('is_edge_case').default(false),
+    patientPackage: jsonb('patient_package').notNull(), // full patient package
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+  },
+  (table) => [
+    uniqueIndex('validation_cases_case_id_idx').on(table.caseId),
+  ],
+);
+
+export const validationAnswerKeys = pgTable(
+  'validation_answer_keys',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    caseId: text('case_id').notNull().unique(), // FK to validation_cases.case_id
+    label: text('label').notNull(), // DUE / NOT_DUE
+    targetCondition: text('target_condition'),
+    answerData: jsonb('answer_data').notNull(), // full answer key
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+  },
+  (table) => [
+    uniqueIndex('validation_keys_case_id_idx').on(table.caseId),
+    index('validation_keys_label_idx').on(table.label),
+  ],
+);
+
+// ── Chat Tables (PRESERVED) ─────────────────────────────────────────────────
 
 export const conversations = pgTable('conversations', {
   id: uuid('id').primaryKey().defaultRandom(),
   title: text('title').default('New conversation'),
-  createdAt: timestamp('created_at').defaultNow(),
-  updatedAt: timestamp('updated_at').defaultNow(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
 });
 
 export const messages = pgTable(
@@ -225,7 +362,7 @@ export const messages = pgTable(
     content: text('content').notNull(),
     toolCalls: jsonb('tool_calls'),
     toolResults: jsonb('tool_results'),
-    createdAt: timestamp('created_at').defaultNow(),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
   },
   (table) => [
     index('messages_conversation_idx').on(
@@ -235,69 +372,64 @@ export const messages = pgTable(
   ],
 );
 
-// ── Relations ────────────────────────────────────────────────────────────────
+// ── Relations ───────────────────────────────────────────────────────────────
 
 export const patientsRelations = relations(patients, ({ many }) => ({
   encounters: many(encounters),
-  observations: many(observations),
+  labResults: many(labResults),
+  vitals: many(vitals),
   medications: many(medications),
-}));
-
-export const providersRelations = relations(providers, ({ many }) => ({
-  encounters: many(encounters),
-  prescriptions: many(medications),
-}));
-
-export const organizationsRelations = relations(organizations, ({ many }) => ({
-  encounters: many(encounters),
 }));
 
 export const encountersRelations = relations(encounters, ({ one, many }) => ({
   patient: one(patients, {
     fields: [encounters.patientId],
-    references: [patients.id],
+    references: [patients.patientId],
   }),
-  provider: one(providers, {
-    fields: [encounters.providerId],
-    references: [providers.id],
-  }),
-  organization: one(organizations, {
-    fields: [encounters.organizationId],
-    references: [organizations.id],
-  }),
-  observations: many(observations),
+  labResults: many(labResults),
+  vitals: many(vitals),
 }));
 
-export const observationsRelations = relations(observations, ({ one }) => ({
+export const labResultsRelations = relations(labResults, ({ one }) => ({
   patient: one(patients, {
-    fields: [observations.patientId],
-    references: [patients.id],
+    fields: [labResults.patientId],
+    references: [patients.patientId],
   }),
   encounter: one(encounters, {
-    fields: [observations.encounterId],
-    references: [encounters.id],
+    fields: [labResults.encounterId],
+    references: [encounters.encounterId],
+  }),
+}));
+
+export const vitalsRelations = relations(vitals, ({ one }) => ({
+  patient: one(patients, {
+    fields: [vitals.patientId],
+    references: [patients.patientId],
+  }),
+  encounter: one(encounters, {
+    fields: [vitals.encounterId],
+    references: [encounters.encounterId],
   }),
 }));
 
 export const medicationsRelations = relations(medications, ({ one }) => ({
   patient: one(patients, {
     fields: [medications.patientId],
-    references: [patients.id],
-  }),
-  prescriber: one(providers, {
-    fields: [medications.prescriberId],
-    references: [providers.id],
+    references: [patients.patientId],
   }),
 }));
 
-export const documentsRelations = relations(documents, ({ many }) => ({
-  chunks: many(documentChunks),
-}));
+export const corpusDocumentsRelations = relations(
+  corpusDocuments,
+  ({ many }) => ({
+    chunks: many(corpusChunks),
+  }),
+);
 
-export const documentChunksRelations = relations(documentChunks, ({ one }) => ({
-  document: one(documents, {
-    fields: [documentChunks.documentId],
-    references: [documents.id],
+export const corpusChunksRelations = relations(corpusChunks, ({ one }) => ({
+  document: one(corpusDocuments, {
+    fields: [corpusChunks.documentId],
+    references: [corpusDocuments.id],
   }),
 }));
 

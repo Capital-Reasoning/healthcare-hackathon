@@ -14,8 +14,8 @@ export async function GET(request: Request) {
     const sort = parseSortParams(searchParams);
     const filters = {
       patientId: searchParams.get('patientId') ?? undefined,
-      status: searchParams.get('status') ?? undefined,
-      type: searchParams.get('type') ?? undefined,
+      disposition: searchParams.get('disposition') ?? searchParams.get('status') ?? undefined,
+      encounterType: searchParams.get('encounterType') ?? searchParams.get('type') ?? undefined,
     };
 
     const { data, total } = await getEncounters({

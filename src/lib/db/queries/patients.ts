@@ -1,16 +1,16 @@
-import { eq, or, ilike, and, asc, desc, count } from 'drizzle-orm';
+import { eq, or, ilike, and, asc, desc, count, gte, lte } from 'drizzle-orm';
 import type { SQL } from 'drizzle-orm';
 import { db } from '@/lib/db/client';
-import { patients, encounters, medications, observations } from '@/lib/db/schema';
+import { patients, encounters, medications, labResults, vitals } from '@/lib/db/schema';
 
 function getSortColumn(field: string) {
   switch (field) {
     case 'lastName': return patients.lastName;
     case 'firstName': return patients.firstName;
     case 'dateOfBirth': return patients.dateOfBirth;
-    case 'riskLevel': return patients.riskLevel;
+    case 'age': return patients.age;
+    case 'sex': return patients.sex;
     case 'createdAt': return patients.createdAt;
-    case 'primaryCondition': return patients.primaryCondition;
     default: return null;
   }
 }
@@ -21,9 +21,9 @@ interface GetPatientsParams {
   sort?: { field: string; direction: 'asc' | 'desc' } | null;
   filters?: {
     search?: string;
-    riskLevel?: string;
-    gender?: string;
-    condition?: string;
+    sex?: string;
+    ageMin?: number;
+    ageMax?: number;
   };
 }
 
@@ -37,26 +37,21 @@ export async function getPatients(params: GetPatientsParams) {
       or(
         ilike(patients.firstName, term),
         ilike(patients.lastName, term),
-        ilike(patients.mrn, term),
-        ilike(patients.primaryCondition, term),
+        ilike(patients.patientId, term),
       )!,
     );
   }
 
-  if (filters?.riskLevel) {
-    conditions.push(
-      eq(patients.riskLevel, filters.riskLevel as 'low' | 'medium' | 'high' | 'critical'),
-    );
+  if (filters?.sex) {
+    conditions.push(eq(patients.sex, filters.sex));
   }
 
-  if (filters?.gender) {
-    conditions.push(
-      eq(patients.gender, filters.gender as 'male' | 'female' | 'other' | 'unknown'),
-    );
+  if (filters?.ageMin !== undefined) {
+    conditions.push(gte(patients.age, filters.ageMin));
   }
 
-  if (filters?.condition) {
-    conditions.push(ilike(patients.primaryCondition, `%${filters.condition}%`));
+  if (filters?.ageMax !== undefined) {
+    conditions.push(lte(patients.age, filters.ageMax));
   }
 
   const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
@@ -77,16 +72,17 @@ export async function getPatients(params: GetPatientsParams) {
     db
       .select({
         id: patients.id,
-        mrn: patients.mrn,
+        patientId: patients.patientId,
         firstName: patients.firstName,
         lastName: patients.lastName,
         dateOfBirth: patients.dateOfBirth,
-        gender: patients.gender,
-        riskLevel: patients.riskLevel,
-        primaryCondition: patients.primaryCondition,
-        email: patients.email,
-        phone: patients.phone,
-        address: patients.address,
+        age: patients.age,
+        sex: patients.sex,
+        postalCode: patients.postalCode,
+        bloodType: patients.bloodType,
+        insuranceNumber: patients.insuranceNumber,
+        primaryLanguage: patients.primaryLanguage,
+        emergencyContactPhone: patients.emergencyContactPhone,
         createdAt: patients.createdAt,
         updatedAt: patients.updatedAt,
       })
@@ -100,24 +96,25 @@ export async function getPatients(params: GetPatientsParams) {
   return { data, total: countResult[0]?.total ?? 0 };
 }
 
-export async function getPatientById(id: string) {
+export async function getPatientById(patientId: string) {
   const patient = await db.query.patients.findFirst({
-    where: eq(patients.id, id),
+    where: eq(patients.patientId, patientId),
     with: {
       encounters: {
-        orderBy: [desc(encounters.startDate)],
+        orderBy: [desc(encounters.encounterDate)],
         limit: 10,
-        with: {
-          provider: true,
-        },
       },
       medications: {
-        where: eq(medications.status, 'active'),
+        where: eq(medications.active, true),
         orderBy: [desc(medications.createdAt)],
       },
-      observations: {
-        orderBy: [desc(observations.effectiveDate)],
+      labResults: {
+        orderBy: [desc(labResults.collectedDate)],
         limit: 20,
+      },
+      vitals: {
+        orderBy: [desc(vitals.recordedAt)],
+        limit: 5,
       },
     },
   });
@@ -134,8 +131,7 @@ export async function searchPatients(query: string, limit: number = 20) {
       or(
         ilike(patients.firstName, term),
         ilike(patients.lastName, term),
-        ilike(patients.mrn, term),
-        ilike(patients.primaryCondition, term),
+        ilike(patients.patientId, term),
       ),
     )
     .limit(limit);
@@ -144,29 +140,20 @@ export async function searchPatients(query: string, limit: number = 20) {
 }
 
 export async function getPatientStats() {
-  const [totalResult, riskResult, genderResult] = await Promise.all([
+  const [totalResult, sexResult] = await Promise.all([
     db.select({ total: count() }).from(patients),
     db
-      .select({ level: patients.riskLevel, count: count() })
+      .select({ sex: patients.sex, count: count() })
       .from(patients)
-      .groupBy(patients.riskLevel),
-    db
-      .select({ gender: patients.gender, count: count() })
-      .from(patients)
-      .groupBy(patients.gender),
+      .groupBy(patients.sex),
   ]);
 
   const total = totalResult[0]?.total ?? 0;
 
-  const byRiskLevel: Record<string, number> = {};
-  for (const row of riskResult) {
-    if (row.level) byRiskLevel[row.level] = row.count;
+  const bySex: Record<string, number> = {};
+  for (const row of sexResult) {
+    if (row.sex) bySex[row.sex] = row.count;
   }
 
-  const byGender: Record<string, number> = {};
-  for (const row of genderResult) {
-    if (row.gender) byGender[row.gender] = row.count;
-  }
-
-  return { total, byRiskLevel, byGender };
+  return { total, bySex };
 }

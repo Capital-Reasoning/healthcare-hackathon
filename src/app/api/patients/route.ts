@@ -16,9 +16,9 @@ export async function GET(request: Request) {
     const sort = parseSortParams(searchParams);
     const filters = {
       search: searchParams.get('search') ?? undefined,
-      riskLevel: searchParams.get('riskLevel') ?? undefined,
-      gender: searchParams.get('gender') ?? undefined,
-      condition: searchParams.get('condition') ?? undefined,
+      sex: searchParams.get('sex') ?? undefined,
+      ageMin: searchParams.get('ageMin') ? parseInt(searchParams.get('ageMin')!, 10) : undefined,
+      ageMax: searchParams.get('ageMax') ? parseInt(searchParams.get('ageMax')!, 10) : undefined,
     };
 
     const { data, total } = await getPatients({ ...pagination, sort, filters });
@@ -38,17 +38,17 @@ export async function POST(request: Request) {
     const [created] = await db
       .insert(patients)
       .values({
-        mrn: body.mrn,
+        patientId: body.patientId,
         firstName: body.firstName,
         lastName: body.lastName,
-        dateOfBirth: body.dateOfBirth ? new Date(body.dateOfBirth) : undefined,
-        gender: body.gender,
-        email: body.email,
-        phone: body.phone,
-        address: body.address,
-        riskLevel: body.riskLevel,
-        primaryCondition: body.primaryCondition,
-        metadata: body.metadata,
+        dateOfBirth: body.dateOfBirth ?? undefined,
+        age: body.age ?? undefined,
+        sex: body.sex ?? undefined,
+        postalCode: body.postalCode ?? undefined,
+        bloodType: body.bloodType ?? undefined,
+        insuranceNumber: body.insuranceNumber ?? undefined,
+        primaryLanguage: body.primaryLanguage ?? undefined,
+        emergencyContactPhone: body.emergencyContactPhone ?? undefined,
       })
       .returning();
 

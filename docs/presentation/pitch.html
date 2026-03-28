@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BestPath — Proactive Care Intelligence</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/black.css">
+  <style>
+
+    :root {
+      --teal: #0B8585;
+      --teal-light: #0FAFAF;
+      --teal-glow: rgba(11, 133, 133, 0.3);
+      --navy: #1A2E44;
+      --navy-deep: #0F1B2D;
+      --warm-white: #FAFAF8;
+      --warm-gray: #E8E6E1;
+      --muted: #8B95A5;
+      --red-accent: #C93B3B;
+      --yellow-accent: #C27A15;
+      --green-accent: #0B7A5E;
+    }
+
+    .reveal {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    .reveal .slides {
+      text-align: left;
+    }
+
+    .reveal .slides section {
+      padding: 48px 72px;
+    }
+
+    /* ---- Typography ---- */
+    .reveal h1 {
+      font-size: 2.8em;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      color: var(--warm-white);
+      text-align: left;
+    }
+
+    .reveal h2 {
+      font-size: 2.0em;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      color: var(--warm-white);
+      text-align: left;
+      margin-bottom: 0.6em;
+    }
+
+    .reveal h3 {
+      font-size: 1.3em;
+      font-weight: 600;
+      color: var(--teal-light);
+      text-align: left;
+      margin-bottom: 0.4em;
+    }
+
+    .reveal p, .reveal li {
+      font-size: 0.95em;
+      font-weight: 400;
+      line-height: 1.6;
+      color: var(--warm-gray);
+    }
+
+    .reveal strong {
+      color: var(--warm-white);
+      font-weight: 600;
+    }
+
+    .reveal em {
+      color: var(--teal-light);
+      font-style: normal;
+      font-weight: 600;
+    }
+
+    .reveal code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85em;
+      color: var(--teal-light);
+      background: rgba(11, 133, 133, 0.15);
+      padding: 0.1em 0.4em;
+      border-radius: 4px;
+    }
+
+    /* ---- Backgrounds ---- */
+    .reveal .slides section {
+      background:
+        radial-gradient(ellipse at 85% 90%, rgba(11, 133, 133, 0.04) 0%, transparent 50%),
+        radial-gradient(ellipse at 15% 10%, rgba(11, 133, 133, 0.06) 0%, var(--navy-deep) 70%);
+    }
+
+    .reveal .slide-background {
+      background: var(--navy-deep) !important;
+    }
+
+    /* ---- Decorative grid dots ---- */
+    .grid-dots {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 200px;
+      height: 200px;
+      opacity: 0.06;
+      background-image: radial-gradient(circle, var(--teal-light) 1px, transparent 1px);
+      background-size: 20px 20px;
+      pointer-events: none;
+    }
+
+    .grid-dots.bottom-left {
+      top: auto;
+      right: auto;
+      bottom: 0;
+      left: 0;
+    }
+
+    /* ---- Accent line ---- */
+    .accent-line {
+      width: 60px;
+      height: 3px;
+      background: linear-gradient(90deg, var(--teal), var(--teal-light));
+      border-radius: 2px;
+      margin: 12px 0 20px;
+    }
+
+    /* ---- Glow card ---- */
+    .glow-card {
+      position: relative;
+      padding: 20px 24px;
+      background: rgba(11, 133, 133, 0.04);
+      border: 1px solid rgba(11, 133, 133, 0.2);
+      border-radius: 12px;
+    }
+
+    .glow-card::before {
+      content: '';
+      position: absolute;
+      top: -1px;
+      left: 20px;
+      right: 20px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--teal-light), transparent);
+    }
+
+    /* ---- Routing examples ---- */
+    .route-example {
+      padding: 12px 16px;
+      border-left: 2px solid var(--teal);
+      background: rgba(11, 133, 133, 0.04);
+      border-radius: 0 8px 8px 0;
+      margin: 8px 0;
+      font-size: 0.85em !important;
+      color: var(--warm-white) !important;
+      font-style: italic;
+    }
+
+    .route-example .route-type {
+      font-style: normal;
+      font-size: 0.8em;
+      color: var(--tealLight);
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+    }
+
+    /* ---- Stats ---- */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+      margin-top: 24px;
+    }
+
+    .stat-block {
+      padding: 20px 24px;
+      border-left: 3px solid var(--teal);
+      background: rgba(11, 133, 133, 0.06);
+      border-radius: 0 8px 8px 0;
+      transition: all 0.3s ease;
+    }
+
+    .stat-block:hover {
+      background: rgba(11, 133, 133, 0.1);
+      box-shadow: 0 0 20px rgba(11, 133, 133, 0.08);
+    }
+
+    .stat-number {
+      font-size: 2.6em;
+      font-weight: 800;
+      color: var(--teal-light);
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    .stat-number.red { color: var(--red-accent); }
+    .stat-number.yellow { color: var(--yellow-accent); }
+
+    .stat-label {
+      font-size: 0.85em;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    /* ---- Lists ---- */
+    .reveal ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .reveal ul li {
+      padding: 6px 0 6px 24px;
+      position: relative;
+    }
+
+    .reveal ul li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 14px;
+      width: 8px;
+      height: 8px;
+      background: var(--teal);
+      border-radius: 50%;
+    }
+
+    /* ---- Special elements ---- */
+    .subtitle {
+      font-size: 1.1em !important;
+      color: var(--teal-light) !important;
+      font-weight: 400;
+      margin-top: 8px;
+    }
+
+    .byline {
+      font-size: 0.7em !important;
+      color: var(--muted) !important;
+      margin-top: 40px;
+      font-weight: 400;
+    }
+
+    .quote-block {
+      border-left: 3px solid var(--teal);
+      padding: 16px 24px;
+      margin: 24px 0;
+      background: rgba(11, 133, 133, 0.06);
+      border-radius: 0 8px 8px 0;
+      font-size: 1.0em !important;
+      color: var(--warm-white) !important;
+      font-style: italic;
+    }
+
+    .quote-block .attribution {
+      font-style: normal;
+      color: var(--muted);
+      font-size: 0.75em;
+      margin-top: 8px;
+    }
+
+    .flow-diagram {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 28px 0;
+      flex-wrap: wrap;
+    }
+
+    .flow-step {
+      background: rgba(11, 133, 133, 0.12);
+      border: 1px solid rgba(11, 133, 133, 0.3);
+      border-radius: 8px;
+      padding: 14px 20px;
+      font-size: 0.8em;
+      color: var(--warm-white);
+      font-weight: 500;
+      text-align: center;
+      min-width: 110px;
+    }
+
+    .flow-step.highlight {
+      background: var(--teal);
+      border-color: var(--teal-light);
+      color: white;
+      box-shadow: 0 0 24px rgba(11, 133, 133, 0.35);
+    }
+
+    .flow-arrow {
+      color: var(--teal);
+      font-size: 1.2em;
+      font-weight: 300;
+    }
+
+    .triage-columns {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+      margin: 24px 0;
+    }
+
+    .triage-col {
+      border-radius: 10px;
+      padding: 24px 20px;
+      text-align: center;
+    }
+
+    .triage-col.red {
+      background: rgba(201, 59, 59, 0.12);
+      border: 1px solid rgba(201, 59, 59, 0.35);
+      box-shadow: 0 0 20px rgba(201, 59, 59, 0.08);
+    }
+
+    .triage-col.yellow {
+      background: rgba(194, 122, 21, 0.12);
+      border: 1px solid rgba(194, 122, 21, 0.35);
+      box-shadow: 0 0 20px rgba(194, 122, 21, 0.08);
+    }
+
+    .triage-col.green {
+      background: rgba(11, 122, 94, 0.12);
+      border: 1px solid rgba(11, 122, 94, 0.35);
+      box-shadow: 0 0 20px rgba(11, 122, 94, 0.08);
+    }
+
+    .triage-col h4 {
+      font-size: 1.0em;
+      font-weight: 700;
+      margin: 0 0 6px 0;
+    }
+
+    .triage-col.red h4 { color: var(--red-accent); }
+    .triage-col.yellow h4 { color: var(--yellow-accent); }
+    .triage-col.green h4 { color: var(--green-accent); }
+
+    .triage-col p {
+      font-size: 0.75em !important;
+      color: var(--muted) !important;
+      margin: 0;
+      text-align: center;
+    }
+
+    .tech-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .tech-item {
+      padding: 14px 18px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px;
+    }
+
+    .tech-item h4 {
+      font-size: 0.8em;
+      color: var(--teal-light);
+      font-weight: 600;
+      margin: 0 0 6px 0;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .tech-item p {
+      font-size: 0.8em !important;
+      margin: 0;
+    }
+
+    .big-text {
+      font-size: 1.6em !important;
+      font-weight: 600;
+      color: var(--warm-white) !important;
+      line-height: 1.4;
+    }
+
+    .section-label {
+      font-size: 0.65em;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--teal-light);
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      align-items: start;
+    }
+
+    .centered {
+      text-align: center;
+    }
+
+    .centered h1, .centered h2, .centered h3, .centered p {
+      text-align: center;
+    }
+
+    .fade-muted {
+      color: var(--muted) !important;
+    }
+
+    .reveal .speaker-notes {
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+    }
+
+    /* Subtle slide transitions */
+    .reveal .slides section {
+      transition: all 0.4s ease;
+    }
+
+    /* Smoother fragment animations */
+    .reveal .fragment {
+      transition: all 0.4s ease;
+    }
+
+    .reveal .fragment.visible {
+      opacity: 1;
+      transform: none;
+    }
+
+    .reveal .fragment:not(.visible):not(.current-fragment) {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+  </style>
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+      <!-- ============================================ -->
+      <!-- SLIDE 1: THE PROBLEM                         -->
+      <!-- ============================================ -->
+      <section>
+        <div class="grid-dots"></div>
+        <div style="display: flex; justify-content: space-between; align-items: baseline;">
+          <div class="section-label">BuildersVault.ai Healthcare & AI Hackathon</div>
+          <p style="font-size: 0.65em; color: var(--muted); margin: 0;">Capital Reasoning &nbsp;·&nbsp; March 2026</p>
+        </div>
+        <h2 style="margin-top: 4px; font-size: 1.8em;"><span style="color: var(--red-accent);">4,620</span> British Columbians died on medical waitlists last year.</h2>
+        <p class="big-text fragment" style="margin-top: 4px; font-size: 1.25em;">Not waiting for experimental treatment. Waiting for a screening, a follow-up, a referral — <em>routine actions</em> someone should have flagged months earlier.</p>
+        <p class="fragment" style="font-size: 1.0em; margin-top: 20px; color: var(--muted);">The patient data exists. The clinical guidelines exist. What's missing is anything that <strong>connects the two</strong> — and tells a clinician what to do, for whom, right now.</p>
+        <div class="stat-grid fragment" style="margin-top: 16px;">
+          <div class="stat-block">
+            <div class="stat-number red">352K</div>
+            <div class="stat-label">Waiting for a family doctor in BC</div>
+          </div>
+          <div class="stat-block">
+            <div class="stat-number red">250+</div>
+            <div class="stat-label">BC emergency rooms closed in 2025</div>
+          </div>
+          <div class="stat-block">
+            <div class="stat-number yellow">6.5M</div>
+            <div class="stat-label">Canadians with no family doctor at all</div>
+          </div>
+          <div class="stat-block">
+            <div class="stat-number yellow">32.2 wks</div>
+            <div class="stat-label">Specialist referral to treatment — eight months</div>
+          </div>
+        </div>
+        <aside class="notes">
+          [0:00 — 0:40] Open with the death stat. Let it land. Then explain WHY.
+          "4,620 British Columbians died on medical waitlists last year. Not waiting for cutting-edge treatment. Waiting for a screening, a follow-up, a referral — routine clinical actions that someone should have flagged months earlier. But nobody did. The patient data was there. The guidelines were there. What's missing is anything that connects the two and tells a clinician: this patient needs this action, right now. [reveal stats] 352 thousand waiting for a family doctor. 250 ER closures last year. 6.5 million Canadians with nobody watching their preventive care at all. 32 weeks from specialist referral to treatment."
+        </aside>
+      </section>
+
+      <!-- ============================================ -->
+      <!-- SLIDE 3: BESTPATH — CLINICIAN VIEW           -->
+      <!-- ============================================ -->
+      <section>
+        <div class="section-label">Clinician View</div>
+        <h2>Best<span style="color: var(--teal-light)">Path</span> <span style="font-size: 0.6em; font-weight: 400; color: var(--muted);">for clinics</span></h2>
+        <p style="font-size: 1.0em; margin-bottom: 20px;">For every patient in a panel: find the <em>single highest-value clinical action</em> most likely to <strong>prevent an ER visit</strong>. Surface it with cited evidence. Let clinicians act.</p>
+
+        <div class="triage-columns fragment">
+          <div class="triage-col red">
+            <h4>Red</h4>
+            <p>Overdue + High Risk<br>Act now</p>
+          </div>
+          <div class="triage-col yellow">
+            <h4>Yellow</h4>
+            <p>Overdue + Lower Risk<br>Act soon</p>
+          </div>
+          <div class="triage-col green">
+            <h4>Green</h4>
+            <p>Up to date<br>Monitor</p>
+          </div>
+        </div>
+
+        <p class="fragment" style="font-size: 0.85em; margin-top: 16px;">An AI agent that renders <em>real interactive UI</em> — tables, charts, patient cards — not walls of text. Ask it anything about your panel and get a cited, visual answer.</p>
+
+        <aside class="notes">
+          [0:40 — 1:00] Product reveal — clinician side.
+          "This is BestPath. For every patient in a clinic's panel, it finds the single highest-value action — the screening, medication, referral most likely to prevent an ER visit — and surfaces it with cited evidence. Red: overdue and high risk, act now. Yellow: overdue, lower risk. Green: up to date. And the AI agent doesn't just give you text — it renders real interactive UI. Tables, charts, patient cards. Ask it anything about your panel."
+        </aside>
+      </section>
+
+      <!-- ============================================ -->
+      <!-- SLIDE 4: BESTPATH — PATIENT VIEW             -->
+      <!-- ============================================ -->
+      <section>
+        <div class="grid-dots bottom-left"></div>
+        <div class="section-label">Patient View</div>
+        <h2>Best<span style="color: var(--teal-light)">Path</span> <span style="font-size: 0.6em; font-weight: 400; color: var(--muted);">for the 6.5M without a doctor</span></h2>
+
+        <div class="two-col" style="margin-top: 16px;">
+          <div>
+            <div class="accent-line"></div>
+            <p style="font-size: 0.95em; margin-bottom: 16px;">Enter your health info conversationally — age, conditions, meds, concerns, family history. <em>As much or as little as you have.</em></p>
+            <p class="fragment" style="font-size: 0.95em;">Same engine underneath: risk profiling, evidence retrieval, guideline matching. You get <em>cited next-step guidance</em> — what you need, when, and <strong>who can actually help</strong>.</p>
+          </div>
+          <div>
+            <div class="accent-line"></div>
+            <h3 style="font-size: 0.9em; margin-bottom: 12px;">Not "see a doctor." Specific routing:</h3>
+            <div class="route-example fragment">
+              "A pharmacist can monitor your blood pressure."
+              <span class="route-type">→ Pharmacy · No referral needed</span>
+            </div>
+            <div class="route-example fragment">
+              "A dietitian can help with diabetes management."
+              <span class="route-type">→ Allied health · Shorter wait</span>
+            </div>
+            <div class="route-example fragment">
+              "You need a walk-in clinic to get this referral started."
+              <span class="route-type">→ Walk-in · Available today</span>
+            </div>
+          </div>
+        </div>
+        <p class="fragment" style="font-size: 0.8em; margin-top: 16px; color: var(--muted);">Routes to the <strong style="color: var(--warm-white);">right level of care</strong>, not the default specialist queue. Patients get faster help. The system gets less load. <em>Everyone wins.</em></p>
+
+        <aside class="notes">
+          [1:00 — 1:25] The other half of the product.
+          "Now, the other side. 6.5 million Canadians don't have a family doctor. Nobody is watching their preventive care. BestPath gives them a self-service care navigator. Enter your health info conversationally — whatever you have. Same engine underneath. But it doesn't just say 'see a doctor.' It routes you to the right level of care. A pharmacist can monitor your blood pressure. A dietitian can help with diabetes management. You need a walk-in for this referral. Smarter routing, faster help, less system load. Everyone wins."
+        </aside>
+      </section>
+
+      <!-- ============================================ -->
+      <!-- SLIDE 7: HOW IT WORKS                        -->
+      <!-- ============================================ -->
+      <section>
+        <div class="grid-dots"></div>
+        <div class="section-label">The Engine</div>
+        <h2>AI suggests. Math decides.</h2>
+
+        <div class="flow-diagram">
+          <div class="fragment" style="display: contents;">
+            <div class="flow-step">Patient Data<br><span style="font-size: 0.8em; color: var(--muted);">Demographics, labs,<br>meds, encounters</span></div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-step">Risk Confluence<br>Vector (RCV)<br><span style="font-size: 0.8em; color: var(--muted);">What could go wrong?</span></div>
+          </div>
+          <div class="fragment" style="display: contents;">
+            <div class="flow-arrow">→</div>
+            <div class="flow-step">Evidence Retrieval<br><span style="font-size: 0.8em; color: var(--muted);">BC clinical guidelines<br>via RAG</span></div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-step">AI Structuring<br><span style="font-size: 0.8em; color: var(--muted);">Claude connects<br>patient → guidelines</span></div>
+          </div>
+          <div class="fragment" style="display: contents;">
+            <div class="flow-arrow">→</div>
+            <div class="flow-step highlight">Deterministic<br>Comparator<br><span style="font-size: 0.8em; color: rgba(255,255,255,0.8);">Pure math.<br>No hallucination.</span></div>
+          </div>
+        </div>
+
+        <div class="two-col fragment" style="margin-top: 24px;">
+          <div class="quote-block" style="margin: 0;">
+            Guidelines say what's needed.<br>
+            Patient data shows what's been done.<br>
+            <strong>Arithmetic determines urgency.</strong>
+            <div class="attribution">No AI on the critical decision path.</div>
+          </div>
+          <div>
+            <p style="font-size: 0.85em;">Every recommendation <em>cited</em>. Every overdue status <em>calculated</em>, not predicted. Confidence reflects <em>data completeness</em>, not model certainty.</p>
+            <p style="font-size: 0.85em; margin-top: 8px;">Our AI doesn't replace doctors. It replaces the sticky note that says <em>"CHECK MRS. CHEN'S LABS???"</em></p>
+          </div>
+        </div>
+
+        <aside class="notes">
+          [1:25 — 1:55] Walk through the pipeline. Emphasize the deterministic comparator.
+          "Here's the engine. Patient data goes in. We build a Risk Confluence Vector: everything that says this patient might be heading for an emergency. That queries our knowledge base — BC clinical guidelines, screening protocols — via RAG. Claude reads the patient data alongside the guidelines and structures the output. But here's the key: the actual decision — is this patient overdue? how urgent? — that's pure arithmetic. Due date equals last screening plus recommended interval. Overdue days equals today minus due date. No AI on the critical path. [beat] Our AI doesn't replace doctors. It replaces the sticky note that says 'check Mrs. Chen's labs, question mark question mark question mark.'"
+        </aside>
+      </section>
+
+      <!-- ============================================ -->
+      <!-- SLIDE 8: DEMO / SCREENSHOTS                  -->
+      <!-- ============================================ -->
+      <section class="centered" style="display: flex; flex-direction: column; justify-content: center; height: 100%;">
+        <div>
+          <div class="section-label">Live Demo</div>
+          <h2 style="text-align: center; font-size: 2.4em;">Let's see it work.</h2>
+          <p style="text-align: center; font-size: 1.0em; color: var(--muted); margin-top: 16px;">Dashboard &nbsp;→&nbsp; Patient drill-down &nbsp;→&nbsp; Agent query &nbsp;→&nbsp; Patient navigator</p>
+        </div>
+
+        <aside class="notes">
+          [1:55 — 2:50] THIS IS THE DEMO. Switch to live app. 4 beats:
+          1. Dashboard — show the red/yellow/green triage across the panel. "2,000 patients, triaged automatically."
+          2. Drill into a red patient — RCV breakdown, overdue actions, cited evidence. "6 months overdue for a colonoscopy. Here's the guideline."
+          3. Agent query — "Who needs an HbA1c recheck?" — live table with citations.
+          4. Patient view — enter some basic health info, show the routing recommendation. "A pharmacist can handle this."
+          If live demo fails, have screenshots queued. Never debug on stage.
+        </aside>
+      </section>
+
+      <!-- ============================================ -->
+      <!-- SLIDE 9: BUSINESS VIABILITY                  -->
+      <!-- ============================================ -->
+      <section>
+        <div class="section-label">Why This Works</div>
+        <h2>This isn't a prototype.</h2>
+
+        <div class="tech-grid">
+          <div class="tech-item fragment">
+            <h4>Real Data, Real Logic</h4>
+            <p>Tested against 2,000 Synthea patients. Same engine works against any EHR feed via FHIR.</p>
+          </div>
+          <div class="tech-item fragment">
+            <h4>Clinician Trust by Design</h4>
+            <p>Every recommendation cited against source guidelines. Every overdue status calculated, not predicted. Missing data flagged, never hidden.</p>
+          </div>
+          <div class="tech-item fragment">
+            <h4>Both Sides of the Problem</h4>
+            <p>Clinicians get a proactive action queue. Unattached patients get cited next-step guidance and provider routing.</p>
+          </div>
+          <div class="tech-item fragment">
+            <h4>Zero Adoption Friction</h4>
+            <p>Red/yellow/green triage mirrors how clinicians already think. AI generates real interactive charts and tables — not walls of text. No behaviour change required.</p>
+          </div>
+        </div>
+
+        <p class="fragment" style="margin-top: 24px; font-size: 0.9em; color: var(--muted);">Existing tools are dashboards <strong style="color: var(--warm-white);">or</strong> chatbots. Never both. BestPath is the first to combine <em>proactive risk triage</em> with <em>generative clinical UI</em>. BC is investing <strong style="color: var(--warm-white);">$2.8B</strong> in healthcare over three years — this is where it should go.</p>
+
+        <aside class="notes">
+          [2:50 — 3:10] Quick hits. Let the grid do the work.
+          "This isn't a prototype. Real data — 2,000 Synthea patients, same engine works against any EHR via FHIR. Every recommendation cited, every status calculated — clinicians can verify it, so they trust it. And the UX mirrors how they already think: red, yellow, green. Zero adoption friction. Existing tools are dashboards or chatbots — never both. BestPath is the first to combine proactive risk triage with generative clinical UI. BC is investing 2.8 billion in healthcare over three years. This is where it should go."
+        </aside>
+      </section>
+
+      <!-- ============================================ -->
+      <!-- SLIDE 10: CLOSE                              -->
+      <!-- ============================================ -->
+      <section class="centered" style="display: flex; flex-direction: column; justify-content: center; height: 100%;">
+        <div>
+          <h1 style="text-align: center; font-size: 3.4em;">Best<span style="color: var(--teal-light)">Path</span></h1>
+          <div style="width: 80px; height: 3px; background: linear-gradient(90deg, var(--teal), var(--teal-light)); margin: 16px auto 24px; border-radius: 2px;"></div>
+          <p style="text-align: center; font-size: 1.1em; margin-top: 20px; color: var(--muted);">4,620 people died on BC waitlists last year.</p>
+          <p class="big-text" style="text-align: center; font-size: 1.3em; margin-top: 12px;">BestPath makes sure the next one gets flagged<br><em>before</em> it's too late.</p>
+
+          <div style="margin-top: 56px; padding: 24px 0 0; border-top: 2px solid rgba(11, 133, 133, 0.3);">
+            <p style="text-align: center; font-size: 0.8em; color: var(--muted);">
+              <strong style="color: var(--warm-white);">Capital Reasoning</strong><br>
+              Clinical AI Track &nbsp;·&nbsp; BuildersVault.ai &nbsp;·&nbsp; March 2026
+            </p>
+          </div>
+        </div>
+
+        <aside class="notes">
+          [3:10 — 3:25] Land the close. Confident, direct. Eye contact.
+          "Four thousand six hundred and twenty people died on BC waitlists last year. BestPath makes sure the next one gets flagged before it's too late. We're Capital Reasoning. Thank you."
+          [Don't say "any questions?" — stop talking. Let the silence land. Let the judges come to you.]
+        </aside>
+      </section>
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+  <script>
+    Reveal.initialize({
+      hash: true,
+      transition: 'fade',
+      transitionSpeed: 'fast',
+      backgroundTransition: 'fade',
+      center: false,
+      width: 1280,
+      height: 720,
+      margin: 0,
+      showNotes: false,
+      minScale: 0.5,
+      maxScale: 1.5,
+      // Press 'S' to open speaker notes
+      // Press 'F' for fullscreen
+      // Press 'O' for overview
+    });
+  </script>
+</body>
+</html>

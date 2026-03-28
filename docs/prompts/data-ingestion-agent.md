@@ -280,27 +280,27 @@ These should be importable too — they're our gold standard for testing the eng
 
 ## Key File References
 
-| File | Purpose |
-|------|---------|
-| `PLAN.md` | **Canonical project spec** — read first |
-| `CLAUDE.md` | Codebase instructions, stack, patterns |
-| `src/lib/db/schema.ts` | Current Drizzle schema (rewrite this) |
-| `src/lib/db/seed.ts` | Current seed script (reference for patterns) |
-| `src/lib/db/queries/*.ts` | Current query functions (will need updating) |
-| `src/lib/rag/embed.ts` | Gemini embedding functions (use as-is) |
-| `src/lib/rag/chunk.ts` | Markdown chunker (review, adapt for HTML) |
-| `src/lib/rag/retrieve.ts` | Hybrid search with RRF (review, adapt) |
-| `src/config/env.ts` | Zod-validated env vars |
-| `scripts/test-unstructured.ts` | Unstructured API test script (reference) |
-| `docs/spec/core_two_vector_operating_model.md` | RCV/SRV construction standard |
-| `docs/spec/minimal_end_to_end_system_blueprint.md` | System modules, data contracts |
-| `docs/spec/corpus_capability_risk_screening_audit.md` | Knowledge coverage assessment |
-| `docs/spec/synthetic_dataset_bundle/` | 100 test cases + answer keys |
-| `hackathon-data/track-1-clinical-ai/synthea-patients/` | The 5 Synthea CSVs |
-| `hackathon-data/shared/drug-database/canadian_drug_reference.csv` | Drug lookup data |
+| File                                                              | Purpose                                      |
+| ----------------------------------------------------------------- | -------------------------------------------- |
+| `PLAN.md`                                                         | **Canonical project spec** — read first      |
+| `CLAUDE.md`                                                       | Codebase instructions, stack, patterns       |
+| `src/lib/db/schema.ts`                                            | Current Drizzle schema (rewrite this)        |
+| `src/lib/db/seed.ts`                                              | Current seed script (reference for patterns) |
+| `src/lib/db/queries/*.ts`                                         | Current query functions (will need updating) |
+| `src/lib/rag/embed.ts`                                            | Gemini embedding functions (use as-is)       |
+| `src/lib/rag/chunk.ts`                                            | Markdown chunker (review, adapt for HTML)    |
+| `src/lib/rag/retrieve.ts`                                         | Hybrid search with RRF (review, adapt)       |
+| `src/config/env.ts`                                               | Zod-validated env vars                       |
+| `scripts/test-unstructured.ts`                                    | Unstructured API test script (reference)     |
+| `docs/spec/core_two_vector_operating_model.md`                    | RCV/SRV construction standard                |
+| `docs/spec/minimal_end_to_end_system_blueprint.md`                | System modules, data contracts               |
+| `docs/spec/corpus_capability_risk_screening_audit.md`             | Knowledge coverage assessment                |
+| `docs/spec/synthetic_dataset_bundle/`                             | 100 test cases + answer keys                 |
+| `hackathon-data/track-1-clinical-ai/synthea-patients/`            | The 5 Synthea CSVs                           |
+| `hackathon-data/shared/drug-database/canadian_drug_reference.csv` | Drug lookup data                             |
 
 Document the updated schema and any ingestion decisions somewhere notable. Fix outdated docs if present.
 
-NOTE: ASK ME LOTS OF QUESTIONS. We want to record the most information possible, and only do this upload once, so that our lives become easier down the line. We don't have to have to re-upload everything — so do some tests on single docs, ensure chunking & whatever works well, before going too far.
+NOTE: ASK ME QUESTIONS. We want to record the most information possible, and only do this upload once, so that our lives become easier down the line. We don't have to have to re-upload everything — so do some tests on single docs, ensure chunking & whatever works well, before going too far. Come to me with your solid plan and such before proceeding. Writing your suggested plan/process to a markdown document at the project root (based on your research/analysis/testing) would probably be wise. 
 
 Also, for the health-info-data — think about what parts of that data we do need, vs what is just noise — and let's skip anything that won't enhance the app at this stage.

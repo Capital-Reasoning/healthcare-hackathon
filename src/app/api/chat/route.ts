@@ -3,6 +3,8 @@ import { anthropic } from '@ai-sdk/anthropic';
 import { buildSystemPrompt } from '@/lib/ai/system-prompt';
 import { agentTools } from '@/lib/ai/tools';
 
+export const maxDuration = 300;
+
 /**
  * Strip incomplete or malformed parts that would cause convertToModelMessages
  * to throw. This includes:

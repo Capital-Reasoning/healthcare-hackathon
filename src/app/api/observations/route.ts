@@ -5,8 +5,12 @@ import {
   buildPaginatedResponse,
   buildErrorResponse,
 } from '@/lib/db/queries/helpers';
-import { getObservations } from '@/lib/db/queries/observations';
+import { getLabResults } from '@/lib/db/queries/lab-results';
 
+/**
+ * Legacy /api/observations endpoint — now serves lab results.
+ * Vitals are available via /api/vitals (if needed).
+ */
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -15,10 +19,10 @@ export async function GET(request: Request) {
     const filters = {
       patientId: searchParams.get('patientId') ?? undefined,
       encounterId: searchParams.get('encounterId') ?? undefined,
-      code: searchParams.get('code') ?? undefined,
+      testCode: searchParams.get('code') ?? searchParams.get('testCode') ?? undefined,
     };
 
-    const { data, total } = await getObservations({
+    const { data, total } = await getLabResults({
       ...pagination,
       sort,
       filters,
@@ -27,7 +31,7 @@ export async function GET(request: Request) {
   } catch (error) {
     console.error('GET /api/observations error:', error);
     return NextResponse.json(
-      buildErrorResponse('Failed to fetch observations'),
+      buildErrorResponse('Failed to fetch lab results'),
       { status: 500 },
     );
   }

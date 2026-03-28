@@ -1,14 +1,14 @@
 import { eq, and, asc, desc, count } from 'drizzle-orm';
 import type { SQL } from 'drizzle-orm';
 import { db } from '@/lib/db/client';
-import { encounters, observations } from '@/lib/db/schema';
+import { encounters } from '@/lib/db/schema';
 
 function getSortColumn(field: string) {
   switch (field) {
-    case 'startDate': return encounters.startDate;
-    case 'endDate': return encounters.endDate;
-    case 'status': return encounters.status;
-    case 'type': return encounters.type;
+    case 'encounterDate': return encounters.encounterDate;
+    case 'encounterType': return encounters.encounterType;
+    case 'disposition': return encounters.disposition;
+    case 'facility': return encounters.facility;
     case 'createdAt': return encounters.createdAt;
     default: return null;
   }
@@ -20,8 +20,8 @@ interface GetEncountersParams {
   sort?: { field: string; direction: 'asc' | 'desc' } | null;
   filters?: {
     patientId?: string;
-    status?: string;
-    type?: string;
+    disposition?: string;
+    encounterType?: string;
   };
 }
 
@@ -33,14 +33,12 @@ export async function getEncounters(params: GetEncountersParams) {
     conditions.push(eq(encounters.patientId, filters.patientId));
   }
 
-  if (filters?.status) {
-    conditions.push(
-      eq(encounters.status, filters.status as 'planned' | 'in_progress' | 'completed' | 'cancelled'),
-    );
+  if (filters?.disposition) {
+    conditions.push(eq(encounters.disposition, filters.disposition));
   }
 
-  if (filters?.type) {
-    conditions.push(eq(encounters.type, filters.type));
+  if (filters?.encounterType) {
+    conditions.push(eq(encounters.encounterType, filters.encounterType));
   }
 
   const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
@@ -50,23 +48,25 @@ export async function getEncounters(params: GetEncountersParams) {
     ? sort?.direction === 'desc'
       ? desc(sortColumn)
       : asc(sortColumn)
-    : desc(encounters.startDate);
+    : desc(encounters.encounterDate);
 
   const [countResult, data] = await Promise.all([
     db.select({ total: count() }).from(encounters).where(whereClause),
     db
       .select({
         id: encounters.id,
+        encounterId: encounters.encounterId,
         patientId: encounters.patientId,
-        providerId: encounters.providerId,
-        organizationId: encounters.organizationId,
-        type: encounters.type,
-        status: encounters.status,
-        startDate: encounters.startDate,
-        endDate: encounters.endDate,
-        reasonCode: encounters.reasonCode,
-        reasonDisplay: encounters.reasonDisplay,
-        notes: encounters.notes,
+        encounterDate: encounters.encounterDate,
+        encounterType: encounters.encounterType,
+        facility: encounters.facility,
+        chiefComplaint: encounters.chiefComplaint,
+        diagnosisCode: encounters.diagnosisCode,
+        diagnosisDescription: encounters.diagnosisDescription,
+        triageLevel: encounters.triageLevel,
+        disposition: encounters.disposition,
+        lengthOfStayHours: encounters.lengthOfStayHours,
+        attendingPhysician: encounters.attendingPhysician,
         createdAt: encounters.createdAt,
       })
       .from(encounters)
@@ -84,11 +84,6 @@ export async function getEncounterById(id: string) {
     where: eq(encounters.id, id),
     with: {
       patient: true,
-      provider: true,
-      organization: true,
-      observations: {
-        orderBy: [desc(observations.effectiveDate)],
-      },
     },
   });
 
