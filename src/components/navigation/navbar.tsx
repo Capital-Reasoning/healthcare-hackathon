@@ -42,13 +42,13 @@ export function Navbar({ className }: { className?: string }) {
       )}
     >
       {/* Left: Logo */}
-      <Link href="/" className="flex items-center">
+      <Link href="/" className="flex items-center rounded-lg bg-white/90 px-2 py-0.5">
         <Image
           src="/logo-new.png"
           alt="BestPath"
           width={400}
           height={300}
-          className="h-12 w-auto"
+          className="h-10 w-auto"
           priority
         />
       </Link>

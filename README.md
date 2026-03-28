@@ -4,14 +4,14 @@
 
 **Live Demo:** [healthcare-hackathon-capital-reasoning-team.vercel.app](https://healthcare-hackathon-capital-reasoning-team.vercel.app)
 
-**Slides:** open on [Google Slides](https://docs.google.com/presentation/d/1_PO_Jm7xCQs8n6wpRiFvRmcxQLA5b576bZ6NiHk6XYY/edit?usp=sharing)
+**Slides:** [Google Slides](https://docs.google.com/presentation/d/1m-cJ8LfStrVDRULew8hPcvo2w552Sed5jM8zExUflwQ/edit?usp=sharing)
 
 ## Team
 
 - **Nicholas Miller** 
 - **Peter Salmon** 
 
-Capital Reasoning Solutions
+[Capital Reasoning Solutions](https://capitalreasoning.com)
 
 ## Challenge Track
 
@@ -86,3 +86,6 @@ Key source organizations include the Canadian Task Force on Preventive Health Ca
 
 Every recommendation traces to a specific guideline passage. The full acquisition pipeline, selection policies, and manifests are in `health-info-data/`.
 
+
+
+**Longer Version of Slides: (for judge review if desired)** open on [Google Slides](https://docs.google.com/presentation/d/1_PO_Jm7xCQs8n6wpRiFvRmcxQLA5b576bZ6NiHk6XYY/edit?usp=sharing)

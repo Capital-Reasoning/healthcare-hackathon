@@ -95,8 +95,8 @@ function TriageCard({ item, dealtWith }: { item: TriageItem; dealtWith: boolean 
     <Link
       href={`/patients/${item.patientId}`}
       className={`group block rounded-lg border p-4 shadow-sm transition-all ${dealtWith
-          ? 'border-border/50 bg-card/60 opacity-50'
-          : 'border-border bg-card hover:shadow-md hover:border-primary/30'
+        ? 'border-border/50 bg-card/60 opacity-50'
+        : 'border-border bg-card hover:shadow-md hover:border-primary/30'
         }`}
     >
       <div className="flex items-start justify-between gap-2">
@@ -244,7 +244,7 @@ function StatsBar({
       <div className="flex items-center gap-1.5 text-foreground">
         <AlertCircle className="size-4 text-error" />
         <span className="font-semibold">{stats.needAction}</span>
-        <span className="text-muted-foreground">need urgent action</span>
+        <span className="text-muted-foreground">need action</span>
       </div>
       <div className="h-4 w-px bg-border" />
       <div className="flex items-center gap-1.5 text-foreground">
@@ -380,8 +380,8 @@ function CompletedSection({
                 type="button"
                 onClick={() => setTimeFilter(f.value)}
                 className={`rounded px-2.5 py-1 text-xs font-medium transition-colors ${timeFilter === f.value
-                    ? 'bg-card text-foreground shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground'
+                  ? 'bg-card text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
                   }`}
               >
                 {f.label}
@@ -502,8 +502,8 @@ export function TriageDashboard({ items, stats }: TriageDashboardProps) {
               type="button"
               onClick={() => setConfidenceFilter(f.value)}
               className={`rounded px-3 py-1.5 text-xs font-medium transition-colors ${confidenceFilter === f.value
-                  ? 'bg-card text-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
+                ? 'bg-card text-foreground shadow-sm'
+                : 'text-muted-foreground hover:text-foreground'
                 }`}
             >
               {f.label}

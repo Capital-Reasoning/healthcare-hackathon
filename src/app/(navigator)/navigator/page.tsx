@@ -304,8 +304,8 @@ export default function NavigatorPage() {
     }
     // Advance through stages on timers
     const t1 = setTimeout(() => setProgressStage(1), 2000);
-    const t2 = setTimeout(() => setProgressStage(2), 7000);
-    const t3 = setTimeout(() => setProgressStage(3), 18000);
+    const t2 = setTimeout(() => setProgressStage(2), 35000);
+    const t3 = setTimeout(() => setProgressStage(3), 70000);
     return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
   }, [isLoading]);
 
