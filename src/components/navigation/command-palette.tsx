@@ -7,8 +7,8 @@ import {
   Users,
   FlaskConical,
   Settings,
-  UserPlus,
-  Download,
+  Compass,
+  Zap,
   MessageSquare,
   Search,
 } from 'lucide-react';
@@ -88,13 +88,13 @@ function CommandPalette({ className }: CommandPaletteProps) {
           <CommandSeparator />
 
           <CommandGroup heading="Actions">
-            <CommandItem onSelect={() => navigate('/patients?action=new')}>
-              <UserPlus className="text-muted-foreground" />
-              New Patient
+            <CommandItem onSelect={() => navigate('/navigator')}>
+              <Compass className="text-muted-foreground" />
+              Care Navigator
             </CommandItem>
             <CommandItem onSelect={() => runAction(() => { /* placeholder */ })}>
-              <Download className="text-muted-foreground" />
-              Export Data
+              <Zap className="text-muted-foreground" />
+              Run Assessment
             </CommandItem>
             <CommandItem onSelect={() => runAction(toggleAgent)}>
               <MessageSquare className="text-muted-foreground" />

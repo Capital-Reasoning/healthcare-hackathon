@@ -39,8 +39,7 @@ export function runComparator(
         status = 'up_to_date';
       }
 
-      const dueDateStr: string | null =
-        dueDate.toISOString().split('T')[0] ?? null;
+      const dueDateStr = dueDate.toISOString().split('T')[0]!;
 
       return {
         ...target,

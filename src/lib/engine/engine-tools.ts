@@ -22,7 +22,7 @@ export const engineTools = {
       try {
         const results = await retrieve(query, {
           mode: 'hybrid',
-          topK: topK ?? 8,
+          topK,
         });
         return results.map((r) => ({
           content: r.content,

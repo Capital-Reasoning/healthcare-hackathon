@@ -1,7 +1,8 @@
 import { streamText, convertToModelMessages, stepCountIs, type UIMessage } from 'ai';
 import { anthropic } from '@ai-sdk/anthropic';
 import { buildSystemPrompt } from '@/lib/ai/system-prompt';
-import { agentTools } from '@/lib/ai/tools';
+import { buildNavigatorPrompt } from '@/lib/ai/navigator-prompt';
+import { agentTools, navigatorTools } from '@/lib/ai/tools';
 
 export const maxDuration = 300;
 
@@ -34,7 +35,11 @@ export async function POST(request: Request) {
     pageContext?: string;
   };
 
-  const systemPrompt = buildSystemPrompt({ pageContext });
+  const isNavigator = pageContext === '/navigator';
+  const systemPrompt = isNavigator
+    ? buildNavigatorPrompt()
+    : buildSystemPrompt({ pageContext });
+  const tools = isNavigator ? navigatorTools : agentTools;
 
   const modelMessages = await convertToModelMessages(sanitizeMessages(messages));
 
@@ -42,7 +47,7 @@ export async function POST(request: Request) {
     model: anthropic('claude-opus-4-6'),
     system: systemPrompt,
     messages: modelMessages,
-    tools: agentTools,
+    tools,
     stopWhen: stepCountIs(10),
   });
 

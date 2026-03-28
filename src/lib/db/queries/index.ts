@@ -42,7 +42,10 @@ export {
 } from './documents';
 
 export {
+  getLatestEngineRun,
   getPatientEngineResults,
   getTriageQueue,
+  getTriageQueueWithPatients,
   getDashboardStats,
+  type TriageItem,
 } from './engine-results';
