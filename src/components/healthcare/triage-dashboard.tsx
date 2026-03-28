@@ -279,10 +279,8 @@ function AnalysisAnimation({ onComplete }: { onComplete: () => void }) {
 export function TriageDashboard({ items, stats }: TriageDashboardProps) {
   const [showResults, setShowResults] = useState(false);
   const [animating, setAnimating] = useState(false);
-  const [runningBatch, setRunningBatch] = useState(false);
-  const [batchError, setBatchError] = useState<string | null>(null);
-  const [liveItems, setLiveItems] = useState(items);
-  const [liveStats, setLiveStats] = useState(stats);
+  const liveItems = items;
+  const liveStats = stats;
 
   const hasData = liveItems.length > 0;
 
@@ -304,44 +302,10 @@ export function TriageDashboard({ items, stats }: TriageDashboardProps) {
     }
   }, []);
 
-  const handleAnalyze = useCallback(async () => {
-    if (hasData) {
-      // Data exists — just run the animation
-      setAnimating(true);
-    } else {
-      // No data — trigger batch engine run
-      setRunningBatch(true);
-      setBatchError(null);
-      try {
-        const res = await fetch('/api/engine/batch', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ limit: 10, modelTier: 'free' }),
-        });
-        const json = await res.json();
-        if (json.error) {
-          setBatchError(json.error);
-          setRunningBatch(false);
-          return;
-        }
-        // Refetch triage data
-        const triageRes = await fetch('/api/triage');
-        if (triageRes.ok) {
-          const triageJson = await triageRes.json();
-          setLiveItems(triageJson.data?.items ?? []);
-          setLiveStats(triageJson.data?.stats ?? { assessed: 0, needAction: 0, onTrack: 0 });
-        }
-        setRunningBatch(false);
-        setShowResults(true);
-        if (typeof window !== 'undefined') {
-          sessionStorage.setItem('bestpath-analyzed', 'true');
-        }
-      } catch (err) {
-        setBatchError(err instanceof Error ? err.message : 'Failed to run analysis');
-        setRunningBatch(false);
-      }
-    }
-  }, [hasData]);
+  const handleAnalyze = useCallback(() => {
+    // Always run the cosmetic animation — results are precomputed
+    setAnimating(true);
+  }, []);
 
   // Group items by category
   const red = liveItems.filter((i) => i.category === 'red');
@@ -362,29 +326,13 @@ export function TriageDashboard({ items, stats }: TriageDashboardProps) {
             identify overdue and high-value clinical actions.
           </p>
 
-          {batchError && (
-            <div className="mb-4 rounded-lg border border-destructive/30 bg-error-tint p-3 text-sm text-error">
-              {batchError}
-            </div>
-          )}
-
           <Button
             size="lg"
             onClick={handleAnalyze}
-            disabled={runningBatch}
             className="min-w-48"
           >
-            {runningBatch ? (
-              <>
-                <Loader2 className="size-4 animate-spin" data-icon="inline-start" />
-                Running Analysis...
-              </>
-            ) : (
-              <>
-                <Zap className="size-4" data-icon="inline-start" />
-                Analyze Patient Panel
-              </>
-            )}
+            <Zap className="size-4" data-icon="inline-start" />
+            Analyze Patient Panel
           </Button>
         </div>
       </div>
