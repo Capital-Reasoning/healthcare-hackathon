@@ -8,6 +8,7 @@ import {
 } from '@/lib/db/queries/analytics';
 import { TriageDashboard } from '@/components/healthcare/triage-dashboard';
 import { DashboardVizSummary } from '@/components/healthcare/dashboard-viz-summary';
+import { DashboardIntro } from '@/components/healthcare/dashboard-intro';
 
 export default async function DashboardPage() {
   // Fetch triage data + analytics in parallel
@@ -46,27 +47,29 @@ export default async function DashboardPage() {
   };
 
   return (
-    <div className="flex flex-col gap-6 p-6 md:p-8">
-      {/* Page header */}
-      <header className="flex flex-col gap-1">
-        <div className="flex items-center gap-2">
-          <Activity className="size-5 text-primary" />
-          <h1 className="text-h1 text-foreground">Clinical Triage</h1>
-        </div>
-        <p className="text-body-sm text-muted-foreground">
-          Prioritized care actions identified from guideline analysis
-        </p>
-      </header>
+    <DashboardIntro>
+      <div className="flex flex-col gap-6 p-6 md:p-8">
+        {/* Page header */}
+        <header className="flex flex-col gap-1">
+          <div className="flex items-center gap-2">
+            <Activity className="size-5 text-primary" />
+            <h1 className="text-h1 text-foreground">Clinical Triage</h1>
+          </div>
+          <p className="text-body-sm text-muted-foreground">
+            Prioritized care actions identified from guideline analysis
+          </p>
+        </header>
 
-      {/* Data visualization summary */}
-      <DashboardVizSummary
-        categorySplit={categorySplit}
-        dueHorizon={dueHorizon}
-        triageByAge={triageByAge}
-      />
+        {/* Data visualization summary */}
+        <DashboardVizSummary
+          categorySplit={categorySplit}
+          dueHorizon={dueHorizon}
+          triageByAge={triageByAge}
+        />
 
-      {/* Triage dashboard (client component with animation) */}
-      <TriageDashboard items={items} stats={stats} />
-    </div>
+        {/* Triage dashboard (client component with animation) */}
+        <TriageDashboard items={items} stats={stats} />
+      </div>
+    </DashboardIntro>
   );
 }
