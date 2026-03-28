@@ -9,6 +9,8 @@ import { db } from '@/lib/db/client';
 import { corpusDocuments } from '@/lib/db/schema';
 import { ingestDocument } from '@/lib/rag/ingest';
 
+export const maxDuration = 300;
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
