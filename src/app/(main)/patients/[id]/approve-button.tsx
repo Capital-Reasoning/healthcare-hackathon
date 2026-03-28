@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Send, CheckCircle2, Mail, Phone } from 'lucide-react';
+import { Send, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import {
@@ -121,7 +121,7 @@ export function ApproveButton({
       </Button>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto bg-white">
           <DialogHeader>
             <DialogTitle>Confirm Patient Notification</DialogTitle>
             <DialogDescription>
@@ -129,12 +129,9 @@ export function ApproveButton({
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-6">
-            {/* Recipient Info */}
-            <div className="rounded-lg border border-border bg-muted p-4 space-y-2">
-              <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
-                Recipient
-              </h4>
+          <div className="space-y-5">
+            {/* Top: Recipient Info */}
+            <div className="rounded-lg border border-border bg-muted/50 p-4 space-y-1.5">
               <div className="text-sm">
                 <span className="font-medium text-foreground">
                   {patientName}
@@ -164,71 +161,83 @@ export function ApproveButton({
               )}
             </div>
 
-            {/* Notification Channels */}
-            <div>
-              <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">
-                Notification Channels
-              </h4>
-              <div className="flex gap-4">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={sendEmail}
-                    onChange={(e) => setSendEmail(e.target.checked)}
-                    className="size-4 rounded border-border text-primary accent-primary"
-                  />
-                  <Mail className="size-4 text-muted-foreground" />
-                  <span className="text-sm font-medium text-foreground">
-                    Email
-                  </span>
-                </label>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={sendSms}
-                    onChange={(e) => setSendSms(e.target.checked)}
-                    className="size-4 rounded border-border text-primary accent-primary"
-                  />
-                  <Phone className="size-4 text-muted-foreground" />
-                  <span className="text-sm font-medium text-foreground">
-                    Text Message
-                  </span>
-                </label>
-              </div>
-            </div>
-
-            {/* Email Preview */}
-            {sendEmail && (
-              <div>
-                <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
-                  Email Message
-                </h4>
+            {/* Middle: Two-column — Email left, SMS right */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Email column */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    Email Message
+                  </h4>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <span className="text-xs font-medium text-muted-foreground">
+                      {sendEmail ? 'On' : 'Off'}
+                    </span>
+                    <button
+                      type="button"
+                      role="switch"
+                      aria-checked={sendEmail}
+                      onClick={() => setSendEmail(!sendEmail)}
+                      className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors ${sendEmail ? 'bg-primary' : 'bg-muted-foreground/30'}`}
+                    >
+                      <span
+                        className={`inline-block size-3.5 rounded-full bg-white shadow-sm transition-transform ${sendEmail ? 'translate-x-[18px]' : 'translate-x-[3px]'}`}
+                      />
+                    </button>
+                  </label>
+                </div>
                 <textarea
                   value={emailContent}
                   onChange={(e) => setEmailContent(e.target.value)}
-                  className="w-full rounded-lg border border-border bg-background p-3 text-sm leading-relaxed text-foreground resize-y min-h-[180px] focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
-                  rows={10}
+                  disabled={!sendEmail}
+                  className={`w-full rounded-lg border border-border p-3 text-sm leading-relaxed resize-y min-h-[280px] focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors ${
+                    sendEmail
+                      ? 'bg-background text-foreground'
+                      : 'bg-muted text-muted-foreground cursor-not-allowed opacity-60'
+                  }`}
+                  rows={12}
                 />
               </div>
-            )}
 
-            {/* SMS Preview */}
-            {sendSms && (
-              <div>
-                <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
-                  Text Message
-                </h4>
+              {/* SMS column */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    Text Message
+                  </h4>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <span className="text-xs font-medium text-muted-foreground">
+                      {sendSms ? 'On' : 'Off'}
+                    </span>
+                    <button
+                      type="button"
+                      role="switch"
+                      aria-checked={sendSms}
+                      onClick={() => setSendSms(!sendSms)}
+                      className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors ${sendSms ? 'bg-primary' : 'bg-muted-foreground/30'}`}
+                    >
+                      <span
+                        className={`inline-block size-3.5 rounded-full bg-white shadow-sm transition-transform ${sendSms ? 'translate-x-[18px]' : 'translate-x-[3px]'}`}
+                      />
+                    </button>
+                  </label>
+                </div>
                 <textarea
                   value={smsContent}
                   onChange={(e) => setSmsContent(e.target.value)}
-                  className="w-full rounded-lg border border-border bg-background p-3 text-sm leading-relaxed text-foreground resize-y min-h-[80px] focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
-                  rows={3}
+                  disabled={!sendSms}
+                  className={`w-full rounded-lg border border-border p-3 text-sm leading-relaxed resize-y min-h-[280px] focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors ${
+                    sendSms
+                      ? 'bg-background text-foreground'
+                      : 'bg-muted text-muted-foreground cursor-not-allowed opacity-60'
+                  }`}
+                  rows={12}
                 />
-                <p className="text-xs text-muted-foreground mt-1">
+                <p className={`text-xs transition-colors ${sendSms ? 'text-muted-foreground' : 'text-muted-foreground/40'}`}>
                   {smsContent.length} / 160 characters
                 </p>
               </div>
-            )}
+            </div>
           </div>
 
           <DialogFooter>
