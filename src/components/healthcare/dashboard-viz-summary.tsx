@@ -31,7 +31,7 @@ export function DashboardVizSummary({
   const totalPatients = categorySplit.reduce((sum, d) => sum + d.value, 0);
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-3 pb-4">
       <Grid cols={3} gap="sm">
         {/* Triage Distribution */}
         <LayoutCard>

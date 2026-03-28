@@ -32,7 +32,7 @@ interface AnalysisAnimationProps {
 /*  Constants (from Vector Cube app.mjs)                               */
 /* ------------------------------------------------------------------ */
 
-const TOTAL_DURATION = 10; // seconds
+const TOTAL_DURATION = 6.5; // seconds
 
 // Original Vector Cube colors (RGB)
 const COLOR = {
@@ -59,10 +59,10 @@ const SPIN_SPEED = 0.18; // rad/s
 
 const STATUS_MESSAGES = [
   { at: 0, text: 'Ingesting patient records...' },
-  { at: 2, text: 'Searching clinical patterns...' },
-  { at: 4.5, text: 'Analyzing guideline matches...' },
-  { at: 7, text: 'Resolving care actions...' },
-  { at: 9, text: 'Analysis complete' },
+  { at: 1.2, text: 'Searching clinical patterns...' },
+  { at: 2.8, text: 'Analyzing guideline matches...' },
+  { at: 4.5, text: 'Resolving care actions...' },
+  { at: 5.8, text: 'Analysis complete' },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -274,7 +274,7 @@ function colorForPoint(
 
   // --- Found points progressively light up azure ---
   if (point.role >= ROLE_FOUND) {
-    const foundT = smoothstep(2, 5, elapsed);
+    const foundT = smoothstep(1, 3, elapsed);
     const twinkle = twinkleIntensity(point.offset, elapsed);
     const azureAlpha = Math.min(0.65, foundT * 0.5 * twinkle * fadeIn);
     if (azureAlpha > 0.001) {
@@ -287,7 +287,7 @@ function colorForPoint(
 
   // --- Retained points transition to mint-teal ---
   if (point.role >= ROLE_RETAINED) {
-    const mintT = smoothstep(4, 7, elapsed);
+    const mintT = smoothstep(2.5, 4.5, elapsed);
     const mintAlpha = Math.min(0.72, mintT * 0.6 * fadeIn);
     if (mintAlpha > 0.001) {
       r += COLOR.retained[0] * mintAlpha;
@@ -299,7 +299,7 @@ function colorForPoint(
 
   // --- Cited points transition to amber ---
   if (point.role === ROLE_CITED) {
-    const amberT = smoothstep(6, 8.5, elapsed);
+    const amberT = smoothstep(3.5, 5.5, elapsed);
     const amberAlpha = Math.min(0.92, amberT * 0.8 * fadeIn);
     if (amberAlpha > 0.001) {
       r += COLOR.cited[0] * amberAlpha;
