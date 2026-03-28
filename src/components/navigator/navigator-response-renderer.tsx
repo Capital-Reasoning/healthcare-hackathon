@@ -75,7 +75,19 @@ export function tryParseCareResponse(text: string): CareNavigatorResponse | null
 
   try {
     const parsed = JSON.parse(jsonStr) as Record<string, unknown>;
-    if (parsed.type === 'care-navigator-response' && Array.isArray(parsed.tiers)) {
+    if (
+      parsed.type === 'care-navigator-response' &&
+      Array.isArray(parsed.tiers) &&
+      typeof parsed.greeting === 'string'
+    ) {
+      // Validate tier shape — each tier must have priority + items array
+      const tiers = parsed.tiers as Record<string, unknown>[];
+      for (const tier of tiers) {
+        if (typeof tier.priority !== 'string' || !Array.isArray(tier.items)) return null;
+        for (const item of tier.items as Record<string, unknown>[]) {
+          if (typeof item.title !== 'string') return null;
+        }
+      }
       return parsed as unknown as CareNavigatorResponse;
     }
   } catch {

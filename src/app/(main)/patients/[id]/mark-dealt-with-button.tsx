@@ -28,7 +28,7 @@ export function MarkDoneButton({ patientId }: { patientId: string }) {
 
   if (done) {
     return (
-      <Button variant="outline" onClick={handleToggle} className="gap-2">
+      <Button variant="outline" size="sm" onClick={handleToggle} className="gap-2">
         <Undo2 className="size-4" />
         Undo Done
       </Button>
@@ -36,7 +36,7 @@ export function MarkDoneButton({ patientId }: { patientId: string }) {
   }
 
   return (
-    <Button variant="secondary" onClick={handleToggle} className="gap-2">
+    <Button variant="secondary" size="sm" onClick={handleToggle} className="gap-2">
       <CheckCircle2 className="size-4" />
       Mark as Done
     </Button>

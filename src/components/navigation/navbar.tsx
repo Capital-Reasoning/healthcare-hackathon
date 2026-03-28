@@ -29,7 +29,7 @@ const NAV_ITEMS: NavItem[] = [
 
 /**
  * Main navigation bar fixed to the top of the viewport.
- * Displays the app logo, primary navigation links, notifications, and user avatar.
+ * Displays the app logo and primary navigation links.
  */
 export function Navbar({ className }: { className?: string }) {
   const pathname = usePathname();

@@ -226,13 +226,13 @@ function splitParagraphs(text: string): { sealed: string[]; pending: string | nu
 /* ─── Message content renderer ─── */
 
 function AssistantMessageContent({ text, isStreaming }: { text: string; isStreaming?: boolean }) {
-  const careResponse = tryParseCareResponse(text);
+  // useMemo MUST be called before any conditional returns (Rules of Hooks)
+  const { sealed, pending } = useMemo(() => splitParagraphs(text), [text]);
+  const careResponse = useMemo(() => tryParseCareResponse(text), [text]);
 
   if (careResponse) {
     return <NavigatorResponseRenderer data={careResponse} />;
   }
-
-  const { sealed, pending } = useMemo(() => splitParagraphs(text), [text]);
 
   const visible = isStreaming
     ? sealed
@@ -267,57 +267,56 @@ function AssistantMessageContent({ text, isStreaming }: { text: string; isStream
 
 function BrandPanel() {
   return (
-    <div className="flex h-full flex-col justify-between px-10 py-10">
-      {/* Top section — logo + description */}
-      <div className="flex flex-col items-start pt-8">
+    <div className="w-full max-w-xl space-y-6 px-8">
+        {/* Logo */}
         <Image
           src="/bestpath-logo.png"
-          alt="BestPath"
-          width={240}
-          height={165}
-          className="mb-10"
+          alt="BestPath — A Step In The Right Direction"
+          width={1700}
+          height={1000}
+          className="w-full h-auto"
           priority
         />
-        <h2 className="text-h2 text-foreground mb-2">
-          Care Navigator
-        </h2>
-        <p className="text-body text-muted-foreground leading-relaxed max-w-xs">
-          Find out what preventive care and screenings you&apos;re due for,
-          and where to access them in BC — no family doctor needed.
+
+        {/* Heading + description */}
+        <div className="text-center">
+          <h2 className="text-h2 text-foreground">Care Navigator</h2>
+          <p className="mt-2 text-body text-muted-foreground leading-relaxed">
+            Find out what preventive care and screenings you&apos;re due for
+            and where to access them in BC — no family doctor needed.
+          </p>
+        </div>
+
+        {/* Divider */}
+        <div className="mx-auto w-10 border-t-2 border-primary/30" />
+
+        {/* Feature bullets */}
+        <div className="space-y-3">
+          <div className="flex items-start gap-3">
+            <div className="flex size-7 items-center justify-center rounded-md bg-primary-tint shrink-0">
+              <Search className="size-3.5 text-primary" />
+            </div>
+            <div>
+              <p className="text-body-sm font-medium text-foreground">Evidence-based guidance</p>
+              <p className="text-body-sm text-muted-foreground">Backed by BC clinical guidelines</p>
+            </div>
+          </div>
+          <div className="flex items-start gap-3">
+            <div className="flex size-7 items-center justify-center rounded-md bg-primary-tint shrink-0">
+              <CheckCircle2 className="size-3.5 text-primary" />
+            </div>
+            <div>
+              <p className="text-body-sm font-medium text-foreground">Clear next steps</p>
+              <p className="text-body-sm text-muted-foreground">Who to see, where to go, what to ask</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Disclaimer */}
+        <p className="text-center text-xs leading-relaxed text-muted-foreground">
+          Guidance based on clinical guidelines, not medical advice.
+          Share with a healthcare provider.
         </p>
-      </div>
-
-      {/* Middle section — feature bullets */}
-      <div className="space-y-5 py-8">
-        <div className="flex items-start gap-3">
-          <div className="flex size-8 items-center justify-center rounded-lg bg-primary-tint shrink-0">
-            <Search className="size-4 text-primary" />
-          </div>
-          <div>
-            <p className="text-body-sm font-medium text-foreground">Evidence-based guidance</p>
-            <p className="text-body-sm text-muted-foreground">
-              Backed by current BC clinical guidelines
-            </p>
-          </div>
-        </div>
-        <div className="flex items-start gap-3">
-          <div className="flex size-8 items-center justify-center rounded-lg bg-primary-tint shrink-0">
-            <CheckCircle2 className="size-4 text-primary" />
-          </div>
-          <div>
-            <p className="text-body-sm font-medium text-foreground">Clear next steps</p>
-            <p className="text-body-sm text-muted-foreground">
-              Who to see, where to go, what to ask for
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Bottom — disclaimer */}
-      <p className="text-[0.8125rem] leading-relaxed text-muted-foreground max-w-xs">
-        This is guidance based on clinical guidelines, not medical advice.
-        Share these suggestions with a healthcare provider.
-      </p>
     </div>
   );
 }
@@ -329,11 +328,13 @@ export default function NavigatorPage() {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const [inputValue, setInputValue] = useState('');
 
+  const transport = useMemo(
+    () => new DefaultChatTransport({ api: '/api/chat', body: { pageContext: '/navigator' } }),
+    [],
+  );
+
   const { messages, sendMessage, status } = useChat({
-    transport: new DefaultChatTransport({
-      api: '/api/chat',
-      body: { pageContext: '/navigator' },
-    }),
+    transport,
     messages: [WELCOME_MESSAGE],
   });
 
@@ -391,7 +392,7 @@ export default function NavigatorPage() {
   return (
     <div className="flex h-full">
       {/* Left panel — brand + description (hidden on small screens) */}
-      <div className="hidden lg:flex lg:w-[40%] border-r border-border bg-card">
+      <div className="hidden lg:flex lg:w-[40%] items-center justify-center border-r border-border bg-card">
         <BrandPanel />
       </div>
 
@@ -466,11 +467,14 @@ export default function NavigatorPage() {
           >
             <textarea
               ref={inputRef}
+              aria-label="Message the Care Navigator"
               value={inputValue}
               onChange={(e) => {
                 setInputValue(e.target.value);
                 e.target.style.height = 'auto';
-                e.target.style.height = `${Math.min(e.target.scrollHeight, 160)}px`;
+                const newHeight = Math.min(e.target.scrollHeight, 160);
+                e.target.style.height = `${newHeight}px`;
+                e.target.style.overflowY = e.target.scrollHeight > 160 ? 'auto' : 'hidden';
               }}
               onKeyDown={onKeyDown}
               placeholder="Tell me about your health concerns..."

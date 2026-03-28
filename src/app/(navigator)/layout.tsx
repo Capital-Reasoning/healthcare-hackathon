@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ArrowLeft, HeartPulse } from 'lucide-react';
+import { HeartPulse, LogOut } from 'lucide-react';
 
 export default function NavigatorLayout({
   children,
@@ -8,7 +8,7 @@ export default function NavigatorLayout({
 }) {
   return (
     <div className="flex h-screen flex-col bg-background">
-      {/* Top bar — minimal, just back link on small screens + branding on mobile */}
+      {/* Top bar — minimal */}
       <header className="flex h-12 items-center justify-between border-b border-border px-4 sm:px-6">
         <div className="flex items-center gap-2 lg:hidden">
           <HeartPulse className="size-5 text-primary" />
@@ -19,10 +19,11 @@ export default function NavigatorLayout({
         <div className="hidden lg:block" />
         <Link
           href="/"
-          className="flex items-center gap-1.5 text-body-sm text-muted-foreground transition-colors hover:text-foreground"
+          className="flex items-center justify-center rounded-md p-2 text-muted-foreground transition-colors hover:text-foreground hover:bg-muted"
+          title="Exit to Dashboard"
+          aria-label="Exit to Dashboard"
         >
-          <ArrowLeft className="size-4" />
-          Back to Dashboard
+          <LogOut className="size-5" />
         </Link>
       </header>
       {/* Content */}

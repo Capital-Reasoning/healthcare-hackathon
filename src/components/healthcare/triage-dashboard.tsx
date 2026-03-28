@@ -167,12 +167,15 @@ function TriageCard({ item, dealtWith }: { item: TriageItem; dealtWith: boolean 
             Confidence: {item.confidence}
           </DataBadge>
         )}
-        <RiskBadge
-          level={riskTierToLevel(item.riskTier)}
-          label={`Risk: ${riskTierToLevel(item.riskTier).charAt(0).toUpperCase()}${riskTierToLevel(item.riskTier).slice(1)}`}
-          size="sm"
-          showIcon={false}
-        />
+        {(() => {
+          const level = riskTierToLevel(item.riskTier);
+          return <RiskBadge
+            level={level}
+            label={`Risk: ${level.charAt(0).toUpperCase()}${level.slice(1)}`}
+            size="sm"
+            showIcon={false}
+          />;
+        })()}
       </div>
     </Link>
   );
@@ -520,6 +523,7 @@ function CompletedSection({
                   onClick={() => rerunOne(item.patientId)}
                   className="shrink-0 rounded-md p-1.5 text-muted-foreground transition-colors hover:text-foreground hover:bg-muted disabled:opacity-40"
                   title="Rerun analysis"
+                  aria-label={`Rerun analysis for ${item.firstName} ${item.lastName}`}
                 >
                   {isRerunning ? (
                     <Loader2 className="size-4 animate-spin" />
@@ -559,24 +563,21 @@ export function TriageDashboard({ items, stats }: TriageDashboardProps) {
   const [animating, setAnimating] = useState(false);
   const [doneIds, setDoneIds] = useState<Set<string>>(new Set());
   const [doneMap, setDoneMap] = useState<Record<string, number>>({});
-  const liveItems = items;
-  const liveStats = stats;
 
-  // Load done state from sessionStorage on mount and after results appear
-  useEffect(() => {
+  const syncDoneState = useCallback(() => {
     setDoneIds(getDoneIds());
     setDoneMap(getDoneMap());
-  }, [showResults]);
-
-  // Listen for storage events (when patient is marked done from detail page)
-  useEffect(() => {
-    const onStorage = () => {
-      setDoneIds(getDoneIds());
-      setDoneMap(getDoneMap());
-    };
-    window.addEventListener('storage', onStorage);
-    return () => window.removeEventListener('storage', onStorage);
   }, []);
+
+  // Sync on mount and whenever the page becomes visible again (covers soft nav back)
+  useEffect(() => {
+    syncDoneState();
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') syncDoneState();
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
+  }, [syncDoneState]);
 
   const handleAnimationComplete = useCallback(() => {
     setAnimating(false);
@@ -591,9 +592,9 @@ export function TriageDashboard({ items, stats }: TriageDashboardProps) {
   }, []);
 
   // Group items by category
-  const red = liveItems.filter((i) => i.category === 'red');
-  const yellow = liveItems.filter((i) => i.category === 'yellow');
-  const green = liveItems.filter((i) => i.category === 'green');
+  const red = items.filter((i) => i.category === 'red');
+  const yellow = items.filter((i) => i.category === 'yellow');
+  const green = items.filter((i) => i.category === 'green');
 
   /* ── Analyze button (initial state) ── */
   if (!showResults && !animating) {
@@ -631,7 +632,7 @@ export function TriageDashboard({ items, stats }: TriageDashboardProps) {
   return (
     <div className="flex flex-col gap-6 animate-fade-in-up">
       {/* Stats bar */}
-      <StatsBar stats={liveStats} />
+      <StatsBar stats={stats} />
 
       {/* Three-column triage grid */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
@@ -667,7 +668,7 @@ export function TriageDashboard({ items, stats }: TriageDashboardProps) {
       </div>
 
       {/* Completed patients section */}
-      <CompletedSection items={liveItems} doneMap={doneMap} />
+      <CompletedSection items={items} doneMap={doneMap} />
     </div>
   );
 }
