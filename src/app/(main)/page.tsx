@@ -1,15 +1,36 @@
 import { Activity } from 'lucide-react';
 import { getTriageQueueWithPatients } from '@/lib/db/queries/engine-results';
+import {
+  getLatestRunIds,
+  getCategorySplit,
+  getDueHorizonStats,
+  getTriageByAge,
+} from '@/lib/db/queries/analytics';
 import { TriageDashboard } from '@/components/healthcare/triage-dashboard';
+import { DashboardVizSummary } from '@/components/healthcare/dashboard-viz-summary';
 
 export default async function DashboardPage() {
-  // Fetch triage data server-side
+  // Fetch triage data + analytics in parallel
+  // Run IDs are fetched once and shared across all engine-based queries
   let items: Awaited<ReturnType<typeof getTriageQueueWithPatients>> = [];
+  let categorySplit: Awaited<ReturnType<typeof getCategorySplit>> = [];
+  let dueHorizon: Awaited<ReturnType<typeof getDueHorizonStats>> = [];
+  let triageByAge: Awaited<ReturnType<typeof getTriageByAge>> = [];
+
   try {
-    items = await getTriageQueueWithPatients();
+    const [triageItems, runIds] = await Promise.all([
+      getTriageQueueWithPatients(),
+      getLatestRunIds(),
+    ]);
+    items = triageItems;
+
+    [categorySplit, dueHorizon, triageByAge] = await Promise.all([
+      getCategorySplit(runIds),
+      getDueHorizonStats(runIds),
+      getTriageByAge(runIds),
+    ]);
   } catch {
     // Database may not be seeded yet — show empty state
-    items = [];
   }
 
   // Compute stats
@@ -36,6 +57,13 @@ export default async function DashboardPage() {
           Prioritized care actions identified from guideline analysis
         </p>
       </header>
+
+      {/* Data visualization summary */}
+      <DashboardVizSummary
+        categorySplit={categorySplit}
+        dueHorizon={dueHorizon}
+        triageByAge={triageByAge}
+      />
 
       {/* Triage dashboard (client component with animation) */}
       <TriageDashboard items={items} stats={stats} />

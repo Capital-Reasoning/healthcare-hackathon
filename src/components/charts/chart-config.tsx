@@ -38,6 +38,11 @@ export const chartTooltipStyle: React.CSSProperties = {
   color: 'var(--foreground)',
 };
 
+/** Force tooltip item text to use foreground color instead of series fill */
+export const chartTooltipItemStyle: React.CSSProperties = {
+  color: 'var(--foreground)',
+};
+
 export const chartAxisStyle = {
   tick: { fill: 'var(--muted-foreground)', fontSize: 12 },
   axisLine: { stroke: 'var(--border)' },

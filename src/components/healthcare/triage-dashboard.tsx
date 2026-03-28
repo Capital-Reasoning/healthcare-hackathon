@@ -1,24 +1,23 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import Link from 'next/link';
+import { DataBadge } from '@/components/data-display/badge';
+import { ErrorBoundary } from '@/components/feedback/error-boundary';
+import type { RiskLevel } from '@/components/healthcare/risk-badge';
+import { RiskBadge } from '@/components/healthcare/risk-badge';
+import { Button } from '@/components/ui/button';
+import type { TriageItem } from '@/lib/db/queries/engine-results';
 import {
   AlertCircle,
-  Clock,
   CheckCircle2,
-  ShieldCheck,
-  Zap,
-  Loader2,
   ChevronRight,
+  Clock,
+  Loader2,
   RefreshCw,
+  ShieldCheck,
 } from 'lucide-react';
+import Link from 'next/link';
+import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { Button } from '@/components/ui/button';
-import { DataBadge } from '@/components/data-display/badge';
-import { RiskBadge } from '@/components/healthcare/risk-badge';
-import type { RiskLevel } from '@/components/healthcare/risk-badge';
-import { ErrorBoundary } from '@/components/feedback/error-boundary';
-import type { TriageItem } from '@/lib/db/queries/engine-results';
 
 /* ─── Types ─────────────────────────────────────────── */
 
@@ -31,35 +30,15 @@ interface TriageDashboardProps {
   };
 }
 
-type AnimationPhase =
-  | 'idle'
-  | 'connecting'
-  | 'comparing'
-  | 'scoring'
-  | 'done';
+type ConfidenceFilter = 'all' | 'high' | 'lower';
 
-const PHASE_MESSAGES: Record<AnimationPhase, string> = {
-  idle: '',
-  connecting: 'Matching patient records to clinical guidelines...',
-  comparing: 'Comparing care history against recommended pathways...',
-  scoring: 'Categorizing findings by clinical priority...',
-  done: '',
-};
+const CONFIDENCE_FILTERS: { value: ConfidenceFilter; label: string }[] = [
+  { value: 'all', label: 'All Results' },
+  { value: 'high', label: 'High Confidence' },
+  { value: 'lower', label: 'Needs Review' },
+];
 
 /* ─── Helpers ───────────────────────────────────────── */
-
-function splitByConfidence(items: TriageItem[]) {
-  const high: TriageItem[] = [];
-  const lower: TriageItem[] = [];
-  for (const item of items) {
-    if (item.confidence === 'high') {
-      high.push(item);
-    } else {
-      lower.push(item);
-    }
-  }
-  return { high, lower };
-}
 
 function riskTierToLevel(tier: string | null): RiskLevel {
   switch (tier) {
@@ -115,11 +94,10 @@ function TriageCard({ item, dealtWith }: { item: TriageItem; dealtWith: boolean 
   return (
     <Link
       href={`/patients/${item.patientId}`}
-      className={`group block rounded-lg border p-4 shadow-sm transition-all ${
-        dealtWith
+      className={`group block rounded-lg border p-4 shadow-sm transition-all ${dealtWith
           ? 'border-border/50 bg-card/60 opacity-50'
           : 'border-border bg-card hover:shadow-md hover:border-primary/30'
-      }`}
+        }`}
     >
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0 flex-1">
@@ -181,38 +159,6 @@ function TriageCard({ item, dealtWith }: { item: TriageItem; dealtWith: boolean 
   );
 }
 
-/* ─── Confidence Sub-section ────────────────────────── */
-
-function ConfidenceGroup({
-  label,
-  items,
-  doneIds,
-}: {
-  label: string;
-  items: TriageItem[];
-  doneIds: Set<string>;
-}) {
-  if (items.length === 0) return null;
-
-  // Sort: non-done first, done at the bottom
-  const sorted = [...items].sort((a, b) => {
-    const aDone = doneIds.has(a.patientId) ? 1 : 0;
-    const bDone = doneIds.has(b.patientId) ? 1 : 0;
-    return aDone - bDone;
-  });
-
-  return (
-    <div className="mt-3">
-      <p className="text-caption text-muted-foreground mb-2">{label}</p>
-      <div className="flex flex-col gap-2">
-        {sorted.map((item) => (
-          <TriageCard key={item.id} item={item} dealtWith={doneIds.has(item.patientId)} />
-        ))}
-      </div>
-    </div>
-  );
-}
-
 /* ─── Column ────────────────────────────────────────── */
 
 interface TriageColumnProps {
@@ -223,14 +169,32 @@ interface TriageColumnProps {
   doneIds: Set<string>;
 }
 
+const PAGE_SIZE = 10;
+
 function TriageColumn({ title, icon, accentClass, items, doneIds }: TriageColumnProps) {
-  const { high, lower } = splitByConfidence(items);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+
+  // Reset visible count when items change (e.g. confidence filter switch)
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [items.length]);
+
+  // Sort: non-done first, then by actionValueScore descending
+  const sorted = [...items].sort((a, b) => {
+    const aDone = doneIds.has(a.patientId) ? 1 : 0;
+    const bDone = doneIds.has(b.patientId) ? 1 : 0;
+    if (aDone !== bDone) return aDone - bDone;
+    return (b.actionValueScore ?? 0) - (a.actionValueScore ?? 0);
+  });
+
+  const visible = sorted.slice(0, visibleCount);
+  const remaining = sorted.length - visibleCount;
 
   return (
     <div
       className={`flex flex-col rounded-lg border border-border bg-card shadow-sm p-4 ${accentClass}`}
     >
-      <div className="flex items-center gap-2 mb-1">
+      <div className="flex items-center gap-2 mb-3">
         {icon}
         <h3 className="text-h3 text-foreground">{title}</h3>
         <span className="ml-auto text-xs text-muted-foreground font-medium">
@@ -239,14 +203,24 @@ function TriageColumn({ title, icon, accentClass, items, doneIds }: TriageColumn
       </div>
 
       {items.length === 0 ? (
-        <p className="mt-4 text-center text-sm text-muted-foreground py-6">
+        <p className="text-center text-sm text-muted-foreground py-6">
           No patients in this category
         </p>
       ) : (
-        <>
-          <ConfidenceGroup label="High Confidence" items={high} doneIds={doneIds} />
-          <ConfidenceGroup label="Lower Confidence" items={lower} doneIds={doneIds} />
-        </>
+        <div className="flex flex-col gap-2">
+          {visible.map((item) => (
+            <TriageCard key={item.id} item={item} dealtWith={doneIds.has(item.patientId)} />
+          ))}
+          {remaining > 0 && (
+            <button
+              type="button"
+              onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
+              className="mt-1 rounded-md border border-border bg-muted/50 px-3 py-2 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            >
+              Show more ({remaining} remaining)
+            </button>
+          )}
+        </div>
       )}
     </div>
   );
@@ -270,7 +244,7 @@ function StatsBar({
       <div className="flex items-center gap-1.5 text-foreground">
         <AlertCircle className="size-4 text-error" />
         <span className="font-semibold">{stats.needAction}</span>
-        <span className="text-muted-foreground">need action this week</span>
+        <span className="text-muted-foreground">need urgent action</span>
       </div>
       <div className="h-4 w-px bg-border" />
       <div className="flex items-center gap-1.5 text-foreground">
@@ -278,64 +252,6 @@ function StatsBar({
         <span className="font-semibold">{stats.onTrack}</span>
         <span className="text-muted-foreground">on track</span>
       </div>
-    </div>
-  );
-}
-
-/* ─── Analysis Animation ────────────────────────────── */
-
-function AnalysisAnimation({ onComplete }: { onComplete: () => void }) {
-  const [phase, setPhase] = useState<AnimationPhase>('connecting');
-  const [progress, setProgress] = useState(0);
-
-  useEffect(() => {
-    const timers: ReturnType<typeof setTimeout>[] = [];
-
-    // Phase 1: connecting (0-33%)
-    timers.push(setTimeout(() => { setPhase('comparing'); setProgress(33); }, 1000));
-    // Phase 2: comparing (33-66%)
-    timers.push(setTimeout(() => { setPhase('scoring'); setProgress(66); }, 2000));
-    // Phase 3: scoring (66-100%)
-    timers.push(setTimeout(() => { setProgress(100); }, 2700));
-    // Done
-    timers.push(setTimeout(() => {
-      setPhase('done');
-      onComplete();
-    }, 3200));
-
-    // Smooth progress increments
-    const interval = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 100) return 100;
-        return prev + 1;
-      });
-    }, 30);
-
-    return () => {
-      timers.forEach(clearTimeout);
-      clearInterval(interval);
-    };
-  }, [onComplete]);
-
-  return (
-    <div className="flex flex-col items-center justify-center py-20 animate-fade-in">
-      <div className="relative mb-6">
-        <div className="size-16 rounded-full border-4 border-primary/20 flex items-center justify-center">
-          <Loader2 className="size-8 text-primary animate-spin" />
-        </div>
-      </div>
-
-      {/* Progress bar */}
-      <div className="w-64 h-1.5 bg-muted rounded-full overflow-hidden mb-4">
-        <div
-          className="h-full bg-primary rounded-full transition-all duration-300 ease-out"
-          style={{ width: `${progress}%` }}
-        />
-      </div>
-
-      <p className="text-body-sm text-muted-foreground text-center animate-pulse-subtle">
-        {PHASE_MESSAGES[phase]}
-      </p>
     </div>
   );
 }
@@ -463,11 +379,10 @@ function CompletedSection({
                 key={f.value}
                 type="button"
                 onClick={() => setTimeFilter(f.value)}
-                className={`rounded px-2.5 py-1 text-xs font-medium transition-colors ${
-                  timeFilter === f.value
+                className={`rounded px-2.5 py-1 text-xs font-medium transition-colors ${timeFilter === f.value
                     ? 'bg-card text-foreground shadow-sm'
                     : 'text-muted-foreground hover:text-foreground'
-                }`}
+                  }`}
               >
                 {f.label}
               </button>
@@ -542,27 +457,10 @@ function CompletedSection({
 
 /* ─── Main Component ────────────────────────────────── */
 
-/**
- * Returns true if this is a full page load (initial visit or hard reload).
- * Client-side (soft) navigations within Next.js will have already set the
- * session flag, so we skip the analyze animation and go straight to results.
- */
-function isFullPageLoad(): boolean {
-  if (typeof window === 'undefined') return true;
-  // On hard reload, clear the flag so the analyze button shows again
-  const navEntry = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined;
-  if (navEntry && navEntry.type === 'reload') {
-    sessionStorage.removeItem('bestpath-nav-active');
-  }
-  return !sessionStorage.getItem('bestpath-nav-active');
-}
-
 export function TriageDashboard({ items, stats }: TriageDashboardProps) {
-  // On soft nav (back from patient page etc.) skip straight to results
-  const [showResults, setShowResults] = useState(() => !isFullPageLoad());
-  const [animating, setAnimating] = useState(false);
   const [doneIds, setDoneIds] = useState<Set<string>>(new Set());
   const [doneMap, setDoneMap] = useState<Record<string, number>>({});
+  const [confidenceFilter, setConfidenceFilter] = useState<ConfidenceFilter>('all');
 
   const syncDoneState = useCallback(() => {
     setDoneIds(getDoneIds());
@@ -579,60 +477,40 @@ export function TriageDashboard({ items, stats }: TriageDashboardProps) {
     return () => document.removeEventListener('visibilitychange', onVisible);
   }, [syncDoneState]);
 
-  const handleAnimationComplete = useCallback(() => {
-    setAnimating(false);
-    setShowResults(true);
-    // Mark that we've shown results this session — soft navs will skip the button
-    sessionStorage.setItem('bestpath-nav-active', '1');
-  }, []);
+  // Apply confidence filter then group by category
+  const filtered = confidenceFilter === 'all'
+    ? items
+    : confidenceFilter === 'high'
+      ? items.filter((i) => i.confidence === 'high')
+      : items.filter((i) => i.confidence !== 'high');
 
-  const handleAnalyze = useCallback(() => {
-    // Always run the cosmetic animation — results are precomputed
-    setAnimating(true);
-  }, []);
-
-  // Group items by category
-  const red = items.filter((i) => i.category === 'red');
-  const yellow = items.filter((i) => i.category === 'yellow');
-  const green = items.filter((i) => i.category === 'green');
-
-  /* ── Analyze button (initial state) ── */
-  if (!showResults && !animating) {
-    return (
-      <div className="flex flex-col items-center justify-center py-20">
-        <div className="max-w-md text-center">
-          <div className="mx-auto mb-6 flex size-16 items-center justify-center rounded-full bg-primary-tint">
-            <Zap className="size-8 text-primary" />
-          </div>
-          <h2 className="text-h2 text-foreground mb-2">Analyze Patient Panel</h2>
-          <p className="text-body-sm text-muted-foreground mb-8">
-            BestPath will analyze your patient panel against clinical guidelines to
-            identify overdue and high-value clinical actions.
-          </p>
-
-          <Button
-            size="lg"
-            onClick={handleAnalyze}
-            className="min-w-48"
-          >
-            <Zap className="size-4" data-icon="inline-start" />
-            Analyze Patient Panel
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
-  /* ── Animation phase ── */
-  if (animating) {
-    return <AnalysisAnimation onComplete={handleAnimationComplete} />;
-  }
+  const red = filtered.filter((i) => i.category === 'red');
+  const yellow = filtered.filter((i) => i.category === 'yellow');
+  const green = filtered.filter((i) => i.category === 'green');
 
   /* ── Results view ── */
   return (
     <div className="flex flex-col gap-6 animate-fade-in-up">
-      {/* Stats bar */}
-      <StatsBar stats={stats} />
+      {/* Stats bar + confidence filter */}
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <StatsBar stats={stats} />
+
+        <div className="flex items-center rounded-md border border-border bg-muted p-0.5 gap-0.5">
+          {CONFIDENCE_FILTERS.map((f) => (
+            <button
+              key={f.value}
+              type="button"
+              onClick={() => setConfidenceFilter(f.value)}
+              className={`rounded px-3 py-1.5 text-xs font-medium transition-colors ${confidenceFilter === f.value
+                  ? 'bg-card text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+                }`}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+      </div>
 
       {/* Three-column triage grid */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">

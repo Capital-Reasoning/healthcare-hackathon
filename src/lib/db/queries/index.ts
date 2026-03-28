@@ -49,3 +49,10 @@ export {
   getDashboardStats,
   type TriageItem,
 } from './engine-results';
+
+export {
+  getLatestRunIds,
+  getCategorySplit,
+  getDueHorizonStats,
+  getTriageByAge,
+} from './analytics';

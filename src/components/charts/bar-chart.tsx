@@ -16,6 +16,7 @@ import {
   CHART_MARGINS,
   CHART_ANIMATION,
   chartTooltipStyle,
+  chartTooltipItemStyle,
   chartAxisStyle,
   chartGridStyle,
   getColor,
@@ -91,7 +92,7 @@ function BarChart({
             <YAxis {...chartAxisStyle} />
           </>
         )}
-        <Tooltip contentStyle={chartTooltipStyle} cursor={{ fill: 'var(--muted)', opacity: 0.3 }} />
+        <Tooltip contentStyle={chartTooltipStyle} itemStyle={chartTooltipItemStyle} cursor={{ fill: 'var(--muted)', opacity: 0.3 }} />
         {showLegend && <Legend content={ChartLegend} />}
         {yKeys.map((key, i) => (
           <Bar

@@ -6,8 +6,8 @@ import { cn } from '@/lib/utils';
 import {
   ChartContainer,
   ChartLegend,
-  CHART_ANIMATION,
   chartTooltipStyle,
+  chartTooltipItemStyle,
   getColor,
 } from './chart-config';
 
@@ -38,6 +38,10 @@ function DonutChart({
   const outerR = Math.min(Math.round(chartHeight * 0.4), 110);
   const innerR = Math.round(outerR * normalizedIR);
 
+  // Filter out zero-value entries for the pie — they create invisible
+  // segments but their paddingAngle still eats arc space, leaving gaps.
+  const pieData = data.filter((d) => d.value > 0);
+
   return (
     <div data-slot="donut-chart" className={cn('w-full', className)}>
       {/* Chart + center label share the same container */}
@@ -45,7 +49,7 @@ function DonutChart({
         <ChartContainer height={chartHeight}>
           <PieChart>
             <Pie
-              data={data}
+              data={pieData}
               dataKey="value"
               nameKey="name"
               cx="50%"
@@ -53,9 +57,9 @@ function DonutChart({
               innerRadius={innerR}
               outerRadius={outerR}
               paddingAngle={2}
-              animationDuration={CHART_ANIMATION.duration}
+              isAnimationActive={false}
             >
-              {data.map((entry, i) => (
+              {pieData.map((entry, i) => (
                 <Cell
                   key={entry.name}
                   fill={entry.color ?? getColor(i)}
@@ -64,7 +68,11 @@ function DonutChart({
                 />
               ))}
             </Pie>
-            <Tooltip contentStyle={chartTooltipStyle} />
+            <Tooltip
+              contentStyle={chartTooltipStyle}
+              itemStyle={chartTooltipItemStyle}
+              wrapperStyle={{ zIndex: 50 }}
+            />
           </PieChart>
         </ChartContainer>
 

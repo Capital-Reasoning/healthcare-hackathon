@@ -2,7 +2,7 @@
 
 import { Treemap as RTreemap, ResponsiveContainer, Tooltip } from 'recharts';
 import { cn } from '@/lib/utils';
-import { CHART_ANIMATION, chartTooltipStyle, getColor } from './chart-config';
+import { CHART_ANIMATION, chartTooltipStyle, chartTooltipItemStyle, getColor } from './chart-config';
 
 interface TreeMapItem {
   name: string;
@@ -95,7 +95,7 @@ function TreeMap({
           animationDuration={CHART_ANIMATION.duration}
           content={<CustomContent colors={colors} />}
         >
-          <Tooltip contentStyle={chartTooltipStyle} />
+          <Tooltip contentStyle={chartTooltipStyle} itemStyle={chartTooltipItemStyle} />
         </RTreemap>
       </ResponsiveContainer>
     </div>

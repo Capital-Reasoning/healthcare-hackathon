@@ -16,6 +16,7 @@ import {
   CHART_MARGINS,
   CHART_ANIMATION,
   chartTooltipStyle,
+  chartTooltipItemStyle,
   chartAxisStyle,
   chartGridStyle,
   getColor,
@@ -70,7 +71,7 @@ function AreaChart({
         {showGrid && <CartesianGrid {...chartGridStyle} />}
         <XAxis dataKey={xKey} {...chartAxisStyle} />
         <YAxis {...chartAxisStyle} />
-        <Tooltip contentStyle={chartTooltipStyle} />
+        <Tooltip contentStyle={chartTooltipStyle} itemStyle={chartTooltipItemStyle} />
         {showLegend && <Legend content={ChartLegend} />}
         {yKeys.map((key, i) => (
           <Area

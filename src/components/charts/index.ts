@@ -6,6 +6,7 @@ export {
   CHART_MARGINS,
   CHART_ANIMATION,
   chartTooltipStyle,
+  chartTooltipItemStyle,
   chartAxisStyle,
   chartGridStyle,
   getColor,

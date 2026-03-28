@@ -18,6 +18,7 @@ import {
   CHART_MARGINS,
   CHART_ANIMATION,
   chartTooltipStyle,
+  chartTooltipItemStyle,
   chartAxisStyle,
   chartGridStyle,
   getColor,
@@ -66,7 +67,7 @@ function LineChart({
       {showGrid && <CartesianGrid {...chartGridStyle} />}
       <XAxis dataKey={xKey} {...chartAxisStyle} />
       <YAxis {...chartAxisStyle} />
-      <Tooltip contentStyle={chartTooltipStyle} />
+      <Tooltip contentStyle={chartTooltipStyle} itemStyle={chartTooltipItemStyle} />
       {showLegend && <Legend content={ChartLegend} />}
     </>
   );

@@ -15,6 +15,7 @@ import {
   ChartLegend,
   CHART_ANIMATION,
   chartTooltipStyle,
+  chartTooltipItemStyle,
   getColor,
 } from './chart-config';
 
@@ -49,7 +50,7 @@ function RadarChart({
         <PolarGrid stroke="var(--border)" />
         <PolarAngleAxis dataKey={axisKey} tick={{ fill: 'var(--muted-foreground)', fontSize: 12 }} />
         <PolarRadiusAxis tick={{ fill: 'var(--muted-foreground)', fontSize: 10 }} />
-        <Tooltip contentStyle={chartTooltipStyle} />
+        <Tooltip contentStyle={chartTooltipStyle} itemStyle={chartTooltipItemStyle} />
         {showLegend && <Legend content={ChartLegend} />}
         {valueKeys.map((key, i) => (
           <Radar

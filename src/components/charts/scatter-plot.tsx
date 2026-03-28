@@ -16,6 +16,7 @@ import {
   CHART_MARGINS,
   CHART_ANIMATION,
   chartTooltipStyle,
+  chartTooltipItemStyle,
   chartAxisStyle,
   chartGridStyle,
   getColor,
@@ -67,7 +68,7 @@ function ScatterPlot({
         <XAxis dataKey={xKey} type="number" name={xKey} {...chartAxisStyle} />
         <YAxis dataKey={yKey} type="number" name={yKey} {...chartAxisStyle} />
         {sizeKey && <ZAxis dataKey={sizeKey} type="number" range={[40, 400]} />}
-        <Tooltip contentStyle={chartTooltipStyle} cursor={{ strokeDasharray: '3 3' }} />
+        <Tooltip contentStyle={chartTooltipStyle} itemStyle={chartTooltipItemStyle} cursor={{ strokeDasharray: '3 3' }} />
         {groups.map((group, i) => (
           <Scatter
             key={group.name}
