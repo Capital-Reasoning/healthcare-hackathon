@@ -6,19 +6,21 @@ const openrouter = createOpenAI({
   apiKey: process.env.OPENROUTER_API_KEY,
 });
 
-export type ModelTier = 'production' | 'testing' | 'free';
+export type ModelTier = 'production' | 'testing' | 'free' | 'onprem';
 
 export function getEngineModel(tier: ModelTier = 'production') {
   switch (tier) {
     case 'production':
+      // Claude Sonnet via Anthropic direct — best quality for demo
       return anthropic('claude-sonnet-4-6');
     case 'testing':
+      // Claude Sonnet via OpenRouter — for development testing
       return openrouter('anthropic/claude-sonnet-4');
+    case 'onprem':
+      // GLM-5 via OpenRouter — proves on-prem deployment feasibility
+      // (no cloud AI dependency, could run locally)
+      return openrouter('z-ai/glm-5');
     case 'free':
-      // Best free models on OpenRouter for structured clinical reasoning
-      // nvidia/nemotron-3-super-120b-a12b:free — largest free model, great quality
-      // meta-llama/llama-3.3-70b-instruct:free — strong alternative
-      // minimax/minimax-m2.5:free — another capable option
       return openrouter('meta-llama/llama-3.3-70b-instruct:free');
   }
 }

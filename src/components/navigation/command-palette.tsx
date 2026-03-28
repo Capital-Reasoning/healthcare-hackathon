@@ -5,8 +5,6 @@ import { useRouter } from 'next/navigation';
 import {
   LayoutDashboard,
   Users,
-  FlaskConical,
-  Settings,
   Compass,
   Zap,
   MessageSquare,
@@ -74,24 +72,15 @@ function CommandPalette({ className }: CommandPaletteProps) {
               Patients
               <CommandShortcut>⌘P</CommandShortcut>
             </CommandItem>
-            <CommandItem onSelect={() => navigate('/research')}>
-              <FlaskConical className="text-muted-foreground" />
-              Research
-              <CommandShortcut>⌘R</CommandShortcut>
-            </CommandItem>
-            <CommandItem onSelect={() => navigate('/settings')}>
-              <Settings className="text-muted-foreground" />
-              Settings
+            <CommandItem onSelect={() => navigate('/navigator')}>
+              <Compass className="text-muted-foreground" />
+              Care Navigator
             </CommandItem>
           </CommandGroup>
 
           <CommandSeparator />
 
           <CommandGroup heading="Actions">
-            <CommandItem onSelect={() => navigate('/navigator')}>
-              <Compass className="text-muted-foreground" />
-              Care Navigator
-            </CommandItem>
             <CommandItem onSelect={() => navigate('/')}>
               <Zap className="text-muted-foreground" />
               Analyze Patient Panel

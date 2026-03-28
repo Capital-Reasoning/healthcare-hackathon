@@ -7,6 +7,7 @@ import { ErrorBoundary } from '@/components/feedback/error-boundary';
 import { AssessmentResults } from './assessment-results';
 import { PatientDataTabs } from './patient-data-tabs';
 import { RunAssessmentButton } from './run-assessment-button';
+import { MarkDoneButton } from './mark-dealt-with-button';
 
 export default async function PatientDetailPage({
   params,
@@ -44,9 +45,15 @@ export default async function PatientDetailPage({
             <User className="size-6 text-primary" />
           </div>
           <div className="flex-1 min-w-0">
-            <h1 className="text-h1 text-foreground">
-              {patientName}
-            </h1>
+            <div className="flex items-start justify-between gap-4">
+              <h1 className="text-h1 text-foreground">
+                {patientName}
+              </h1>
+              <div className="flex items-center gap-2 shrink-0">
+                <RunAssessmentButton patientId={patientId} />
+                <MarkDoneButton patientId={patientId} />
+              </div>
+            </div>
             <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1 text-sm text-muted-foreground">
               {patient.age != null && <span>{patient.age} years old</span>}
               {patient.sex && <span>{patient.sex}</span>}

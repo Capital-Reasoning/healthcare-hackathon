@@ -4,15 +4,11 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   Activity,
-  Bell,
   Compass,
   LayoutDashboard,
   Users,
-  FlaskConical,
-  Settings,
 } from 'lucide-react';
 import { APP_CONFIG } from '@/config/app';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 
 /** Navigation item definition */
@@ -28,9 +24,7 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   { label: 'Dashboard', href: '/', icon: LayoutDashboard },
   { label: 'Patients', href: '/patients', icon: Users },
-  { label: 'Research', href: '/research', icon: FlaskConical },
   { label: 'Care Navigator', href: '/navigator', icon: Compass },
-  { label: 'Settings', href: '/settings', icon: Settings },
 ];
 
 /**
@@ -84,32 +78,8 @@ export function Navbar({ className }: { className?: string }) {
         })}
       </nav>
 
-      {/* Right: Notifications + User */}
-      <div className="flex items-center gap-4">
-        {/* Notification Bell */}
-        <button
-          type="button"
-          className="relative rounded-md p-1.5 text-white/60 transition-colors hover:text-white/80"
-          aria-label="Notifications"
-        >
-          <Bell className="size-5" aria-hidden="true" />
-          {/* Unread indicator */}
-          <span
-            className="absolute top-1 right-1 size-2 rounded-full bg-destructive"
-            aria-label="Unread notifications"
-          />
-        </button>
-
-        {/* User Avatar + Name */}
-        <div className="flex items-center gap-2">
-          <Avatar size="sm">
-            <AvatarFallback className="bg-teal-500 text-xs text-white">
-              DC
-            </AvatarFallback>
-          </Avatar>
-          <span className="hidden sm:inline text-body-sm text-white/80">Dr.&nbsp;Chen</span>
-        </div>
-      </div>
+      {/* Right: spacer to keep nav centered */}
+      <div className="flex items-center" />
     </header>
   );
 }

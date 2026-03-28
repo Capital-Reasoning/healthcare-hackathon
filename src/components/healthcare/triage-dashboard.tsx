@@ -10,7 +10,9 @@ import {
   Zap,
   Loader2,
   ChevronRight,
+  RefreshCw,
 } from 'lucide-react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { DataBadge } from '@/components/data-display/badge';
 import { RiskBadge } from '@/components/healthcare/risk-badge';
@@ -72,13 +74,52 @@ function riskTierToLevel(tier: string | null): RiskLevel {
   }
 }
 
+/* ─── Done-patient helpers ─────────────────────────── */
+
+const DONE_KEY = 'bestpath-done';
+
+/** Returns map of patientId → timestamp (ms) when marked done */
+function getDoneMap(): Record<string, number> {
+  if (typeof window === 'undefined') return {};
+  try {
+    const raw = sessionStorage.getItem(DONE_KEY);
+    return raw ? (JSON.parse(raw) as Record<string, number>) : {};
+  } catch {
+    return {};
+  }
+}
+
+function getDoneIds(): Set<string> {
+  return new Set(Object.keys(getDoneMap()));
+}
+
+export function markPatientDone(patientId: string) {
+  const map = getDoneMap();
+  map[patientId] = Date.now();
+  sessionStorage.setItem(DONE_KEY, JSON.stringify(map));
+}
+
+export function unmarkPatientDone(patientId: string) {
+  const map = getDoneMap();
+  delete map[patientId];
+  sessionStorage.setItem(DONE_KEY, JSON.stringify(map));
+}
+
+export function isPatientDone(patientId: string): boolean {
+  return patientId in getDoneMap();
+}
+
 /* ─── Patient Triage Card ───────────────────────────── */
 
-function TriageCard({ item }: { item: TriageItem }) {
+function TriageCard({ item, dealtWith }: { item: TriageItem; dealtWith: boolean }) {
   return (
     <Link
       href={`/patients/${item.patientId}`}
-      className="group block rounded-lg border border-border bg-card p-4 shadow-sm transition-all hover:shadow-md hover:border-primary/30"
+      className={`group block rounded-lg border p-4 shadow-sm transition-all ${
+        dealtWith
+          ? 'border-border/50 bg-card/60 opacity-50'
+          : 'border-border bg-card hover:shadow-md hover:border-primary/30'
+      }`}
     >
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0 flex-1">
@@ -107,6 +148,12 @@ function TriageCard({ item }: { item: TriageItem }) {
 
       {/* Badges row */}
       <div className="mt-3 flex flex-wrap items-center gap-1.5">
+        {dealtWith && (
+          <DataBadge variant="secondary" size="sm">
+            <CheckCircle2 className="size-3 mr-0.5" />
+            Done
+          </DataBadge>
+        )}
         {item.overdueDays != null && item.overdueDays > 0 && (
           <DataBadge variant="error" size="sm">
             {item.overdueDays}d overdue
@@ -136,17 +183,27 @@ function TriageCard({ item }: { item: TriageItem }) {
 function ConfidenceGroup({
   label,
   items,
+  doneIds,
 }: {
   label: string;
   items: TriageItem[];
+  doneIds: Set<string>;
 }) {
   if (items.length === 0) return null;
+
+  // Sort: non-done first, done at the bottom
+  const sorted = [...items].sort((a, b) => {
+    const aDone = doneIds.has(a.patientId) ? 1 : 0;
+    const bDone = doneIds.has(b.patientId) ? 1 : 0;
+    return aDone - bDone;
+  });
+
   return (
     <div className="mt-3">
       <p className="text-caption text-muted-foreground mb-2">{label}</p>
       <div className="flex flex-col gap-2">
-        {items.map((item) => (
-          <TriageCard key={item.id} item={item} />
+        {sorted.map((item) => (
+          <TriageCard key={item.id} item={item} dealtWith={doneIds.has(item.patientId)} />
         ))}
       </div>
     </div>
@@ -160,9 +217,10 @@ interface TriageColumnProps {
   icon: React.ReactNode;
   accentClass: string;
   items: TriageItem[];
+  doneIds: Set<string>;
 }
 
-function TriageColumn({ title, icon, accentClass, items }: TriageColumnProps) {
+function TriageColumn({ title, icon, accentClass, items, doneIds }: TriageColumnProps) {
   const { high, lower } = splitByConfidence(items);
 
   return (
@@ -183,8 +241,8 @@ function TriageColumn({ title, icon, accentClass, items }: TriageColumnProps) {
         </p>
       ) : (
         <>
-          <ConfidenceGroup label="High Confidence" items={high} />
-          <ConfidenceGroup label="Lower Confidence" items={lower} />
+          <ConfidenceGroup label="High Confidence" items={high} doneIds={doneIds} />
+          <ConfidenceGroup label="Lower Confidence" items={lower} doneIds={doneIds} />
         </>
       )}
     </div>
@@ -279,32 +337,234 @@ function AnalysisAnimation({ onComplete }: { onComplete: () => void }) {
   );
 }
 
+/* ─── Time filter options ──────────────────────────── */
+
+type TimeFilter = 'all' | '1h' | 'today' | 'week';
+
+const TIME_FILTERS: { value: TimeFilter; label: string }[] = [
+  { value: 'all', label: 'All' },
+  { value: '1h', label: 'Last hour' },
+  { value: 'today', label: 'Today' },
+  { value: 'week', label: 'This week' },
+];
+
+function filterByTime(doneMap: Record<string, number>, filter: TimeFilter): Set<string> {
+  const now = Date.now();
+  const entries = Object.entries(doneMap);
+  if (filter === 'all') return new Set(entries.map(([id]) => id));
+
+  const cutoff = filter === '1h'
+    ? now - 60 * 60 * 1000
+    : filter === 'today'
+      ? new Date().setHours(0, 0, 0, 0)
+      : now - 7 * 24 * 60 * 60 * 1000;
+
+  return new Set(
+    entries.filter(([, ts]) => ts >= cutoff).map(([id]) => id),
+  );
+}
+
+function formatDoneTime(ts: number): string {
+  const diff = Date.now() - ts;
+  if (diff < 60_000) return 'just now';
+  if (diff < 3_600_000) return `${Math.floor(diff / 60_000)}m ago`;
+  if (diff < 86_400_000) return `${Math.floor(diff / 3_600_000)}h ago`;
+  return `${Math.floor(diff / 86_400_000)}d ago`;
+}
+
+/* ─── Completed Patients Section ───────────────────── */
+
+function CompletedSection({
+  items,
+  doneMap,
+}: {
+  items: TriageItem[];
+  doneMap: Record<string, number>;
+}) {
+  const [timeFilter, setTimeFilter] = useState<TimeFilter>('all');
+  const [rerunningAll, setRerunningAll] = useState(false);
+  const [rerunningId, setRerunningId] = useState<string | null>(null);
+
+  const doneIds = filterByTime(doneMap, timeFilter);
+  // Deduplicate by patientId — one entry per patient
+  const seen = new Set<string>();
+  const doneItems = items.filter((i) => {
+    if (!doneIds.has(i.patientId) || seen.has(i.patientId)) return false;
+    seen.add(i.patientId);
+    return true;
+  });
+
+  if (Object.keys(doneMap).length === 0) return null;
+
+  async function rerunOne(patientId: string) {
+    setRerunningId(patientId);
+    try {
+      const res = await fetch('/api/engine/assess', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ patientId }),
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        toast.error(json.error ?? 'Assessment failed');
+      } else {
+        toast.success('Assessment complete', {
+          description: `Found ${json.data?.targets?.length ?? 0} targets`,
+        });
+      }
+    } catch {
+      toast.error('Failed to run assessment');
+    } finally {
+      setRerunningId(null);
+    }
+  }
+
+  async function rerunAll() {
+    setRerunningAll(true);
+    const patientIds = doneItems.map((i) => i.patientId);
+    let success = 0;
+    for (const pid of patientIds) {
+      try {
+        const res = await fetch('/api/engine/assess', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ patientId: pid }),
+        });
+        if (res.ok) success++;
+      } catch {
+        // continue with next
+      }
+    }
+    toast.success(`Re-ran analysis for ${success}/${patientIds.length} patients`);
+    setRerunningAll(false);
+  }
+
+  return (
+    <div className="rounded-lg border border-border bg-card shadow-sm p-4">
+      <div className="flex items-center justify-between gap-4 mb-4">
+        <div className="flex items-center gap-2">
+          <CheckCircle2 className="size-5 text-muted-foreground" />
+          <h3 className="text-h3 text-foreground">
+            Completed Patients
+          </h3>
+          <span className="text-xs text-muted-foreground font-medium">
+            {doneItems.length}
+          </span>
+        </div>
+
+        <div className="flex items-center gap-2">
+          {/* Time filters */}
+          <div className="flex items-center rounded-md border border-border bg-muted p-0.5 gap-0.5">
+            {TIME_FILTERS.map((f) => (
+              <button
+                key={f.value}
+                type="button"
+                onClick={() => setTimeFilter(f.value)}
+                className={`rounded px-2.5 py-1 text-xs font-medium transition-colors ${
+                  timeFilter === f.value
+                    ? 'bg-card text-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Rerun all */}
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={rerunningAll || doneItems.length === 0}
+            onClick={rerunAll}
+            className="gap-1.5"
+          >
+            {rerunningAll ? (
+              <Loader2 className="size-3.5 animate-spin" />
+            ) : (
+              <RefreshCw className="size-3.5" />
+            )}
+            Rerun All
+          </Button>
+        </div>
+      </div>
+
+      {doneItems.length === 0 ? (
+        <p className="text-sm text-muted-foreground text-center py-4">
+          No completed patients in this time range
+        </p>
+      ) : (
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+          {doneItems.map((item) => {
+            const ts = doneMap[item.patientId];
+            const isRerunning = rerunningId === item.patientId;
+            return (
+              <div
+                key={item.patientId}
+                className="flex items-center gap-3 rounded-lg border border-border/60 bg-muted/30 p-3"
+              >
+                <Link
+                  href={`/patients/${item.patientId}`}
+                  className="flex-1 min-w-0 hover:underline"
+                >
+                  <p className="text-body-sm font-medium text-foreground truncate">
+                    {item.firstName} {item.lastName}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Done {ts ? formatDoneTime(ts) : ''}
+                  </p>
+                </Link>
+                <button
+                  type="button"
+                  disabled={isRerunning || rerunningAll}
+                  onClick={() => rerunOne(item.patientId)}
+                  className="shrink-0 rounded-md p-1.5 text-muted-foreground transition-colors hover:text-foreground hover:bg-muted disabled:opacity-40"
+                  title="Rerun analysis"
+                >
+                  {isRerunning ? (
+                    <Loader2 className="size-4 animate-spin" />
+                  ) : (
+                    <RefreshCw className="size-4" />
+                  )}
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ─── Main Component ────────────────────────────────── */
 
 export function TriageDashboard({ items, stats }: TriageDashboardProps) {
   const [showResults, setShowResults] = useState(false);
   const [animating, setAnimating] = useState(false);
+  const [doneIds, setDoneIds] = useState<Set<string>>(new Set());
+  const [doneMap, setDoneMap] = useState<Record<string, number>>({});
   const liveItems = items;
   const liveStats = stats;
 
-  const hasData = liveItems.length > 0;
-
-  // Check sessionStorage on mount
+  // Load done state from sessionStorage on mount and after results appear
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const analyzed = sessionStorage.getItem('bestpath-analyzed');
-      if (analyzed === 'true' && hasData) {
-        setShowResults(true);
-      }
-    }
-  }, [hasData]);
+    setDoneIds(getDoneIds());
+    setDoneMap(getDoneMap());
+  }, [showResults]);
+
+  // Listen for storage events (when patient is marked done from detail page)
+  useEffect(() => {
+    const onStorage = () => {
+      setDoneIds(getDoneIds());
+      setDoneMap(getDoneMap());
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, []);
 
   const handleAnimationComplete = useCallback(() => {
     setAnimating(false);
     setShowResults(true);
-    if (typeof window !== 'undefined') {
-      sessionStorage.setItem('bestpath-analyzed', 'true');
-    }
   }, []);
 
   const handleAnalyze = useCallback(() => {
@@ -363,6 +623,7 @@ export function TriageDashboard({ items, stats }: TriageDashboardProps) {
             icon={<AlertCircle className="size-5 text-error" />}
             accentClass="border-t-2 border-t-error"
             items={red}
+            doneIds={doneIds}
           />
         </ErrorBoundary>
 
@@ -372,6 +633,7 @@ export function TriageDashboard({ items, stats }: TriageDashboardProps) {
             icon={<Clock className="size-5 text-warning" />}
             accentClass="border-t-2 border-t-warning"
             items={yellow}
+            doneIds={doneIds}
           />
         </ErrorBoundary>
 
@@ -381,9 +643,13 @@ export function TriageDashboard({ items, stats }: TriageDashboardProps) {
             icon={<CheckCircle2 className="size-5 text-success" />}
             accentClass="border-t-2 border-t-success"
             items={green}
+            doneIds={doneIds}
           />
         </ErrorBoundary>
       </div>
+
+      {/* Completed patients section */}
+      <CompletedSection items={liveItems} doneMap={doneMap} />
     </div>
   );
 }
