@@ -34,11 +34,8 @@ Next.js 16 · TypeScript · Tailwind v4 + shadcn/ui · Supabase (Postgres + pgve
 ## Clinical Knowledge Base
 We built a systematic pipeline to acquire and curate 4,000+ clinical guideline documents from BC and national sources. The corpus includes screening guidelines, management protocols, drug safety information, and provincial quality standards. Every recommendation traces to a specific passage. See `health-info-data/` for the acquisition pipeline.
 
-## Live Demo
-[Vercel URL — to be added after deployment]
-
 ## Slides
-See `docs/presentation/pitch.html` (open in browser) or [Google Slides link — to be added]
+See `docs/presentation/pitch.html` (open in browser for the pitch deck).
 
 ## How to Run Locally
 
