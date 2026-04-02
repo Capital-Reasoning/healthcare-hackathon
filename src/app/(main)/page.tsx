@@ -1,4 +1,4 @@
-import { Activity } from 'lucide-react';
+import Image from 'next/image';
 import { unstable_cache } from 'next/cache';
 import { getTriageQueueWithPatients } from '@/lib/db/queries/engine-results';
 import {
@@ -24,22 +24,18 @@ const getCachedBestTargets = unstable_cache(
 );
 
 export default async function DashboardPage() {
-  // Fetch triage data + analytics in parallel
-  // Run IDs are fetched once and shared across all engine-based queries
   let items: Awaited<ReturnType<typeof getTriageQueueWithPatients>> = [];
   let categorySplit: Awaited<ReturnType<typeof getCategorySplit>> = [];
   let dueHorizon: Awaited<ReturnType<typeof getDueHorizonStats>> = [];
   let triageByAge: Awaited<ReturnType<typeof getTriageByAge>> = [];
 
   try {
-    // Fetch triage items + best-target-per-patient in parallel (2 queries, cached 60s)
     const [triageItems, bestPerPatient] = await Promise.all([
       getCachedTriageQueue(),
       getCachedBestTargets(),
     ]);
     items = triageItems;
 
-    // Derive all three chart datasets from the single bestPerPatient result
     [categorySplit, dueHorizon, triageByAge] = await Promise.all([
       getCategorySplit(undefined, bestPerPatient),
       getDueHorizonStats(undefined, bestPerPatient),
@@ -63,16 +59,33 @@ export default async function DashboardPage() {
 
   return (
     <DashboardIntro>
-      <div className="flex flex-col gap-6 p-6 md:p-8">
-        {/* Page header */}
-        <header className="flex flex-col gap-1">
-          <div className="flex items-center gap-2">
-            <Activity className="size-5 text-primary" />
-            <h1 className="text-h1 text-foreground">Clinical Triage</h1>
+      <div className="mx-auto max-w-7xl flex flex-col gap-6 p-6 pt-8">
+        {/* Page header with logo */}
+        <header>
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h1 className="text-h1 text-foreground">Care Review</h1>
+              <p className="text-sm text-muted-foreground mt-1">
+                Prioritized actions from clinical guideline analysis
+              </p>
+              {/* Compact inline stats */}
+              <div className="flex items-center gap-3 mt-3 text-sm">
+                <span><span className="font-semibold text-foreground">{stats.assessed}</span> <span className="text-muted-foreground">patients assessed</span></span>
+                <span className="text-muted-foreground">&middot;</span>
+                <span><span className="font-semibold text-error">{stats.needAction}</span> <span className="text-muted-foreground">need action</span></span>
+                <span className="text-muted-foreground">&middot;</span>
+                <span><span className="font-semibold text-success">{stats.onTrack}</span> <span className="text-muted-foreground">on track</span></span>
+              </div>
+            </div>
+            <Image
+              src="/logo-new.png"
+              alt="BestPath"
+              width={400}
+              height={300}
+              className="h-7 w-auto"
+              priority
+            />
           </div>
-          <p className="text-body-sm text-muted-foreground">
-            Prioritized care actions identified from guideline analysis
-          </p>
         </header>
 
         {/* Data visualization summary */}
@@ -82,8 +95,8 @@ export default async function DashboardPage() {
           triageByAge={triageByAge}
         />
 
-        {/* Triage dashboard (client component with animation) */}
-        <TriageDashboard items={items} stats={stats} />
+        {/* Triage dashboard — tabbed view */}
+        <TriageDashboard items={items} />
       </div>
     </DashboardIntro>
   );

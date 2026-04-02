@@ -135,7 +135,7 @@ function DataTable<T>({
               e.stopPropagation();
               row.toggleExpanded();
             }}
-            className="p-0.5 rounded hover:bg-muted transition-colors"
+            className="p-0.5 rounded hover:bg-gray-50 transition-colors"
             aria-label={row.getIsExpanded() ? 'Collapse row' : 'Expand row'}
           >
             {row.getIsExpanded() ? (
@@ -201,10 +201,10 @@ function DataTable<T>({
       )}
 
       {/* Table */}
-      <div className="overflow-x-auto rounded-lg border border-border bg-card">
+      <div className="overflow-x-auto rounded-md border border-border bg-white">
         <table className="w-full text-body-sm">
           {/* Header */}
-          <thead className="bg-muted">
+          <thead className="bg-gray-50">
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
@@ -259,9 +259,9 @@ function DataTable<T>({
                   <tr
                     className={cn(
                       'border-b border-border transition-colors',
-                      'hover:bg-muted/50',
+                      'hover:bg-gray-50',
                       row.getIsSelected() && 'bg-primary-tint',
-                      variant === 'striped' && 'even:bg-muted/30',
+                      variant === 'striped' && 'even:bg-gray-50',
                       onRowClick && 'cursor-pointer',
                     )}
                     onClick={() => onRowClick?.(row.original)}
@@ -274,7 +274,7 @@ function DataTable<T>({
                   </tr>
                   {/* Expanded row content */}
                   {expandable && row.getIsExpanded() && renderExpanded && (
-                    <tr className="bg-muted/20">
+                    <tr className="bg-gray-50">
                       <td colSpan={totalColumns} className="px-4 py-3">
                         {renderExpanded(row.original)}
                       </td>
@@ -306,7 +306,7 @@ function DataTable<T>({
             <div className="flex items-center gap-2 text-body-sm">
               <span className="text-muted-foreground">Rows:</span>
               <select
-                className="h-8 rounded-md border border-border bg-card px-2 text-body-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                className="h-8 rounded-md border border-border bg-white px-2 text-body-sm focus:outline-none focus:ring-2 focus:ring-ring"
                 value={table.getState().pagination.pageSize}
                 onChange={(e) => table.setPageSize(Number(e.target.value))}
               >
@@ -374,7 +374,7 @@ function PaginationButton({
   return (
     <button
       type="button"
-      className="inline-flex items-center justify-center size-8 rounded-md border border-border bg-card text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-40 disabled:pointer-events-none"
+      className="inline-flex items-center justify-center size-8 rounded-md border border-border bg-white text-muted-foreground transition-colors hover:bg-gray-50 hover:text-foreground disabled:opacity-40 disabled:pointer-events-none"
       {...props}
     >
       {children}

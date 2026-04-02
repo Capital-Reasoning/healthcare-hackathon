@@ -32,7 +32,7 @@ export function Panel({
     <div
       data-slot="panel"
       className={cn(
-        'overflow-hidden rounded-xl bg-card ring-1 ring-foreground/10',
+        'overflow-hidden rounded-lg bg-card border border-border',
         paddingClasses[padding],
         className,
       )}

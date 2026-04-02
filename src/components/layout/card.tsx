@@ -27,7 +27,7 @@ const variantClasses: Record<'default' | 'muted' | 'interactive', string> = {
   default: '',
   muted: 'bg-muted',
   interactive:
-    'transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 cursor-pointer',
+    'transition-all duration-200 hover:shadow-sm cursor-pointer',
 };
 
 /**
@@ -53,7 +53,7 @@ function LayoutCard({
         data-slot="layout-card"
         data-variant="glass"
         className={cn(
-          'glass-strong flex flex-col gap-4 rounded-[14px] py-4 text-sm',
+          'glass-strong flex flex-col gap-4 rounded-lg py-4 text-sm',
           className,
         )}
         {...props}

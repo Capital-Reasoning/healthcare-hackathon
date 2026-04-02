@@ -37,12 +37,12 @@ export function Navbar({ className }: { className?: string }) {
     <header
       data-slot="navbar"
       className={cn(
-        'fixed top-0 left-0 right-0 z-50 flex h-14 items-center bg-navy-800 px-4',
+        'fixed top-0 left-0 right-0 z-50 flex h-14 items-center bg-white border-b border-border px-4',
         className
       )}
     >
       {/* Left: Logo */}
-      <Link href="/" className="flex items-center rounded-lg bg-white/90 px-2 py-0.5">
+      <Link href="/" className="flex items-center">
         <Image
           src="/logo-new.png"
           alt="BestPath"
@@ -70,8 +70,8 @@ export function Navbar({ className }: { className?: string }) {
               className={cn(
                 'flex items-center gap-1.5 rounded-md px-3 py-1.5 text-body-sm font-medium transition-colors',
                 isActive
-                  ? 'bg-white/10 text-white'
-                  : 'text-white/60 hover:bg-white/5 hover:text-white/80'
+                  ? 'bg-gray-100 text-foreground'
+                  : 'text-muted-foreground hover:bg-gray-50 hover:text-foreground'
               )}
             >
               <Icon className="size-4" aria-hidden="true" />

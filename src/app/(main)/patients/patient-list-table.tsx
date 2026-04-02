@@ -10,6 +10,30 @@ import {
   Users,
 } from 'lucide-react';
 
+function getInitials(firstName: string, lastName: string): string {
+  return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+}
+
+// Deterministic color based on name — always returns the same color for the same patient
+const AVATAR_COLORS = [
+  'bg-teal-100 text-teal-700',
+  'bg-blue-100 text-blue-700',
+  'bg-purple-100 text-purple-700',
+  'bg-amber-100 text-amber-700',
+  'bg-rose-100 text-rose-700',
+  'bg-emerald-100 text-emerald-700',
+  'bg-indigo-100 text-indigo-700',
+  'bg-cyan-100 text-cyan-700',
+];
+
+function getAvatarColor(name: string): string {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length]!;
+}
+
 interface PatientRow {
   id: string;
   patientId: string;
@@ -102,7 +126,7 @@ export function PatientListTable({
             }
           }}
           placeholder="Search by name or patient ID..."
-          className="w-full rounded-lg border border-border bg-card pl-9 pr-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary/30"
+          className="w-full rounded-md border border-border bg-white pl-9 pr-4 py-2 text-sm text-foreground placeholder:text-muted-foreground outline-none transition-colors focus:border-primary focus:ring-1 focus:ring-primary/20"
         />
       </div>
 
@@ -119,7 +143,7 @@ export function PatientListTable({
       </div>
 
       {/* Table */}
-      <div className="rounded-lg border border-border bg-card overflow-hidden">
+      <div className="rounded-md border border-border bg-white overflow-hidden">
         {patients.length === 0 ? (
           <div className="p-12 text-center">
             <Users className="size-10 mx-auto text-muted-foreground/40 mb-3" />
@@ -136,7 +160,7 @@ export function PatientListTable({
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-border bg-muted/50">
+                <tr className="border-b border-border bg-gray-50">
                   <th className="px-4 py-2.5 text-left font-medium text-muted-foreground">
                     Patient Name
                   </th>
@@ -161,14 +185,21 @@ export function PatientListTable({
                 {patients.map((patient) => (
                   <tr
                     key={patient.id}
-                    className="group border-b border-border last:border-0 hover:bg-muted/30 transition-colors cursor-pointer"
+                    className="group border-b border-border last:border-0 hover:bg-gray-50 transition-colors cursor-pointer"
                   >
                     <td className="px-4 py-3">
                       <Link
                         href={`/patients/${patient.patientId}`}
-                        className="font-medium text-foreground hover:text-primary transition-colors"
+                        className="flex items-center gap-3 group/name"
                       >
-                        {patient.lastName}, {patient.firstName}
+                        <span
+                          className={`flex size-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold ${getAvatarColor(patient.firstName + patient.lastName)}`}
+                        >
+                          {getInitials(patient.firstName, patient.lastName)}
+                        </span>
+                        <span className="font-medium text-foreground group-hover/name:text-primary transition-colors">
+                          {patient.lastName}, {patient.firstName}
+                        </span>
                       </Link>
                     </td>
                     <td className="px-4 py-3 text-muted-foreground font-mono text-xs">
@@ -220,7 +251,7 @@ export function PatientListTable({
             type="button"
             onClick={() => goToPage(page - 1)}
             disabled={page <= 1}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted/50 disabled:opacity-40 disabled:cursor-not-allowed"
+            className="inline-flex items-center gap-1.5 rounded-md border border-border bg-white px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <ChevronLeft className="size-4" />
             Previous
@@ -234,7 +265,7 @@ export function PatientListTable({
             type="button"
             onClick={() => goToPage(page + 1)}
             disabled={page >= totalPages}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted/50 disabled:opacity-40 disabled:cursor-not-allowed"
+            className="inline-flex items-center gap-1.5 rounded-md border border-border bg-white px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
           >
             Next
             <ChevronRight className="size-4" />

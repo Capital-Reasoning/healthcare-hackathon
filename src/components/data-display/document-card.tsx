@@ -35,7 +35,7 @@ export function DocumentCard({
     : null;
 
   return (
-    <div className="flex items-start gap-3 rounded-xl border border-border bg-card p-4 transition-colors hover:bg-muted">
+    <div className="flex items-start gap-3 rounded-md border border-border bg-white p-4 transition-colors hover:bg-gray-50">
       <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary-tint">
         {status === 'processing' ? (
           <Loader2 className="size-5 animate-spin text-primary" />

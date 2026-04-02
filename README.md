@@ -57,16 +57,15 @@ Batch processing runs up to 3 patients in parallel, orders by encounter count (r
 
 ## Tech Stack
 
-| Layer         | Technology                                                                           |
-| ------------- | ------------------------------------------------------------------------------------ |
-| Framework     | Next.js 16 (App Router) · TypeScript (strict)                                        |
-| Styling       | Tailwind v4 · shadcn/ui                                                              |
-| Database      | Supabase (Postgres + pgvector) · Drizzle ORM                                         |
-| AI Engine     | Claude Sonnet 4.6 (assessment) · Claude Opus 4.6 (interactive agent) · Vercel AI SDK |
-| RAG Pipeline  | LlamaParse → Gemini Embeddings (3072-dim) → pgvector hybrid search                   |
-| Generative UI | OpenUI (27 agent-renderable components)                                              |
-| Charts        | Recharts                                                                             |
-| State         | Zustand                                                                              |
+| Layer        | Technology                                                                   |
+| ------------ | ---------------------------------------------------------------------------- |
+| Framework    | Next.js 16 (App Router) · TypeScript (strict)                                |
+| Styling      | Tailwind v4 · shadcn/ui                                                      |
+| Database     | Supabase (Postgres + pgvector) · Drizzle ORM                                 |
+| AI Engine    | Claude Sonnet 4.6 (assessment) · Claude Opus 4.6 (navigator) · Vercel AI SDK |
+| RAG Pipeline | LlamaParse → Gemini Embeddings (3072-dim) → pgvector hybrid search           |
+| Charts       | Recharts                                                                     |
+| State        | Zustand                                                                      |
 
 ### Architecture
 
@@ -75,11 +74,11 @@ Batch processing runs up to 3 patients in parallel, orders by encounter count (r
 │  Clinician Dashboard          Patient Navigator         │
 │  (Server-rendered + client)   (Conversational chat)     │
 ├─────────────────────────────────────────────────────────┤
-│  Assessment Engine (3-phase)  │  Agent Panel (OpenUI)   │
-│  Phase A: RAG tool-use loop   │  27 renderable components│
-│  Phase B: Structured output   │  Streaming reveal       │
-│  Phase C: Date math scoring   │  Glass morphism UI      │
-├───────────────────────────────┴─────────────────────────┤
+│  Assessment Engine (3-phase)                            │
+│  Phase A: RAG tool-use loop                             │
+│  Phase B: Structured output                             │
+│  Phase C: Date math scoring                             │
+├─────────────────────────────────────────────────────────┤
 │  Hybrid Search (RRF)                                    │
 │  Vector (cosine, HNSW) + Keyword (tsvector/GIN)         │
 ├─────────────────────────────────────────────────────────┤
@@ -128,17 +127,6 @@ Key source organizations include the Canadian Task Force on Preventive Health Ca
 
 Every recommendation traces to a specific guideline passage. The full acquisition pipeline, selection policies, and manifests are in `health-info-data/`.
 
-### Generative UI
-
-The AI agent renders structured UI components directly in conversation using [OpenUI](https://openui.fly.dev). 27 components are registered across 5 groups:
-
-- **Data Display** — StatCard, DataTable, ComparisonTable, MetricRow, and more
-- **Charts** — Bar, Line, Area, Donut, Radar, Scatter, Gauge, HeatMap, SparkLine
-- **Healthcare** — PatientCard, RiskBadge, Timeline, VitalSign, MedicationCard
-- **Layout** — Row (auto-stacking grid), Card (subtle/elevated/glass), Tabs
-
-Every component works in both static pages and agent-generated contexts. During streaming, a progressive reveal system holds back incomplete blocks until they're fully formed.
 
 
-
-**Longer Version of Slides: (for judge review if desired)** open on [Google Slides](https://docs.google.com/presentation/d/1_PO_Jm7xCQs8n6wpRiFvRmcxQLA5b576bZ6NiHk6XYY/edit?usp=sharing)
+**Longer Version of Slides: (for judge review, if desired)** open on [Google Slides](https://docs.google.com/presentation/d/1_PO_Jm7xCQs8n6wpRiFvRmcxQLA5b576bZ6NiHk6XYY/edit?usp=sharing)

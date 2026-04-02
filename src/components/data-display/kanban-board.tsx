@@ -121,7 +121,7 @@ function KanbanBoard({
                     'flex flex-col gap-2 flex-1 rounded-lg p-2 min-h-[120px]',
                     snapshot.isDraggingOver
                       ? 'bg-primary-tint border-2 border-dashed border-primary/30'
-                      : 'bg-muted/50 border-2 border-transparent',
+                      : 'bg-gray-50 border-2 border-transparent',
                   )}
                 >
                   {column.items.map((item, index) => (

@@ -69,7 +69,7 @@ function TimelineEvent({
       {/* Icon dot */}
       <div
         className={cn(
-          'relative z-10 flex items-center justify-center size-8 rounded-full border-2 border-card shrink-0',
+          'relative z-10 flex items-center justify-center size-8 rounded-full border-2 border-white shrink-0',
           bg + '/15',
         )}
       >

@@ -1,33 +1,26 @@
 'use client';
 
 import { DataBadge } from '@/components/data-display/badge';
-import { ErrorBoundary } from '@/components/feedback/error-boundary';
-import type { RiskLevel } from '@/components/healthcare/risk-badge';
-import { RiskBadge } from '@/components/healthcare/risk-badge';
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { TriageItem } from '@/lib/db/queries/engine-results';
 import {
-  AlertCircle,
   CheckCircle2,
   ChevronRight,
-  Clock,
+  LayoutGrid,
+  List as ListIcon,
   Loader2,
   RefreshCw,
-  ShieldCheck,
+  X,
 } from 'lucide-react';
 import Link from 'next/link';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
 /* ─── Types ─────────────────────────────────────────── */
 
 interface TriageDashboardProps {
   items: TriageItem[];
-  stats: {
-    assessed: number;
-    needAction: number;
-    onTrack: number;
-  };
 }
 
 type ConfidenceFilter = 'all' | 'high' | 'lower';
@@ -40,16 +33,31 @@ const CONFIDENCE_FILTERS: { value: ConfidenceFilter; label: string }[] = [
 
 /* ─── Helpers ───────────────────────────────────────── */
 
-function riskTierToLevel(tier: string | null): RiskLevel {
-  switch (tier) {
-    case 'high':
-      return 'high';
-    case 'medium':
-      return 'medium';
-    case 'low':
-      return 'low';
-    default:
-      return 'medium';
+const AVATAR_COLORS = [
+  'bg-teal-100 text-teal-700',
+  'bg-blue-100 text-blue-700',
+  'bg-purple-100 text-purple-700',
+  'bg-amber-100 text-amber-700',
+  'bg-rose-100 text-rose-700',
+  'bg-emerald-100 text-emerald-700',
+  'bg-indigo-100 text-indigo-700',
+  'bg-cyan-100 text-cyan-700',
+];
+
+function getAvatarColor(name: string): string {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length]!;
+}
+
+function getCategoryAccent(category: string | null): string {
+  switch (category) {
+    case 'red': return 'border-l-red-400';
+    case 'yellow': return 'border-l-amber-400';
+    case 'green': return 'border-l-emerald-400';
+    default: return 'border-l-gray-300';
   }
 }
 
@@ -91,92 +99,169 @@ export function isPatientDone(patientId: string): boolean {
 /* ─── Patient Triage Card ───────────────────────────── */
 
 function TriageCard({ item, dealtWith }: { item: TriageItem; dealtWith: boolean }) {
+  const fullName = `${item.firstName} ${item.lastName}`;
+  const initials = `${item.firstName.charAt(0)}${item.lastName.charAt(0)}`;
+  const avatarColor = getAvatarColor(fullName);
+  const accentBorder = getCategoryAccent(item.category);
+
   return (
     <Link
       href={`/patients/${item.patientId}`}
-      className={`group block rounded-lg border p-4 shadow-sm transition-all ${dealtWith
-        ? 'border-border/50 bg-card/60 opacity-50'
-        : 'border-border bg-card hover:shadow-md hover:border-primary/30'
+      className={`group block rounded-md border border-l-[3px] ${accentBorder} p-4 transition-colors ${dealtWith
+        ? 'border-border/50 bg-gray-50 opacity-60'
+        : 'border-border bg-white hover:bg-gray-50/80'
         }`}
     >
-      <div className="flex items-start justify-between gap-2">
+      <div className="flex items-start gap-3">
+        {/* Avatar */}
+        <span className={`flex size-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold ${avatarColor}`}>
+          {initials}
+        </span>
+
         <div className="min-w-0 flex-1">
-          <p className="text-body-sm font-semibold text-foreground truncate">
-            {item.firstName} {item.lastName}
-          </p>
-          <p className="text-xs text-muted-foreground">
-            {item.age != null ? `${item.age}y` : ''}
-            {item.sex ? ` ${item.sex}` : ''}
-          </p>
+          {/* Name + demographics */}
+          <div className="flex items-center gap-2">
+            <p className="text-sm font-semibold text-foreground truncate">{fullName}</p>
+            <span className="text-xs text-muted-foreground">
+              {item.age != null ? `${item.age}y` : ''}
+              {item.sex ? ` ${item.sex}` : ''}
+            </span>
+            <ChevronRight className="size-4 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 shrink-0 ml-auto" />
+          </div>
+
+          {/* Condition */}
+          {item.condition && (
+            <p className="text-xs font-medium text-foreground mt-1">{item.condition}</p>
+          )}
+
+          {/* Action */}
+          {item.action && (
+            <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{item.action}</p>
+          )}
+
+          {/* Badges — simplified */}
+          <div className="mt-2 flex flex-wrap items-center gap-1.5">
+            {dealtWith && (
+              <DataBadge variant="secondary" size="sm">
+                <CheckCircle2 className="size-3 mr-0.5" />
+                Done
+              </DataBadge>
+            )}
+            {item.overdueDays != null && item.overdueDays > 0 && (
+              <DataBadge variant="error" size="sm">
+                {item.overdueDays}d overdue
+              </DataBadge>
+            )}
+            {item.confidence && (
+              <DataBadge
+                variant={item.confidence === 'high' ? 'success' : item.confidence === 'medium' ? 'warning' : 'secondary'}
+                size="sm"
+              >
+                {item.confidence.charAt(0).toUpperCase() + item.confidence.slice(1)} confidence
+              </DataBadge>
+            )}
+          </div>
         </div>
-        <ChevronRight className="size-4 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 shrink-0 mt-0.5" />
-      </div>
-
-      {/* Condition + Action */}
-      <div className="mt-2">
-        {item.condition && (
-          <p className="text-xs font-medium text-foreground">{item.condition}</p>
-        )}
-        {item.action && (
-          <p className="mt-0.5 text-xs text-muted-foreground line-clamp-2">
-            {item.action}
-          </p>
-        )}
-      </div>
-
-      {/* Badges row */}
-      <div className="mt-3 flex flex-wrap items-center gap-1.5">
-        {dealtWith && (
-          <DataBadge variant="secondary" size="sm">
-            <CheckCircle2 className="size-3 mr-0.5" />
-            Done
-          </DataBadge>
-        )}
-        {item.overdueDays != null && item.overdueDays > 0 && (
-          <DataBadge variant="error" size="sm">
-            {item.overdueDays}d overdue
-          </DataBadge>
-        )}
-        {item.confidence && (
-          <DataBadge
-            variant={item.confidence === 'high' ? 'success' : item.confidence === 'medium' ? 'warning' : 'secondary'}
-            size="sm"
-          >
-            Confidence: {item.confidence}
-          </DataBadge>
-        )}
-        {(() => {
-          const level = riskTierToLevel(item.riskTier);
-          return <RiskBadge
-            level={level}
-            label={`Risk: ${level.charAt(0).toUpperCase()}${level.slice(1)}`}
-            size="sm"
-            showIcon={false}
-          />;
-        })()}
       </div>
     </Link>
   );
 }
 
-/* ─── Column ────────────────────────────────────────── */
+/* ─── Triage List Row ─────────────────────────────── */
 
-interface TriageColumnProps {
-  title: string;
-  icon: React.ReactNode;
-  accentClass: string;
-  items: TriageItem[];
-  doneIds: Set<string>;
+function TriageListRow({ item, dealtWith }: { item: TriageItem; dealtWith: boolean }) {
+  const fullName = `${item.firstName} ${item.lastName}`;
+  const initials = `${item.firstName.charAt(0)}${item.lastName.charAt(0)}`;
+  const avatarColor = getAvatarColor(fullName);
+  const accentBorder = getCategoryAccent(item.category);
+
+  return (
+    <Link
+      href={`/patients/${item.patientId}`}
+      className={`group flex items-center gap-4 border-b border-border px-4 py-3 transition-colors ${dealtWith
+        ? 'opacity-50'
+        : 'hover:bg-gray-50'
+        }`}
+    >
+      {/* Patient: accent dot + avatar + name */}
+      <div className="flex items-center gap-2.5 w-44 shrink-0">
+        <div className={`w-1 self-stretch rounded-full ${accentBorder.replace('border-l-', 'bg-')}`} />
+        <span className={`flex size-7 shrink-0 items-center justify-center rounded-full text-[10px] font-semibold ${avatarColor}`}>
+          {initials}
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-medium text-foreground truncate">{fullName}</p>
+          <p className="text-xs text-muted-foreground">
+            {item.age != null ? `${item.age}y` : ''}{item.sex ? ` ${item.sex}` : ''}
+          </p>
+        </div>
+      </div>
+
+      {/* Condition */}
+      <div className="w-48 shrink-0">
+        <p className="text-xs font-medium text-foreground truncate">{item.condition ?? '--'}</p>
+      </div>
+
+      {/* Action — flexible */}
+      <div className="flex-1 min-w-0">
+        <p className="text-xs text-muted-foreground truncate">{item.action ?? '--'}</p>
+      </div>
+
+      {/* Overdue */}
+      <div className="w-20 shrink-0 text-right">
+        {item.overdueDays != null && item.overdueDays > 0 ? (
+          <DataBadge variant="error" size="sm">{item.overdueDays}d</DataBadge>
+        ) : (
+          <span className="text-xs text-muted-foreground">--</span>
+        )}
+      </div>
+
+      {/* Confidence */}
+      <div className="w-16 shrink-0 text-right">
+        {item.confidence ? (
+          <span className={`text-xs font-medium ${
+            item.confidence === 'high' ? 'text-success' : item.confidence === 'medium' ? 'text-warning' : 'text-muted-foreground'
+          }`}>
+            {item.confidence.charAt(0).toUpperCase() + item.confidence.slice(1)}
+          </span>
+        ) : (
+          <span className="text-xs text-muted-foreground">--</span>
+        )}
+      </div>
+
+      {/* Chevron */}
+      <ChevronRight className="size-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+    </Link>
+  );
 }
 
-const PAGE_SIZE = 10;
+/* ─── Paginated Content ──────────────────────────── */
 
-function TriageColumn({ title, icon, accentClass, items, doneIds }: TriageColumnProps) {
-  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+const PAGE_SIZE = 30;
+const PAGE_INCREMENT = 30;
+
+/** Round up to the next multiple of 3 so the grid always fills evenly */
+function nextMultipleOf3(n: number, total: number): number {
+  const next = Math.ceil(n / 3) * 3;
+  return Math.min(next, total);
+}
+
+function PaginatedContent({
+  items,
+  doneIds,
+  viewMode,
+}: {
+  items: TriageItem[];
+  doneIds: Set<string>;
+  viewMode: 'list' | 'grid';
+}) {
+  const [visibleCount, setVisibleCount] = useState(() =>
+    nextMultipleOf3(PAGE_SIZE, items.length),
+  );
 
   // Reset visible count when items change (e.g. confidence filter switch)
   useEffect(() => {
-    setVisibleCount(PAGE_SIZE);
+    setVisibleCount(nextMultipleOf3(PAGE_SIZE, items.length));
   }, [items.length]);
 
   // Sort: non-done first, then by actionValueScore descending
@@ -190,68 +275,47 @@ function TriageColumn({ title, icon, accentClass, items, doneIds }: TriageColumn
   const visible = sorted.slice(0, visibleCount);
   const remaining = sorted.length - visibleCount;
 
-  return (
-    <div
-      className={`flex flex-col rounded-lg border border-border bg-card shadow-sm p-4 ${accentClass}`}
-    >
-      <div className="flex items-center gap-2 mb-3">
-        {icon}
-        <h3 className="text-h3 text-foreground">{title}</h3>
-        <span className="ml-auto text-xs text-muted-foreground font-medium">
-          {items.length}
-        </span>
-      </div>
+  if (items.length === 0) {
+    return (
+      <p className="text-center text-sm text-muted-foreground py-6">
+        No patients in this category
+      </p>
+    );
+  }
 
-      {items.length === 0 ? (
-        <p className="text-center text-sm text-muted-foreground py-6">
-          No patients in this category
-        </p>
-      ) : (
-        <div className="flex flex-col gap-2">
+  return (
+    <div className="flex flex-col gap-3">
+      {viewMode === 'grid' ? (
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
           {visible.map((item) => (
             <TriageCard key={item.id} item={item} dealtWith={doneIds.has(item.patientId)} />
           ))}
-          {remaining > 0 && (
-            <button
-              type="button"
-              onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
-              className="mt-1 rounded-md border border-border bg-muted/50 px-3 py-2 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-            >
-              Show more ({remaining} remaining)
-            </button>
-          )}
+        </div>
+      ) : (
+        <div className="rounded-md border border-border bg-white overflow-hidden">
+          {/* List header */}
+          <div className="flex items-center gap-4 border-b border-border bg-gray-50 px-4 py-2 text-xs font-medium text-muted-foreground">
+            <div className="w-44 pl-4">Patient</div>
+            <div className="w-48">Primary Condition</div>
+            <div className="flex-1">Recommended Action</div>
+            <div className="w-20 text-right">Overdue</div>
+            <div className="w-16 text-right">Conf.</div>
+            <div className="w-4" />
+          </div>
+          {visible.map((item) => (
+            <TriageListRow key={item.id} item={item} dealtWith={doneIds.has(item.patientId)} />
+          ))}
         </div>
       )}
-    </div>
-  );
-}
-
-/* ─── Stats Bar ─────────────────────────────────────── */
-
-function StatsBar({
-  stats,
-}: {
-  stats: { assessed: number; needAction: number; onTrack: number };
-}) {
-  return (
-    <div className="flex flex-wrap items-center gap-4 text-body-sm">
-      <div className="flex items-center gap-1.5 text-foreground">
-        <ShieldCheck className="size-4 text-primary" />
-        <span className="font-semibold">{stats.assessed}</span>
-        <span className="text-muted-foreground">patients assessed</span>
-      </div>
-      <div className="h-4 w-px bg-border" />
-      <div className="flex items-center gap-1.5 text-foreground">
-        <AlertCircle className="size-4 text-error" />
-        <span className="font-semibold">{stats.needAction}</span>
-        <span className="text-muted-foreground">need action</span>
-      </div>
-      <div className="h-4 w-px bg-border" />
-      <div className="flex items-center gap-1.5 text-foreground">
-        <CheckCircle2 className="size-4 text-success" />
-        <span className="font-semibold">{stats.onTrack}</span>
-        <span className="text-muted-foreground">on track</span>
-      </div>
+      {remaining > 0 && (
+        <button
+          type="button"
+          onClick={() => setVisibleCount((c) => nextMultipleOf3(c + PAGE_INCREMENT, sorted.length))}
+          className="mt-1 self-start rounded border border-border bg-gray-50 px-3 py-2 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+        >
+          Show more ({remaining} remaining)
+        </button>
+      )}
     </div>
   );
 }
@@ -291,9 +355,9 @@ function formatDoneTime(ts: number): string {
   return `${Math.floor(diff / 86_400_000)}d ago`;
 }
 
-/* ─── Completed Patients Section ───────────────────── */
+/* ─── Completed Tab Content ────────────────────────── */
 
-function CompletedSection({
+function CompletedTabContent({
   items,
   doneMap,
 }: {
@@ -312,8 +376,6 @@ function CompletedSection({
     seen.add(i.patientId);
     return true;
   });
-
-  if (Object.keys(doneMap).length === 0) return null;
 
   async function rerunOne(patientId: string) {
     setRerunningId(patientId);
@@ -360,53 +422,48 @@ function CompletedSection({
     setRerunningAll(false);
   }
 
+  if (Object.keys(doneMap).length === 0) {
+    return (
+      <p className="text-center text-sm text-muted-foreground py-6">
+        No completed patients yet
+      </p>
+    );
+  }
+
   return (
-    <div className="rounded-lg border border-border bg-card shadow-sm p-4">
-      <div className="flex items-center justify-between gap-4 mb-4">
-        <div className="flex items-center gap-2">
-          <CheckCircle2 className="size-5 text-muted-foreground" />
-          <h3 className="text-h3 text-foreground">
-            Completed Patients
-          </h3>
-          <span className="text-xs text-muted-foreground font-medium">
-            {doneItems.length}
-          </span>
+    <div className="flex flex-col gap-4">
+      {/* Time filter + rerun controls */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center rounded border border-border bg-gray-50 p-0.5 gap-0.5">
+          {TIME_FILTERS.map((f) => (
+            <button
+              key={f.value}
+              type="button"
+              onClick={() => setTimeFilter(f.value)}
+              className={`rounded px-2.5 py-1 text-xs font-medium transition-colors ${timeFilter === f.value
+                ? 'bg-white text-foreground'
+                : 'text-muted-foreground hover:text-foreground'
+                }`}
+            >
+              {f.label}
+            </button>
+          ))}
         </div>
 
-        <div className="flex items-center gap-2">
-          {/* Time filters */}
-          <div className="flex items-center rounded-md border border-border bg-muted p-0.5 gap-0.5">
-            {TIME_FILTERS.map((f) => (
-              <button
-                key={f.value}
-                type="button"
-                onClick={() => setTimeFilter(f.value)}
-                className={`rounded px-2.5 py-1 text-xs font-medium transition-colors ${timeFilter === f.value
-                  ? 'bg-card text-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
-                  }`}
-              >
-                {f.label}
-              </button>
-            ))}
-          </div>
-
-          {/* Rerun all */}
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={rerunningAll || doneItems.length === 0}
-            onClick={rerunAll}
-            className="gap-1.5"
-          >
-            {rerunningAll ? (
-              <Loader2 className="size-3.5 animate-spin" />
-            ) : (
-              <RefreshCw className="size-3.5" />
-            )}
-            Rerun All
-          </Button>
-        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={rerunningAll || doneItems.length === 0}
+          onClick={rerunAll}
+          className="gap-1.5"
+        >
+          {rerunningAll ? (
+            <Loader2 className="size-3.5 animate-spin" />
+          ) : (
+            <RefreshCw className="size-3.5" />
+          )}
+          Rerun All
+        </Button>
       </div>
 
       {doneItems.length === 0 ? (
@@ -414,14 +471,14 @@ function CompletedSection({
           No completed patients in this time range
         </p>
       ) : (
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
           {doneItems.map((item) => {
             const ts = doneMap[item.patientId];
             const isRerunning = rerunningId === item.patientId;
             return (
               <div
                 key={item.patientId}
-                className="flex items-center gap-3 rounded-lg border border-border/60 bg-muted/30 p-3"
+                className="flex items-center gap-3 rounded border border-border bg-gray-50 p-3"
               >
                 <Link
                   href={`/patients/${item.patientId}`}
@@ -459,10 +516,13 @@ function CompletedSection({
 
 /* ─── Main Component ────────────────────────────────── */
 
-export function TriageDashboard({ items, stats }: TriageDashboardProps) {
+export function TriageDashboard({ items }: TriageDashboardProps) {
   const [doneIds, setDoneIds] = useState<Set<string>>(new Set());
   const [doneMap, setDoneMap] = useState<Record<string, number>>({});
   const [confidenceFilter, setConfidenceFilter] = useState<ConfidenceFilter>('all');
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
+  const [sexFilter, setSexFilter] = useState<string>('all');
+  const [ageFilter, setAgeFilter] = useState<string>('all');
 
   const syncDoneState = useCallback(() => {
     setDoneIds(getDoneIds());
@@ -479,76 +539,167 @@ export function TriageDashboard({ items, stats }: TriageDashboardProps) {
     return () => document.removeEventListener('visibilitychange', onVisible);
   }, [syncDoneState]);
 
-  // Apply confidence filter then group by category
-  const filtered = confidenceFilter === 'all'
-    ? items
-    : confidenceFilter === 'high'
-      ? items.filter((i) => i.confidence === 'high')
-      : items.filter((i) => i.confidence !== 'high');
+  // Apply all filters
+  let filtered = items;
 
-  const red = filtered.filter((i) => i.category === 'red');
-  const yellow = filtered.filter((i) => i.category === 'yellow');
-  const green = filtered.filter((i) => i.category === 'green');
+  // Sex filter
+  if (sexFilter !== 'all') {
+    filtered = filtered.filter((i) => i.sex?.toLowerCase() === sexFilter);
+  }
+
+  // Age filter
+  if (ageFilter !== 'all') {
+    filtered = filtered.filter((i) => {
+      if (i.age == null) return false;
+      switch (ageFilter) {
+        case '0-18': return i.age <= 18;
+        case '19-40': return i.age >= 19 && i.age <= 40;
+        case '41-65': return i.age >= 41 && i.age <= 65;
+        case '65+': return i.age > 65;
+        default: return true;
+      }
+    });
+  }
+
+  // Confidence filter
+  const afterConfidence = confidenceFilter === 'all'
+    ? filtered
+    : confidenceFilter === 'high'
+      ? filtered.filter((i) => i.confidence === 'high')
+      : filtered.filter((i) => i.confidence !== 'high');
+
+  const red = afterConfidence.filter((i) => i.category === 'red');
+  const yellow = afterConfidence.filter((i) => i.category === 'yellow');
+  const green = afterConfidence.filter((i) => i.category === 'green');
+
+  const doneCount = useMemo(() => Object.keys(doneMap).length, [doneMap]);
+
+  const hasActiveFilters = sexFilter !== 'all' || ageFilter !== 'all';
+
+  function clearFilters() {
+    setSexFilter('all');
+    setAgeFilter('all');
+  }
+
+  // Default to the first tab that has items, falling back to "urgent"
+  const defaultTab = red.length > 0
+    ? 'urgent'
+    : yellow.length > 0
+      ? 'followup'
+      : green.length > 0
+        ? 'ontrack'
+        : 'urgent';
 
   /* ── Results view ── */
   return (
     <div className="flex flex-col gap-6 animate-fade-in-up">
-      {/* Stats bar + confidence filter */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <StatsBar stats={stats} />
+      {/* Tabbed triage view */}
+      <Tabs defaultValue={defaultTab}>
+        {/* Tabs header: triggers on left, confidence filter on right */}
+        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border pb-px">
+          <TabsList variant="line">
+            <TabsTrigger value="urgent">Urgent Action ({red.length})</TabsTrigger>
+            <TabsTrigger value="followup">Follow-up ({yellow.length})</TabsTrigger>
+            <TabsTrigger value="ontrack">On Track ({green.length})</TabsTrigger>
+            <TabsTrigger value="completed">Completed ({doneCount})</TabsTrigger>
+          </TabsList>
 
-        <div className="flex items-center rounded-md border border-border bg-muted p-0.5 gap-0.5">
-          {CONFIDENCE_FILTERS.map((f) => (
-            <button
-              key={f.value}
-              type="button"
-              onClick={() => setConfidenceFilter(f.value)}
-              className={`rounded px-3 py-1.5 text-xs font-medium transition-colors ${confidenceFilter === f.value
-                ? 'bg-card text-foreground shadow-sm'
-                : 'text-muted-foreground hover:text-foreground'
-                }`}
-            >
-              {f.label}
-            </button>
-          ))}
+          {/* Confidence filter */}
+          <div className="flex items-center rounded border border-border bg-gray-50 p-0.5 gap-0.5">
+            {CONFIDENCE_FILTERS.map((f) => (
+              <button
+                key={f.value}
+                type="button"
+                onClick={() => setConfidenceFilter(f.value)}
+                className={`rounded px-2.5 py-1 text-xs font-semibold transition-colors ${confidenceFilter === f.value
+                  ? 'bg-white text-foreground shadow-sm border border-border'
+                  : 'text-gray-500 hover:text-foreground'
+                  }`}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
 
-      {/* Three-column triage grid */}
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <ErrorBoundary>
-          <TriageColumn
-            title="Needs Urgent Action"
-            icon={<AlertCircle className="size-5 text-error" />}
-            accentClass="border-t-[5px] border-t-error"
-            items={red}
-            doneIds={doneIds}
-          />
-        </ErrorBoundary>
+        {/* Toolbar: filters + view toggle */}
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-4 pb-2">
+          <div className="flex items-center gap-2">
+            {/* Sex filter */}
+            <select
+              value={sexFilter}
+              onChange={(e) => setSexFilter(e.target.value)}
+              className="h-8 rounded-md border border-border bg-white px-2.5 text-xs font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-ring/30 focus:border-ring cursor-pointer"
+            >
+              <option value="all">All sexes</option>
+              <option value="m">Male</option>
+              <option value="f">Female</option>
+            </select>
 
-        <ErrorBoundary>
-          <TriageColumn
-            title="Follow-up Soon"
-            icon={<Clock className="size-5 text-warning" />}
-            accentClass="border-t-[5px] border-t-amber-400"
-            items={yellow}
-            doneIds={doneIds}
-          />
-        </ErrorBoundary>
+            {/* Age filter */}
+            <select
+              value={ageFilter}
+              onChange={(e) => setAgeFilter(e.target.value)}
+              className="h-8 rounded-md border border-border bg-white px-2.5 text-xs font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-ring/30 focus:border-ring cursor-pointer"
+            >
+              <option value="all">All ages</option>
+              <option value="0-18">0–18</option>
+              <option value="19-40">19–40</option>
+              <option value="41-65">41–65</option>
+              <option value="65+">65+</option>
+            </select>
 
-        <ErrorBoundary>
-          <TriageColumn
-            title="On Track"
-            icon={<CheckCircle2 className="size-5 text-success" />}
-            accentClass="border-t-[5px] border-t-success"
-            items={green}
-            doneIds={doneIds}
-          />
-        </ErrorBoundary>
-      </div>
+            {/* Clear filters button — only shown when filters active */}
+            {hasActiveFilters && (
+              <button
+                type="button"
+                onClick={clearFilters}
+                className="flex items-center gap-1 rounded-md px-2 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <X className="size-3" />
+                Clear
+              </button>
+            )}
+          </div>
 
-      {/* Completed patients section */}
-      <CompletedSection items={items} doneMap={doneMap} />
+          {/* View toggle */}
+          <div className="flex items-center rounded-md border border-border p-0.5 gap-0.5">
+            <button
+              type="button"
+              onClick={() => setViewMode('list')}
+              className={`flex items-center gap-1.5 rounded px-2.5 py-1 text-xs font-medium transition-colors ${viewMode === 'list' ? 'bg-gray-100 text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+            >
+              <ListIcon className="size-3.5" />
+              List
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode('grid')}
+              className={`flex items-center gap-1.5 rounded px-2.5 py-1 text-xs font-medium transition-colors ${viewMode === 'grid' ? 'bg-gray-100 text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+            >
+              <LayoutGrid className="size-3.5" />
+              Grid
+            </button>
+          </div>
+        </div>
+
+        {/* Tab panels */}
+        <TabsContent value="urgent" className="pt-2">
+          <PaginatedContent items={red} doneIds={doneIds} viewMode={viewMode} />
+        </TabsContent>
+
+        <TabsContent value="followup" className="pt-2">
+          <PaginatedContent items={yellow} doneIds={doneIds} viewMode={viewMode} />
+        </TabsContent>
+
+        <TabsContent value="ontrack" className="pt-2">
+          <PaginatedContent items={green} doneIds={doneIds} viewMode={viewMode} />
+        </TabsContent>
+
+        <TabsContent value="completed" className="pt-2">
+          <CompletedTabContent items={items} doneMap={doneMap} />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

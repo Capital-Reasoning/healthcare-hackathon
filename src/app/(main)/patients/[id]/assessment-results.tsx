@@ -24,7 +24,7 @@ interface EvidenceRef {
   excerpt: string;
 }
 
-interface TargetFact {
+export interface TargetFact {
   id: string;
   runId: string;
   targetId: string;
@@ -48,7 +48,7 @@ interface TargetFact {
   generatedAt: Date | null;
 }
 
-interface ActivityEntry {
+export interface ActivityEntry {
   timestamp: Date;
   message: string;
 }
@@ -211,7 +211,7 @@ function getStatusIcon(status: string | null) {
   }
 }
 
-function TargetCard({
+export function TargetCard({
   target,
   patientName,
   isOnTrack,
@@ -229,144 +229,135 @@ function TargetCard({
     target.intervalDays,
   );
 
+  const subtitle = [
+    target.screeningType,
+    target.condition && target.screeningType !== target.condition
+      ? target.condition
+      : null,
+  ]
+    .filter(Boolean)
+    .join(' · ');
+
   return (
     <div
       className={cn(
-        'rounded-lg border bg-card p-5 border-l-4',
+        'rounded-md border bg-white border-l-4',
         getCategoryBorder(target.category),
-        isOnTrack
-          ? 'border-border/60 opacity-80'
-          : 'border-border',
+        isOnTrack ? 'border-border/60 opacity-80' : 'border-border',
       )}
     >
-      {/* Card Header */}
-      <div className="flex items-start justify-between mb-3">
-        <div className="space-y-1">
-          <h3
+      {/* ── Top section: action + status ── */}
+      <div className="p-5 pb-4">
+        {/* Row 1: Action (hero) + badges */}
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p
+              className={cn(
+                'text-base font-semibold leading-snug',
+                isOnTrack ? 'text-muted-foreground' : 'text-foreground',
+              )}
+            >
+              {isOnTrack
+                ? (target.action ?? target.screeningType ?? 'On Track')
+                : (target.action ?? 'Recommendation')}
+            </p>
+            {subtitle && (
+              <p className="text-sm text-muted-foreground mt-0.5">
+                {subtitle}
+              </p>
+            )}
+          </div>
+          <div className="flex items-center gap-2 shrink-0 pt-0.5">
+            {getCategoryBadge(target.category, target.status)}
+            {getConfidenceBadge(target.confidence)}
+          </div>
+        </div>
+
+        {/* Row 2: Status line */}
+        <div className="flex items-center gap-2 mt-3 text-sm">
+          {getStatusIcon(target.status)}
+          <span
             className={cn(
-              'text-h3',
-              isOnTrack ? 'text-muted-foreground' : 'text-foreground',
+              target.status === 'overdue_now' && 'text-destructive font-medium',
+              target.status === 'due_soon' && 'text-warning font-medium',
+              target.status === 'up_to_date' && 'text-success',
+              target.status === 'unknown_due' && 'text-muted-foreground',
+              !target.status && 'text-muted-foreground',
             )}
           >
-            {target.screeningType ?? target.condition ?? 'Target'}
-          </h3>
-          {target.condition && target.screeningType && (
-            <p className="text-sm text-muted-foreground">
-              Condition: {target.condition}
-            </p>
-          )}
+            {getStatusText(target.status, target.overdueDays, target.dueDate)}
+          </span>
         </div>
-        <div className="flex items-center gap-2 shrink-0">
-          {getCategoryBadge(target.category, target.status)}
-          {getConfidenceBadge(target.confidence)}
-        </div>
-      </div>
 
-      {/* Action */}
-      {target.action && (
-        <div className="mb-3">
-          {isOnTrack ? (
-            <>
-              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                Last Action
-              </span>
-              <p className="text-sm text-muted-foreground mt-0.5">
-                {target.action}
-              </p>
-            </>
-          ) : (
-            <>
-              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                Recommended Action
-              </span>
-              <p className="text-sm text-foreground font-medium mt-0.5">
-                {target.action}
-              </p>
-            </>
-          )}
-        </div>
-      )}
-
-      {/* Status */}
-      <div className="flex items-center gap-2 mb-4 text-sm">
-        {getStatusIcon(target.status)}
-        <span
-          className={cn(
-            target.status === 'overdue_now' && 'text-destructive font-medium',
-            target.status === 'due_soon' && 'text-warning font-medium',
-            target.status === 'up_to_date' && 'text-success',
-            target.status === 'unknown_due' && 'text-muted-foreground',
-            !target.status && 'text-muted-foreground',
-          )}
-        >
-          {getStatusText(
-            target.status,
-            target.overdueDays,
-            target.dueDate,
-          )}
-        </span>
-      </div>
-
-      {/* Next due date for on-track items */}
-      {isOnTrack && nextDueText && (
-        <div className="mb-4 text-sm text-foreground font-medium flex items-center gap-2">
-          <Clock className="size-4 text-primary" />
-          {nextDueText}
-        </div>
-      )}
-
-      {/* Why sections */}
-      <div className="grid gap-3 sm:grid-cols-2 mb-4">
-        {target.whyThisAction && (
-          <div className="rounded-md bg-muted border border-border/50 p-3">
-            <p className="text-xs font-medium text-muted-foreground mb-1">
-              Why this action
-            </p>
-            <p className="text-sm text-foreground">
-              {target.whyThisAction}
-            </p>
-          </div>
-        )}
-        {target.whyNow && (
-          <div className="rounded-md bg-muted border border-border/50 p-3">
-            <p className="text-xs font-medium text-muted-foreground mb-1">
-              Why now
-            </p>
-            <p className="text-sm text-foreground">{target.whyNow}</p>
+        {/* Next due date for on-track items */}
+        {isOnTrack && nextDueText && (
+          <div className="mt-2 text-sm text-foreground font-medium flex items-center gap-2">
+            <Clock className="size-4 text-primary" />
+            {nextDueText}
           </div>
         )}
       </div>
 
-      {/* Evidence Citations */}
-      <div className="mb-4">
-        <EvidenceCitation refs={evidenceRefs} />
-      </div>
+      {/* ── Middle section: rationale (lighter) ── */}
+      {(target.whyThisAction || target.whyNow) && (
+        <div className="border-t border-border/60 bg-gray-50/60 px-5 py-3">
+          <div className="grid gap-4 sm:grid-cols-2 text-sm">
+            {target.whyThisAction && (
+              <div>
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
+                  Why this action
+                </p>
+                <p className="text-foreground/80 leading-relaxed">
+                  {target.whyThisAction}
+                </p>
+              </div>
+            )}
+            {target.whyNow && (
+              <div>
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
+                  Why now
+                </p>
+                <p className="text-foreground/80 leading-relaxed">
+                  {target.whyNow}
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
-      {/* Footer: Provider Route + Approve Button */}
-      <div className="flex items-center justify-between pt-3 border-t border-border">
-        {target.providerRoute && (
+      {/* ── Evidence ── */}
+      {evidenceRefs.length > 0 && (
+        <div className="border-t border-border/60 px-5 py-3">
+          <EvidenceCitation refs={evidenceRefs} />
+        </div>
+      )}
+
+      {/* ── Footer: provider + approve ── */}
+      <div className="flex items-center justify-between border-t border-border px-5 py-3">
+        {target.providerRoute ? (
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Activity className="size-4" />
             <span>
-              Provider:{' '}
+              Route to{' '}
               <span className="capitalize font-medium text-foreground">
                 {target.providerRoute}
               </span>
             </span>
           </div>
+        ) : (
+          <div />
         )}
-        <div className="ml-auto">
-          {!isOnTrack && (
-            <ApproveButton
-              patientName={patientName}
-              action={target.action ?? 'Recommendation'}
-              condition={target.condition}
-              providerRoute={target.providerRoute}
-              whyThisAction={target.whyThisAction}
-              onApproved={() => onApproved(target.action)}
-            />
-          )}
-        </div>
+        {!isOnTrack && (
+          <ApproveButton
+            patientName={patientName}
+            action={target.action ?? 'Recommendation'}
+            condition={target.condition}
+            providerRoute={target.providerRoute}
+            whyThisAction={target.whyThisAction}
+            onApproved={() => onApproved(target.action)}
+          />
+        )}
       </div>
     </div>
   );
@@ -493,7 +484,7 @@ export function AssessmentResults({
       )}
 
       {/* Activity Log */}
-      <div className="rounded-lg border border-border bg-card p-5">
+      <div className="rounded-md border border-border bg-white p-5">
         <h3 className="text-h3 text-foreground mb-3 flex items-center gap-2">
           <Clock className="size-4" />
           Activity Log

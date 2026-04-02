@@ -88,7 +88,7 @@ export default function ResearchPage() {
           </div>
 
           {/* Mode selector */}
-          <div className="flex gap-1 rounded-lg border border-border bg-card p-1">
+          <div className="flex gap-1 rounded-md border border-border bg-white p-1">
             {(
               [
                 { value: 'hybrid', label: 'Hybrid' },

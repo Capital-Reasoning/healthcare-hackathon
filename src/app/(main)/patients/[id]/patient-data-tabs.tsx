@@ -111,8 +111,6 @@ export function PatientDataTabs({
 
   return (
     <div className="space-y-4">
-      <h2 className="text-h2 text-foreground">Clinical Record</h2>
-
       <Tabs defaultValue="encounters">
         <TabsList variant="line">
           <TabsTrigger value="encounters">
@@ -135,7 +133,7 @@ export function PatientDataTabs({
 
         {/* ── Encounters ────────────────────────────────────────────── */}
         <TabsContent value="encounters">
-          <div className="rounded-lg border border-border bg-card overflow-hidden">
+          <div className="rounded-md border border-border bg-white overflow-hidden">
             {encounters.length === 0 ? (
               <p className="p-6 text-sm text-muted-foreground text-center">
                 No encounters recorded.
@@ -144,7 +142,7 @@ export function PatientDataTabs({
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-border bg-muted/50">
+                    <tr className="border-b border-border bg-gray-50">
                       <th className="px-4 py-2.5 text-left font-medium text-muted-foreground">
                         Date
                       </th>
@@ -169,7 +167,7 @@ export function PatientDataTabs({
                     {encounters.map((enc) => (
                       <tr
                         key={enc.id}
-                        className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors"
+                        className="border-b border-border last:border-0 hover:bg-gray-50 transition-colors"
                       >
                         <td className="px-4 py-2.5 whitespace-nowrap">
                           {formatDate(enc.encounterDate)}
@@ -222,7 +220,7 @@ export function PatientDataTabs({
 
         {/* ── Medications ───────────────────────────────────────────── */}
         <TabsContent value="medications">
-          <div className="rounded-lg border border-border bg-card overflow-hidden">
+          <div className="rounded-md border border-border bg-white overflow-hidden">
             {medications.length === 0 ? (
               <p className="p-6 text-sm text-muted-foreground text-center">
                 No active medications.
@@ -231,7 +229,7 @@ export function PatientDataTabs({
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-border bg-muted/50">
+                    <tr className="border-b border-border bg-gray-50">
                       <th className="px-4 py-2.5 text-left font-medium text-muted-foreground">
                         Drug Name
                       </th>
@@ -253,7 +251,7 @@ export function PatientDataTabs({
                     {medications.map((med) => (
                       <tr
                         key={med.id}
-                        className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors"
+                        className="border-b border-border last:border-0 hover:bg-gray-50 transition-colors"
                       >
                         <td className="px-4 py-2.5 font-medium">
                           {med.drugName}
@@ -289,7 +287,7 @@ export function PatientDataTabs({
 
         {/* ── Lab Results ───────────────────────────────────────────── */}
         <TabsContent value="labs">
-          <div className="rounded-lg border border-border bg-card overflow-hidden">
+          <div className="rounded-md border border-border bg-white overflow-hidden">
             {labResults.length === 0 ? (
               <p className="p-6 text-sm text-muted-foreground text-center">
                 No lab results recorded.
@@ -298,7 +296,7 @@ export function PatientDataTabs({
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-border bg-muted/50">
+                    <tr className="border-b border-border bg-gray-50">
                       <th className="px-4 py-2.5 text-left font-medium text-muted-foreground">
                         Test Name
                       </th>
@@ -329,7 +327,7 @@ export function PatientDataTabs({
                             'border-b border-border last:border-0 transition-colors',
                             isAbnormal
                               ? 'bg-error-tint/50 hover:bg-error-tint/70'
-                              : 'hover:bg-muted/30',
+                              : 'hover:bg-gray-50',
                           )}
                         >
                           <td className="px-4 py-2.5 font-medium">
@@ -372,7 +370,7 @@ export function PatientDataTabs({
 
         {/* ── Vitals ────────────────────────────────────────────────── */}
         <TabsContent value="vitals">
-          <div className="rounded-lg border border-border bg-card p-5">
+          <div className="rounded-md border border-border bg-white p-5">
             {!latestVital ? (
               <p className="text-sm text-muted-foreground text-center">
                 No vitals recorded.
@@ -450,7 +448,7 @@ function VitalCard({
   unit: string;
 }) {
   return (
-    <div className="rounded-lg border border-border bg-background p-3 text-center">
+    <div className="rounded-md border border-border bg-gray-50 p-3 text-center">
       <p className="text-xs text-muted-foreground mb-1">{label}</p>
       <p className="text-xl font-semibold text-foreground">{value}</p>
       <p className="text-xs text-muted-foreground">{unit}</p>

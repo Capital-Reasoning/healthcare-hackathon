@@ -129,11 +129,11 @@ export function EvidenceCitation({ refs }: { refs: EvidenceRef[] }) {
 
           {selectedChunk?.textAsHtml ? (
             <div
-              className="rounded-lg border border-border bg-muted/50 p-4 text-sm leading-relaxed prose prose-sm max-w-none"
+              className="rounded-md border border-border bg-gray-50 p-4 text-sm leading-relaxed prose prose-sm max-w-none"
               dangerouslySetInnerHTML={{ __html: selectedChunk.textAsHtml }}
             />
           ) : (
-            <div className="rounded-lg border border-border bg-muted/50 p-4 text-sm leading-relaxed whitespace-pre-wrap">
+            <div className="rounded-md border border-border bg-gray-50 p-4 text-sm leading-relaxed whitespace-pre-wrap">
               {selectedChunk?.content ?? 'Loading...'}
             </div>
           )}

@@ -77,7 +77,7 @@ function StatusAlert({
       data-variant={variant}
       role="alert"
       className={cn(
-        'flex overflow-hidden rounded-lg',
+        'flex overflow-hidden rounded-md',
         styles.bg,
         className,
       )}

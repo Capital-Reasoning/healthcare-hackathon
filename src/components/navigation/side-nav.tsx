@@ -47,7 +47,7 @@ export function SideNav({
       data-slot="side-nav"
       data-collapsed={collapsed || undefined}
       className={cn(
-        'flex flex-col border-r border-border bg-card transition-all duration-200',
+        'flex flex-col border-r border-border bg-white transition-all duration-200',
         collapsed ? 'w-14' : 'w-60',
         className
       )}
@@ -67,7 +67,7 @@ export function SideNav({
                 'group flex items-center gap-3 rounded-md px-3 py-2 text-body-sm font-medium transition-colors',
                 item.active
                   ? 'border-l-2 border-teal-500 bg-teal-50 text-teal-500'
-                  : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+                  : 'text-muted-foreground hover:bg-gray-50 hover:text-foreground',
                 collapsed && 'justify-center px-0'
               )}
             >
@@ -104,7 +104,7 @@ export function SideNav({
             onClick={onToggleCollapse}
             aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             className={cn(
-              'flex w-full items-center gap-3 rounded-md px-3 py-2 text-body-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground',
+              'flex w-full items-center gap-3 rounded-md px-3 py-2 text-body-sm font-medium text-muted-foreground transition-colors hover:bg-gray-50 hover:text-foreground',
               collapsed && 'justify-center px-0'
             )}
           >

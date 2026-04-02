@@ -1,104 +1,116 @@
 'use client';
 
-import { useState, type ReactNode } from 'react';
-import { Sparkles, Star } from 'lucide-react';
+import { type ReactNode } from 'react';
+import {
+  ArrowRight,
+  ClipboardList,
+  FileSearch,
+  GitCompareArrows,
+  ShieldCheck,
+} from 'lucide-react';
 import { useAnalysisStore } from '@/stores/analysis-store';
-import { AnalysisAnimation } from '@/components/healthcare/analysis-animation';
 import { Button } from '@/components/ui/button';
 
-type Stage = 'idle' | 'animating' | 'revealing' | 'done';
+const PROCESS_STEPS = [
+  {
+    icon: ClipboardList,
+    title: 'Ingest Patient Records',
+    description:
+      'Electronic health records — encounters, medications, lab results, and vitals — are loaded into a structured clinical data model.',
+  },
+  {
+    icon: FileSearch,
+    title: 'Match Against Guidelines',
+    description:
+      'Each patient profile is cross-referenced against uploaded clinical practice guidelines using AI-powered document analysis and retrieval.',
+  },
+  {
+    icon: GitCompareArrows,
+    title: 'Identify Care Gaps',
+    description:
+      'The engine detects overdue screenings, missed follow-ups, and recommended actions by comparing patient history to guideline timelines.',
+  },
+  {
+    icon: ShieldCheck,
+    title: 'Prioritize & Triage',
+    description:
+      'Results are categorized by urgency — urgent, follow-up, or on-track — with confidence scores and cited evidence for each recommendation.',
+  },
+];
 
 export function DashboardIntro({ children }: { children: ReactNode }) {
   const hasAnalyzed = useAnalysisStore((s) => s.hasAnalyzed);
   const setAnalyzed = useAnalysisStore((s) => s.setAnalyzed);
-  const [stage, setStage] = useState<Stage>(hasAnalyzed ? 'done' : 'idle');
 
-  function handleSkipAll() {
-    setAnalyzed();
-    setStage('done');
-  }
-
-  function handleComplete() {
-    setStage('revealing');
-    // Let the CSS transitions play, then mark done
-    setTimeout(() => {
-      setAnalyzed();
-      setStage('done');
-    }, 800);
+  if (hasAnalyzed) {
+    return <>{children}</>;
   }
 
   return (
-    <>
-      {/* Dashboard content — always mounted, visibility controlled by stage */}
-      <div
-        className={
-          stage === 'done'
-            ? ''
-            : stage === 'revealing'
-              ? 'animate-[dashboard-reveal_500ms_ease-out_200ms_forwards] opacity-0'
-              : 'hidden'
-        }
-      >
-        {children}
-      </div>
-
-      {/* Idle: dark themed pre-analysis screen matching navbar / cube animation */}
-      {stage === 'idle' && (
-        <div
-          className="fixed inset-0 top-14 z-40 flex items-center justify-center p-8"
-          style={{ background: '#07101b' }}
-        >
-          <div className="flex flex-col items-center gap-6 rounded-2xl border border-white/10 bg-white/[0.07] px-12 py-10 text-center shadow-2xl backdrop-blur-xl">
-            <div className="rounded-full bg-teal-500/15 p-5">
-              <Sparkles className="size-10 text-teal-400" />
-            </div>
-            <div className="flex flex-col gap-2">
-              <h2 className="text-h2 text-white">Clinical Triage Analysis</h2>
-              <p className="max-w-md text-body-sm text-white/60">
-                Run BestPath&apos;s AI engine across patient records to identify prioritized
-                care actions from clinical guideline analysis.
-              </p>
-            </div>
-            <Button size="lg" onClick={() => setStage('animating')} className="gap-2 px-8">
-              <Sparkles className="size-4" />
-              Analyze Data
-            </Button>
-          </div>
+    <div className="flex flex-col items-center justify-center px-6 py-16 md:py-24">
+      <div className="w-full max-w-2xl">
+        {/* Header */}
+        <div className="text-center">
+          <h1 className="text-h1 text-foreground">
+            Care Review Dashboard
+          </h1>
+          <p className="mt-2 text-sm text-muted-foreground max-w-lg mx-auto leading-relaxed">
+            BestPath analyses patient records against clinical practice
+            guidelines to surface prioritized care actions. Here&apos;s how it
+            works.
+          </p>
         </div>
-      )}
 
-      {/* Animating: full-screen vector cube overlay */}
-      {stage === 'animating' && (
-        <div
-          className="fixed inset-0 z-50 flex flex-col items-center justify-center"
-          style={{ background: '#07101b' }}
-        >
-          <AnalysisAnimation onComplete={handleComplete} />
-          <button
-            onClick={handleComplete}
-            className="absolute bottom-6 right-6 font-mono text-xs tracking-wide text-white/30 transition-colors hover:text-white/60"
+        {/* Process steps */}
+        <div className="mt-10 space-y-0">
+          {PROCESS_STEPS.map((step, i) => {
+            const Icon = step.icon;
+            return (
+              <div key={step.title} className="relative flex gap-4 pb-8 last:pb-0">
+                {/* Connecting line */}
+                {i < PROCESS_STEPS.length - 1 && (
+                  <div className="absolute left-[17px] top-10 bottom-0 w-px bg-border" />
+                )}
+
+                {/* Step number + icon */}
+                <div className="relative z-10 flex size-9 shrink-0 items-center justify-center rounded-full border border-border bg-white">
+                  <Icon className="size-4 text-foreground" />
+                </div>
+
+                {/* Content */}
+                <div className="pt-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-medium text-muted-foreground">
+                      Step {i + 1}
+                    </span>
+                  </div>
+                  <h3 className="text-sm font-semibold text-foreground mt-0.5">
+                    {step.title}
+                  </h3>
+                  <p className="mt-1 text-sm text-muted-foreground leading-relaxed">
+                    {step.description}
+                  </p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* CTA */}
+        <div className="mt-10 text-center">
+          <Button
+            size="lg"
+            onClick={setAnalyzed}
+            className="gap-2 px-6"
           >
-            Skip
-          </button>
+            View Dashboard
+            <ArrowRight className="size-4" />
+          </Button>
+          <p className="mt-3 text-xs text-muted-foreground">
+            Assessment data has already been computed for all patients.
+          </p>
         </div>
-      )}
-
-      {/* Dev skip: tiny star in bottom-left to jump straight to data */}
-      <button
-        onClick={handleSkipAll}
-        className="fixed bottom-4 right-4 z-[60] rounded-full p-1.5 text-muted-foreground/20 transition-colors hover:text-muted-foreground/60"
-        title="Skip to dashboard"
-      >
-        <Star className="size-3.5" />
-      </button>
-
-      {/* Revealing: overlay fading out */}
-      {stage === 'revealing' && (
-        <div
-          className="pointer-events-none fixed inset-0 z-50 animate-[cube-fade-out_600ms_ease-in_forwards]"
-          style={{ background: '#07101b' }}
-        />
-      )}
-    </>
+      </div>
+    </div>
   );
 }
