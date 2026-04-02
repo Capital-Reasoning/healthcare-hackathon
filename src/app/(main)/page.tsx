@@ -82,7 +82,7 @@ export default async function DashboardPage() {
               alt="BestPath"
               width={400}
               height={300}
-              className="h-7 w-auto"
+              className="h-20 w-auto"
               priority
             />
           </div>
